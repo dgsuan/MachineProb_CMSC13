@@ -27,7 +27,7 @@ public final class GameApplication extends Application {
     private final Pane viewport = new Pane();
     private final Player player = new Player();
     private final Gate gate = new Gate(GATE_X);
-    private final QuestionManager questionManager = new QuestionManager();
+    private final QuestionBank questionBank = new QuestionBank();
     private GameState state = GameState.MENU;
     private Trial trial;
     private Label prompt;
@@ -114,7 +114,7 @@ public final class GameApplication extends Application {
     private void startTrial() {
         if (trialOneComplete) return;
         state = GameState.TRIAL;
-        trial = new Trial(questionManager.getTrialOneQuestions());
+        trial = new Trial(questionBank, 1);
         showQuestion();
     }
 
@@ -122,8 +122,21 @@ public final class GameApplication extends Application {
         Question question = trial.getCurrentQuestion();
         VBox box = new VBox(14);
         box.setAlignment(Pos.CENTER); box.setMaxWidth(880);
-        Label exp = text("TRIAL 1    EXP: " + trial.getExp() + " / " + Trial.REQUIRED_EXP, 18);
-        Label kernel = text("KERNEL:\n\"" + question.getText() + "\"", 22);
+        Label exp = text(
+            "TRIAL 1    EXP: " 
+            + trial.getExp() 
+            + " / " 
+            + Trial.REQUIRED_EXP,
+             18
+        );
+
+        Label kernel = text(
+            "KERNEL:\n\"" 
+            + question.getQuestionText() 
+            + "\"", 
+            22
+        );
+
         GridPane answers = new GridPane(); answers.setAlignment(Pos.CENTER); answers.setHgap(16); answers.setVgap(16);
         for (int i = 0; i < 4; i++) {
             int answer = i;
@@ -186,6 +199,10 @@ public final class GameApplication extends Application {
         if (key == KeyCode.D || key == KeyCode.RIGHT) player.setRight(false);
     }
 
-    private Label title(String value, int size) { Label label = text(value, size); label.setStyle("-fx-font-weight: bold; -fx-text-fill: white;"); return label; }
-    private Label text(String value, int size) { Label label = new Label(value); label.setStyle("-fx-font-size: " + size + "; -fx-text-fill: white;"); label.setWrapText(true); label.setTextAlignment(javafx.scene.text.TextAlignment.CENTER); return label; }
+    private Label title(String value, int size) { 
+        Label label = text(value, size); label.setStyle("-fx-font-weight: bold; -fx-text-fill: white;"); return label; 
+    }
+    private Label text(String value, int size) { 
+        Label label = new Label(value); label.setStyle("-fx-font-size: " + size + "; -fx-text-fill: white;"); label.setWrapText(true); label.setTextAlignment(javafx.scene.text.TextAlignment.CENTER); return label; 
+    }
 }

@@ -2,25 +2,61 @@ package cmsc13.game;
 
 import java.util.List;
 
-/** Immutable data for one reusable multiple-choice question. */
-public final class Question {
-    private final String topic;
-    private final QuestionType type;
-    private final String text;
-    private final List<String> choices;
-    private final int correctAnswer;
-
-    public Question(String topic, QuestionType type, String text, List<String> choices, int correctAnswer) {
-        this.topic = topic;
+/**
+ * Represents a single question
+ */
+public class Question {
+    
+    private int id;
+    private QuestionType type;
+    private String topic;
+    private String questionText;
+    private List<String> choices;
+    private int correctAnswerIndex;
+    private String explanation;
+    private int difficulty; // 1-5
+    private int trialId;
+    
+    public Question(
+        int id,
+        QuestionType type,
+        String topic,
+        String questionText,
+        List<String> choices,
+        int correctAnswerIndex,
+        String explanation,
+        int difficulty,
+        int trialId
+    ) {
+        this.id = id;
         this.type = type;
-        this.text = text;
-        this.choices = List.copyOf(choices);
-        this.correctAnswer = correctAnswer;
+        this.topic = topic;
+        this.questionText = questionText;
+        this.choices = choices;
+        this.correctAnswerIndex = correctAnswerIndex;
+        this.explanation = explanation;
+        this.difficulty = difficulty;
+        this.trialId = trialId;
     }
-
-    public String getTopic() { return topic; }
+    
+    public boolean isCorrectAnswer(int selectedIndex) {
+        return selectedIndex == correctAnswerIndex;
+    }
+    
+    // Getters
+    public int getId() { return id; }
     public QuestionType getType() { return type; }
-    public String getText() { return text; }
+    public String getTopic() { return topic; }
+    public String getQuestionText() { return questionText; }
     public List<String> getChoices() { return choices; }
-    public boolean isCorrect(int answer) { return answer == correctAnswer; }
+    public int getCorrectAnswerIndex() { return correctAnswerIndex; }
+    public String getExplanation() { return explanation; }
+    public int getDifficulty() { return difficulty; }
+    public int getTrialId() { return trialId; }
+    public String getCorrectChoiceText() { return choices.get(correctAnswerIndex); }
+    
+    public String getChoiceLetter(int index) {
+        char[] letters = {'A', 'B', 'C', 'D'};
+        return String.valueOf(letters[Math.min(index, 3)]);
+    }
 }

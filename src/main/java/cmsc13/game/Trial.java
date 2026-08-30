@@ -8,14 +8,16 @@ public final class Trial {
     private final List<Question> questions;
     private int questionIndex;
     private int exp;
+    private int trialID;
 
-    public Trial(List<Question> questions) {
-        this.questions = questions;
+    public Trial(QuestionBank questionBank, int trialID) {
+        this.trialID = trialID;
+        this.questions = questionBank.getQuestionsForTrial(this.trialID);
     }
 
     public Question getCurrentQuestion() { return questions.get(questionIndex); }
     public boolean answer(int selectedAnswer) {
-        boolean correct = getCurrentQuestion().isCorrect(selectedAnswer);
+        boolean correct = getCurrentQuestion().isCorrectAnswer(selectedAnswer);
         if (correct) exp++;
         return correct;
     }
