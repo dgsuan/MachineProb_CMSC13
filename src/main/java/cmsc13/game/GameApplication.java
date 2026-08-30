@@ -1,5 +1,6 @@
 package cmsc13.game;
 
+import java.util.List;
 import javafx.animation.AnimationTimer;
 import javafx.animation.PauseTransition;
 import javafx.application.Application;
@@ -17,21 +18,37 @@ import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
-/** Controls the menu, one world, and one Trial 1 quiz loop. */
+/** Controls the menu, one world with simple platforming, and the trial quiz loop. */
 public final class GameApplication extends Application {
     private static final int WIDTH = 1280;
     private static final int HEIGHT = 720;
-    private static final double GATE_X = 1200;
+    private static final double WORLD_WIDTH = 3200;
+
+    /** Solid ground spans: gaps between them are holes the player can fall through. */
+    private static final List<double[]> GROUND_SEGMENTS = List.of(
+        new double[] {0, 1400},
+        new double[] {1700, 2050},
+        new double[] {2350, WORLD_WIDTH}
+    );
+    /** Floating platforms used to cross the two holes. */
+    private static final List<Platform> PLATFORMS = List.of(
+        new Platform(1460, 520, 120),
+        new Platform(1620, 460, 120),
+        new Platform(2120, 520, 120),
+        new Platform(2260, 470, 110)
+    );
+
     private final StackPane root = new StackPane();
     private final Pane world = new Pane();
     private final Pane viewport = new Pane();
     private final Player player = new Player();
-    private final Gate gate = new Gate(GATE_X);
+    private final Gate gate1 = new Gate(1, 1200);
+    private final Gate gate2 = new Gate(2, 2700);
     private final QuestionManager questionManager = new QuestionManager();
     private GameState state = GameState.MENU;
     private Trial trial;
+    private Gate activeGate;
     private Label prompt;
-    private boolean trialOneComplete;
 
     @Override
     public void start(Stage stage) {
@@ -52,13 +69,20 @@ public final class GameApplication extends Application {
 
     private void createWorld() {
         world.getChildren().clear();
-        world.setPrefSize(3000, HEIGHT);
+        world.setPrefSize(WORLD_WIDTH, HEIGHT);
         world.setStyle("-fx-background-color: linear-gradient(to bottom, #202333, #36394a);");
-        Rectangle ground = new Rectangle(0, Player.GROUND_Y, 3000, 120);
-        ground.setFill(Color.web("#596275"));
+        for (double[] segment : GROUND_SEGMENTS) {
+            Rectangle ground = new Rectangle(segment[0], Player.GROUND_Y, segment[1] - segment[0], 120);
+            ground.setFill(Color.web("#596275"));
+            world.getChildren().add(ground);
+        }
+        for (Platform platform : PLATFORMS) {
+            world.getChildren().add(platform.getNode());
+        }
         Label start = new Label("SYSTEM START");
         start.setTextFill(Color.WHITE); start.setLayoutX(45); start.setLayoutY(630);
-        world.getChildren().addAll(ground, gate.getNode(), player.getNode(), start);
+        world.getChildren().addAll(gate1.getNode(), gate2.getNode(), player.getNode(), start);
+        player.setLevel(WORLD_WIDTH, GROUND_SEGMENTS, PLATFORMS);
         viewport.getChildren().setAll(world);
         viewport.setPrefSize(WIDTH, HEIGHT);
         viewport.setMinSize(WIDTH, HEIGHT);
@@ -84,7 +108,11 @@ public final class GameApplication extends Application {
         state = GameState.HOW_TO_PLAY;
         VBox box = new VBox(14);
         box.setAlignment(Pos.CENTER); box.setMaxWidth(700);
-        Label instructions = text("HOW TO PLAY\n\nMove through the system and reach Trial 1.\n\nA / Left Arrow — Move left\nD / Right Arrow — Move right\nSpace — Jump\nE — Enter a nearby trial\nEnter — Continue after a trial result\n\nEarn 3 EXP from 5 questions to complete Trial 1.", 18);
+        Label instructions = text("HOW TO PLAY\n\nMove through the system, cross the gaps, and clear each trial gate.\n\n"
+            + "A / Left Arrow — Move left\nD / Right Arrow — Move right\nSpace — Jump onto floating platforms\n"
+            + "E — Enter a nearby trial\nEnter — Continue after a trial result\n\n"
+            + "Fall into a hole and you respawn at the last checkpoint.\n"
+            + "Earn 3 EXP from 5 questions to clear a trial.", 18);
         Button back = new Button("BACK"); back.setOnAction(e -> showMenu());
         box.getChildren().addAll(title("HOW TO PLAY", 32), instructions, back);
         root.getChildren().setAll(box);
@@ -93,28 +121,45 @@ public final class GameApplication extends Application {
     private void showWorld() {
         state = GameState.WORLD;
         createWorld();
-        if (trialOneComplete) player.clearWall(); else player.setWallLeft(gate.getLeftEdge());
+        refreshWall();
         prompt = text("", 16);
         prompt.setTextFill(Color.WHITE); prompt.setTranslateY(-300);
         root.getChildren().setAll(viewport, prompt);
         root.requestFocus();
     }
 
+    /** Blocks the player at the first uncleared gate to their right. */
+    private void refreshWall() {
+        if (!gate1.isCompleted()) player.setWallLeft(gate1.getLeftEdge());
+        else if (!gate2.isCompleted()) player.setWallLeft(gate2.getLeftEdge());
+        else player.clearWall();
+    }
+
     private void updateWorld() {
         player.update();
-        double cameraX = Math.max(0, Math.min(player.getX() - 320, 3000 - WIDTH));
+        double cameraX = Math.max(0, Math.min(player.getX() - 320, WORLD_WIDTH - WIDTH));
         world.setTranslateX(-cameraX);
-        if (gate.isNear(player)) {
-            prompt.setText(trialOneComplete ? "TRIAL 1 COMPLETE" : "Press E to Enter Trial 1");
-        } else {
+        Gate near = nearbyGate();
+        if (near == null) {
             prompt.setText("");
+        } else if (near.isCompleted()) {
+            prompt.setText("TRIAL " + near.getTrialNumber() + " COMPLETE");
+        } else {
+            prompt.setText("Press E to Enter Trial " + near.getTrialNumber());
         }
     }
 
-    private void startTrial() {
-        if (trialOneComplete) return;
+    private Gate nearbyGate() {
+        if (gate1.isNear(player)) return gate1;
+        if (gate2.isNear(player)) return gate2;
+        return null;
+    }
+
+    private void startTrial(Gate gate) {
+        if (gate == null || gate.isCompleted()) return;
+        activeGate = gate;
         state = GameState.TRIAL;
-        trial = new Trial(questionManager.getTrialOneQuestions());
+        trial = new Trial(gate.getTrialNumber(), questionManager.getQuestions(gate.getTrialNumber()));
         showQuestion();
     }
 
@@ -122,7 +167,7 @@ public final class GameApplication extends Application {
         Question question = trial.getCurrentQuestion();
         VBox box = new VBox(14);
         box.setAlignment(Pos.CENTER); box.setMaxWidth(880);
-        Label exp = text("TRIAL 1    EXP: " + trial.getExp() + " / " + Trial.REQUIRED_EXP, 18);
+        Label exp = text("TRIAL " + trial.getNumber() + "    EXP: " + trial.getExp() + " / " + Trial.REQUIRED_EXP, 18);
         Label kernel = text("KERNEL:\n\"" + question.getText() + "\"", 22);
         GridPane answers = new GridPane(); answers.setAlignment(Pos.CENTER); answers.setHgap(16); answers.setVgap(16);
         for (int i = 0; i < 4; i++) {
@@ -132,7 +177,7 @@ public final class GameApplication extends Application {
             button.setWrapText(true); button.setOnAction(e -> answerQuestion(answer));
             answers.add(button, i % 2, i / 2);
         }
-        box.getChildren().addAll(title("TRIAL 1", 28), exp, kernel, answers);
+        box.getChildren().addAll(title("TRIAL " + trial.getNumber(), 28), exp, kernel, answers);
         root.getChildren().setAll(viewport, box);
     }
 
@@ -154,16 +199,21 @@ public final class GameApplication extends Application {
     private void showResult() {
         state = GameState.RESULT;
         boolean passed = trial.isComplete();
-        if (passed) { trialOneComplete = true; gate.setCompleted(true); }
+        if (passed) {
+            activeGate.setCompleted(true);
+            player.setCheckpoint(activeGate.getLeftEdge() + 100);
+            refreshWall();
+        }
         Label result = text((passed ? "TRIAL COMPLETE" : "TRIAL FAILED") + "\n\nEXP EARNED: "
             + trial.getExp() + " / " + Trial.REQUIRED_EXP + "\n\n"
-            + (passed ? "Press ENTER to return to the map." : "The Kernel returns you to the Trial 1 checkpoint.\nPress ENTER to retry."), 25);
+            + (passed ? "Press ENTER to return to the map."
+                      : "The Kernel returns you to the Trial " + trial.getNumber() + " checkpoint.\nPress ENTER to retry."), 25);
         result.setTextFill(passed ? Color.web("#8ee6a1") : Color.web("#ff9a9a"));
         root.getChildren().setAll(viewport, result);
     }
 
     private void finishResult() {
-        if (!trial.isComplete()) player.respawnAtTrialOne();
+        if (!trial.isComplete()) player.respawnAt(activeGate.getLeftEdge() - 120);
         showWorld();
     }
 
@@ -172,7 +222,7 @@ public final class GameApplication extends Application {
             if (key == KeyCode.A || key == KeyCode.LEFT) player.setLeft(true);
             if (key == KeyCode.D || key == KeyCode.RIGHT) player.setRight(true);
             if (key == KeyCode.SPACE) player.jump();
-            if (key == KeyCode.E && gate.isNear(player)) startTrial();
+            if (key == KeyCode.E) startTrial(nearbyGate());
             if (key == KeyCode.ESCAPE) showMenu();
         } else if (state == GameState.RESULT && key == KeyCode.ENTER) {
             finishResult();

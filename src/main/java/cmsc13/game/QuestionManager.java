@@ -19,4 +19,10 @@ public final class QuestionManager {
     }
 
     public List<Question> getTrialOneQuestions() { return questions; }
+
+    /** Placeholder: Trial 2 reuses the same questions until its own bank is written. */
+    public List<Question> getTrialTwoQuestions() { return questions; }
+
+    /** Returns the question bank for the given trial number. */
+    public List<Question> getQuestions(int trialNumber) { return questions; }
 }
