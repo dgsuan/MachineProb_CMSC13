@@ -29,10 +29,8 @@ public final class GameApplication extends Application {
     );
     /** Placeholder platforms for the first section of the long map. */
     private static final List<Platform> PLATFORMS = List.of(
-        new Platform(1460, 520, 120),
-        new Platform(1620, 460, 120),
-        new Platform(2120, 520, 120),
-        new Platform(2260, 470, 110)
+        new Platform(368, 140, 45),
+        new Platform(527, 140, 45)
     );
 
     private final StackPane root = new StackPane();
@@ -246,7 +244,7 @@ public final class GameApplication extends Application {
         boolean passed = trial.isComplete();
         if (passed) {
             activeGate.setCompleted(true);
-            player.setCheckpoint(activeGate.getLeftEdge() + 100);
+            player.setCheckpoint(activeGate.getLeftEdge() + 25);
             refreshWall();
         }
         Label result = text((passed ? "TRIAL COMPLETE" : "TRIAL FAILED") + "\n\nEXP EARNED: "
@@ -258,7 +256,7 @@ public final class GameApplication extends Application {
     }
 
     private void finishResult() {
-        if (!trial.isComplete()) player.respawnAt(activeGate.getLeftEdge() - 120);
+        if (!trial.isComplete()) player.respawnAt(activeGate.getLeftEdge() - 30);
         showWorld();
     }
 

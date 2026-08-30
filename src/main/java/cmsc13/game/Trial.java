@@ -5,8 +5,8 @@ import java.util.List;
 /** Tracks one attempt at a trial and deliberately has no UI code. */
 public final class Trial {
     public static final int REQUIRED_EXP = 3;
-    private final int number;
-    private final List<Question> questions;
+    private  int number;
+    private  List<Question> questions;
     private int questionIndex;
     private int exp;
     private final int trialID;
