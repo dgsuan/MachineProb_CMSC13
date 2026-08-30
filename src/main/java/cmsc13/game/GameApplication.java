@@ -160,10 +160,32 @@ public final class GameApplication extends Application {
         player.clearWall();
     }
 
+    private Gate wallCompleted() {
+
+        Gate notCompleteGate = null;
+        for (Gate gate : gates) {
+            if(!gate.isCompleted()) {
+                notCompleteGate = gate;
+                break;
+            }
+        }
+        
+        return notCompleteGate;
+    }
+
     private void updateWorld() {
         player.update();
-        double cameraX = Math.max(0, Math.min(player.getX() - Constants.LOGICAL_WIDTH / 4,
-            WORLD_WIDTH - Constants.LOGICAL_WIDTH));
+        double cameraX;
+        Gate gateCheck = wallCompleted();
+
+        if(gateCheck != null) {
+            cameraX = Math.max(0, Math.min(player.getX() - Constants.LOGICAL_WIDTH / 4,
+                (gateCheck.getX() + Constants.TILE_SIZE) - Constants.LOGICAL_WIDTH));
+        } else {
+            cameraX = Math.max(0, Math.min(player.getX() - Constants.LOGICAL_WIDTH / 4,
+                WORLD_WIDTH - Constants.LOGICAL_WIDTH));
+        }
+
         world.setTranslateX(-cameraX);
         // Menus deliberately have no gameplay prompt, but their background still animates.
         if (prompt == null) return;

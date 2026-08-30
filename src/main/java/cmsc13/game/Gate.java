@@ -29,6 +29,7 @@ public final class Gate {
         refresh();
     }
 
+    public double getX() {return this.x;}
     public int getTrialNumber() { return trialNumber; }
     public boolean isNear(Player player) { return Math.abs(player.getX() - x) < 70; }
     public double getLeftEdge() { return x; }
