@@ -42,15 +42,9 @@ public final class GameApplication extends Application {
     private final Pane world = new Pane();
     private final Pane viewport = new Pane();
     private final Player player = new Player();
-<<<<<<< Updated upstream
-    private final Gate gate1 = new Gate(1, 1200);
-    private final Gate gate2 = new Gate(2, 2700);
-    private final QuestionManager questionManager = new QuestionManager();
-=======
     private final Gate gate1 = new Gate(1, 250);
     private final Gate gate2 = new Gate(2, 500);
-    private final QuestionBank questionBank = new QuestionBank();
->>>>>>> Stashed changes
+    private final QuestionManager questionManager = new QuestionManager();
     private GameState state = GameState.MENU;
     private Trial trial;
     private Gate activeGate;
