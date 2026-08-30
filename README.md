@@ -1,4 +1,4 @@
-# SYSTEM ESCAPE
+# SystemBound:The Paradigm Trials
 
 A small JavaFX skeleton for the CMSC 13: Survey of Programming Paradigms Machine Problem.
 
