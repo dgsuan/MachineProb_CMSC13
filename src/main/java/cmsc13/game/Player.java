@@ -1,15 +1,21 @@
 package cmsc13.game;
 
+import java.util.ArrayList;
+import java.util.List;
 import javafx.scene.Group;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 
-/** Minimal player movement and ground physics. */
+/** Minimal player movement with ground segments, holes, and floating platforms. */
 public final class Player {
     public static final double WIDTH = 30;
     public static final double HEIGHT = 50;
     public static final double GROUND_Y = 600;
+    private static final double GRAVITY = 0.6;
+    private static final double JUMP_VELOCITY = -15;
+    private static final double MOVE_SPEED = 5;
+    private static final double FALL_LIMIT = 900;
     private final Group node = new Group();
     private double x = 100;
     private double y = GROUND_Y - HEIGHT;
@@ -18,6 +24,10 @@ public final class Player {
     private boolean right;
     private boolean onGround = true;
     private double wallLeft = Double.POSITIVE_INFINITY;
+    private double worldWidth = 3000;
+    private double checkpointX = 100;
+    private List<double[]> groundSegments = new ArrayList<>();
+    private List<Platform> platforms = new ArrayList<>();
 
     public Player() {
         Rectangle body = new Rectangle(WIDTH, HEIGHT, Color.web("#ff8fab"));
@@ -27,20 +37,71 @@ public final class Player {
         draw();
     }
 
+    /** Feeds the current level geometry to the player each time the world is (re)built. */
+    public void setLevel(double worldWidth, List<double[]> groundSegments, List<Platform> platforms) {
+        this.worldWidth = worldWidth;
+        this.groundSegments = groundSegments;
+        this.platforms = platforms;
+    }
+
     public void update() {
-        if (left) x -= 5;
-        if (right) x += 5;
-        x = Math.max(0, Math.min(2970, x));
+        if (left) x -= MOVE_SPEED;
+        if (right) x += MOVE_SPEED;
+        x = Math.max(0, Math.min(worldWidth - WIDTH, x));
         if (x + WIDTH > wallLeft) x = wallLeft - WIDTH;
-        if (!onGround) velocityY += 0.6;
-        y += velocityY;
-        if (y >= GROUND_Y - HEIGHT) { y = GROUND_Y - HEIGHT; velocityY = 0; onGround = true; }
+
+        velocityY += GRAVITY;
+        double nextY = y + velocityY;
+        double support = supportSurface();
+        if (nextY + HEIGHT >= support) {
+            y = support - HEIGHT;
+            velocityY = 0;
+            onGround = true;
+        } else {
+            y = nextY;
+            onGround = false;
+        }
+        if (y > FALL_LIMIT) respawnAtCheckpoint();
         draw();
     }
-    public void jump() { if (onGround) { velocityY = -15; onGround = false; } }
+
+    /** The highest surface directly under the player's feet, or +infinity if there is only a hole. */
+    private double supportSurface() {
+        double support = Double.POSITIVE_INFINITY;
+        if (onSolidGround()) support = GROUND_Y;
+        if (velocityY >= 0) {
+            for (Platform platform : platforms) {
+                boolean horizontallyOnPlatform = x + WIDTH > platform.getX()
+                    && x < platform.getX() + platform.getWidth();
+                boolean fallingFromAbove = y + HEIGHT <= platform.getTop() + 2;
+                if (horizontallyOnPlatform && fallingFromAbove) {
+                    support = Math.min(support, platform.getTop());
+                }
+            }
+        }
+        return support;
+    }
+
+    private boolean onSolidGround() {
+        double centerX = x + WIDTH / 2;
+        for (double[] segment : groundSegments) {
+            if (centerX >= segment[0] && centerX <= segment[1]) return true;
+        }
+        return false;
+    }
+
+    public void jump() { if (onGround) { velocityY = JUMP_VELOCITY; onGround = false; } }
     public void setWallLeft(double worldX) { this.wallLeft = worldX; }
     public void clearWall() { this.wallLeft = Double.POSITIVE_INFINITY; }
-    public void respawnAtTrialOne() { x = 1080; y = GROUND_Y - HEIGHT; velocityY = 0; onGround = true; draw(); }
+    public void setCheckpoint(double worldX) { this.checkpointX = worldX; }
+    public void respawnAtCheckpoint() { respawnAt(checkpointX); }
+    public void respawnAt(double worldX) {
+        x = Math.max(0, worldX);
+        y = GROUND_Y - HEIGHT;
+        velocityY = 0;
+        onGround = true;
+        draw();
+    }
     public void setLeft(boolean value) { left = value; }
     public void setRight(boolean value) { right = value; }
     public double getX() { return x; }
