@@ -10,11 +10,11 @@ import javafx.scene.image.ImageView;
 public final class Player {
     public static final double WIDTH = 23;
     public static final double HEIGHT = 28;
-    public static final double GROUND_Y = 600;
-    private static final double GRAVITY = 0.6;
-    private static final double JUMP_VELOCITY = -15;
-    private static final double MOVE_SPEED = 5;
-    private static final double FALL_LIMIT = 900;
+    public static final double GROUND_Y = 150;
+    private static final double GRAVITY = 0.15;
+    private static final double JUMP_VELOCITY = -3.75;
+    private static final double MOVE_SPEED = 1.25;
+    private static final double FALL_LIMIT = 225;
     private static final double SPRITE_SIZE = 32;
     private static final long IDLE_FRAME_DURATION = 180_000_000L;
     private static final long RUN_FRAME_DURATION = 95_000_000L;
@@ -48,6 +48,7 @@ public final class Player {
         sprite.setFitWidth(SPRITE_SIZE);
         sprite.setFitHeight(SPRITE_SIZE);
         sprite.setPreserveRatio(true);
+        sprite.setSmooth(false); // keep pixel art crisp when the view is scaled up
         // Centre the sprite over the collision box and keep its feet on the ground.
         sprite.setLayoutX((WIDTH - SPRITE_SIZE) / 2);
         sprite.setLayoutY(HEIGHT - SPRITE_SIZE);

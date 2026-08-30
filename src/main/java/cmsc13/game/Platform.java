@@ -5,7 +5,7 @@ import javafx.scene.shape.Rectangle;
 
 /** A simple one-way floating platform: the player lands on it from above but can jump up through it. */
 public final class Platform {
-    public static final double THICKNESS = 18;
+    public static final double THICKNESS = 5;
     private final double x;
     private final double y;
     private final double width;
@@ -16,7 +16,7 @@ public final class Platform {
         this.y = y;
         this.width = width;
         node = new Rectangle(width, THICKNESS, Color.web("#8d7ec8"));
-        node.setArcWidth(8); node.setArcHeight(8);
+        node.setArcWidth(2); node.setArcHeight(2);
         node.setLayoutX(x); node.setLayoutY(y);
     }
 
