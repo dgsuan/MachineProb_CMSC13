@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>SystemBound: The Paradigm Trials — Prototype</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;800&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --void-900:#0a0e17;
+    --void-700:#131b2e;
+    --circuit-cyan:#35e0c9;
+    --kernel-blue:#5b8cff;
+    --error-amber:#ff5d5d;
+    --ink-100:#eaf2ff;
+    --ink-400:#8ea2c6;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;height:100%;background:#000;overflow:hidden;font-family:'Inter',sans-serif;}
+  #stage{position:relative;width:100%;height:100vh;min-height:480px;}
+  canvas{display:block;width:100%;height:100%;cursor:pointer;}
+
+  /* ---------- HUD ---------- */
+  #hud{
+    position:absolute;top:0;left:0;right:0;
+    display:flex;justify-content:space-between;align-items:flex-start;
+    padding:18px 24px;pointer-events:none;
+    font-family:'JetBrains Mono',monospace;
+    color:var(--ink-100);
+  }
+  #hud .badge{
+    background:rgba(10,14,23,.55);
+    border:1px solid rgba(255,255,255,.12);
+    border-radius:10px;
+    padding:8px 14px;
+    backdrop-filter:blur(6px);
+  }
+  #expWrap{min-width:220px;}
+  #expLabel{font-size:11px;letter-spacing:.14em;color:var(--ink-400);margin-bottom:6px;text-transform:uppercase;}
+  #expBarTrack{width:100%;height:8px;border-radius:5px;background:rgba(255,255,255,.08);overflow:hidden;}
+  #expBarFill{height:100%;width:0%;background:linear-gradient(90deg,var(--circuit-cyan),var(--kernel-blue));transition:width .35s ease;}
+  #expNum{font-size:12px;margin-top:6px;color:var(--ink-100);}
+  #trialLabel{font-size:12px;letter-spacing:.1em;text-align:right;}
+  #trialLabel b{color:var(--circuit-cyan);}
+
+  #hint{
+    position:absolute;left:50%;bottom:34px;transform:translateX(-50%);
+    font-family:'JetBrains Mono',monospace;color:var(--ink-100);
+    background:rgba(10,14,23,.6);border:1px solid rgba(255,255,255,.15);
+    padding:8px 16px;border-radius:999px;font-size:12px;letter-spacing:.05em;
+    opacity:0;transition:opacity .25s ease;pointer-events:none;
+    text-align:center;white-space:nowrap;
+  }
+  #hint.show{opacity:1;}
+
+  #controls{
+    position:absolute;left:24px;bottom:20px;
+    font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink-400);
+    background:rgba(10,14,23,.45);border:1px solid rgba(255,255,255,.08);
+    padding:8px 12px;border-radius:8px;line-height:1.6;pointer-events:none;
+  }
+  #controls b{color:var(--ink-100);}
+
+  /* ---------- Dialogue panel ---------- */
+  #dialogue{
+    position:absolute;left:50%;bottom:0;transform:translate(-50%,110%);
+    width:min(680px,92%);
+    background:linear-gradient(180deg,#0e1524,#0a0f1b);
+    border:1px solid rgba(91,140,255,.35);
+    border-bottom:none;
+    border-radius:16px 16px 0 0;
+    padding:20px 24px 24px;
+    box-shadow:0 -20px 60px rgba(0,0,0,.55);
+    transition:transform .4s cubic-bezier(.2,.8,.2,1);
+    color:var(--ink-100);
+  }
+  #dialogue.open{transform:translate(-50%,0%);}
+
+  #kernelRow{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+  #kernelDot{
+    width:12px;height:12px;border-radius:50%;
+    background:var(--circuit-cyan);
+    box-shadow:0 0 10px var(--circuit-cyan);
+    animation:pulse 1.4s ease-in-out infinite;
+  }
+  @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.35;}}
+  #kernelName{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.12em;color:var(--circuit-cyan);text-transform:uppercase;}
+
+  #speechBubble{
+    font-size:16px;line-height:1.5;margin-bottom:16px;min-height:44px;
+  }
+  #speechBubble .status{
+    display:inline-block;font-family:'JetBrains Mono',monospace;font-size:11px;
+    letter-spacing:.08em;padding:2px 8px;border-radius:5px;margin-bottom:8px;
+  }
+  .status.ok{background:rgba(53,224,201,.15);color:var(--circuit-cyan);border:1px solid rgba(53,224,201,.4);}
+  .status.bad{background:rgba(255,93,93,.15);color:var(--error-amber);border:1px solid rgba(255,93,93,.4);}
+
+  #choices{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .choiceBtn{
+    text-align:left;padding:12px 14px;border-radius:10px;
+    background:rgba(255,255,255,.04);
+    border:1px solid rgba(255,255,255,.14);
+    color:var(--ink-100);font-family:'Inter',sans-serif;font-size:14px;
+    cursor:pointer;transition:all .15s ease;
+  }
+  .choiceBtn:hover{background:rgba(91,140,255,.16);border-color:var(--kernel-blue);}
+  .choiceBtn:disabled{opacity:.5;cursor:default;}
+  .choiceBtn.correct{background:rgba(53,224,201,.22);border-color:var(--circuit-cyan);}
+  .choiceBtn.wrong{background:rgba(255,93,93,.2);border-color:var(--error-amber);}
+
+  #dialogueFoot{
+    margin-top:14px;display:flex;justify-content:space-between;align-items:center;
+    font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink-400);
+  }
+  #continueBtn{
+    font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.08em;
+    background:var(--circuit-cyan);color:#04211d;border:none;border-radius:8px;
+    padding:8px 16px;cursor:pointer;display:none;font-weight:600;
+  }
+
+  /* ---------- Victory overlay ---------- */
+  #victory{
+    position:absolute;inset:0;display:none;align-items:center;justify-content:center;
+    flex-direction:column;gap:8px;text-align:center;
+    background:radial-gradient(circle at 50% 40%,rgba(255,214,102,.25),rgba(10,14,23,.92));
+    color:#fff;
+  }
+  #victory h1{font-family:'JetBrains Mono',monospace;font-size:clamp(28px,5vw,48px);margin:0;letter-spacing:.05em;}
+  #victory p{font-family:'Inter',sans-serif;color:var(--ink-400);max-width:480px;margin:6px 0 18px;}
+  #victory button{
+    font-family:'JetBrains Mono',monospace;background:transparent;border:1px solid var(--ink-100);
+    color:var(--ink-100);padding:10px 22px;border-radius:999px;cursor:pointer;letter-spacing:.08em;font-size:12px;
+  }
+</style>
+</head>
+<body>
+<div id="stage">
+  <canvas id="game"></canvas>
+
+  <div id="hud">
+    <div id="expWrap" class="badge">
+      <div id="expLabel">System EXP</div>
+      <div id="expBarTrack"><div id="expBarFill"></div></div>
+      <div id="expNum">0 / 0</div>
+    </div>
+    <div id="trialLabel" class="badge">TRIAL <b id="trialCur">0</b> / <span id="trialTotal">0</span></div>
+  </div>
+
+  <div id="hint"></div>
+  <div id="controls"><b>A / D</b> or <b>← / →</b> — move&nbsp;&nbsp;&nbsp;<b>E</b> — talk to Kernel</div>
+
+  <div id="dialogue">
+    <div id="kernelRow"><div id="kernelDot"></div><div id="kernelName">KERNEL</div></div>
+    <div id="speechBubble"></div>
+    <div id="choices"></div>
+    <div id="dialogueFoot">
+      <span id="progressNote"></span>
+      <button id="continueBtn">CONTINUE →</button>
+    </div>
+  </div>
+
+  <div id="victory">
+    <h1>SYSTEM CLEARED</h1>
+    <p>You answered every Kernel's trial correctly. The grid behind you has fully bloomed — reality reached.</p>
+    <button onclick="location.reload()">RUN AGAIN</button>
+  </div>
+</div>
+
+<script>
+/* ============================== WORLD / DATA ============================== */
+const TRIALS = [
+  {
+    name: "PROCEDURAL",
+    x: 1400,
+    required: 2,
+    questions: [
+      { q: "Procedural programming primarily organizes a program around:", choices: ["Objects and messages", "Step-by-step procedures/functions", "Logical facts and rules", "Immutable pure functions"], correct: 1,
+        okMsg: "Correct. Procedures calling procedures — that's the whole model.", badMsg: "Not quite. Procedural code is about sequences of function calls." },
+      { q: "Which best matches a purely procedural mindset?", choices: ["A recipe with numbered steps", "A spreadsheet of facts and inference rules", "A class hierarchy with inheritance", "A pipeline of function composition"], correct: 0,
+        okMsg: "Exactly — a recipe followed top to bottom.", badMsg: "Think 'recipe', not 'facts' or 'classes'." }
+    ]
+  },
+  {
+    name: "OBJECT-ORIENTED",
+    x: 3000,
+    required: 2,
+    questions: [
+      { q: "Which concept lets a class acquire properties/methods from another class?", choices: ["Encapsulation", "Polymorphism", "Inheritance", "Abstraction"], correct: 2,
+        okMsg: "Correct — inheritance passes down the family traits.", badMsg: "Close, but that's not inheritance." },
+      { q: "Bundling data and the methods that operate on it together is called:", choices: ["Encapsulation", "Recursion", "Currying", "Unification"], correct: 0,
+        okMsg: "Correct — data and behavior, sealed in one capsule.", badMsg: "That one's encapsulation, not this choice." }
+    ]
+  },
+  {
+    name: "FUNCTIONAL",
+    x: 4700,
+    required: 2,
+    questions: [
+      { q: "A 'pure function' is one that:", choices: ["Modifies global state", "Always returns the same output for the same input, no side effects", "Requires a class instance", "Depends on the current date/time"], correct: 1,
+        okMsg: "Correct — same input, same output, no side effects.", badMsg: "Purity means: no side effects, deterministic output." },
+      { q: "Combining small functions into a pipeline is called:", choices: ["Composition", "Inheritance", "Polymorphism", "Unification"], correct: 0,
+        okMsg: "Correct — functions chained together, output feeding input.", badMsg: "That's function composition, not this term." }
+    ]
+  },
+  {
+    name: "LOGIC",
+    x: 6200,
+    required: 2,
+    questions: [
+      { q: "Logic programming expresses a program mainly as:", choices: ["A sequence of loops", "Facts and rules the system infers from", "A class diagram", "A stack of function calls"], correct: 1,
+        okMsg: "Correct — you declare facts/rules, the engine infers the rest.", badMsg: "Logic programming is about facts + rules, not loops." },
+      { q: "In logic programming, 'unification' refers to:", choices: ["Merging two classes", "Matching terms/variables to satisfy a query", "Compiling to bytecode", "Garbage collection"], correct: 1,
+        okMsg: "Correct — unification is how the engine matches variables to facts.", badMsg: "Think pattern-matching variables against facts." }
+    ]
+  }
+];
+const WORLD_WIDTH = TRIALS[TRIALS.length-1].x + 1400;
+const GROUND_Y_RATIO = 0.74;
+
+/* ============================== CANVAS SETUP ============================== */
+const canvas = document.getElementById('game');
+const ctx = canvas.getContext('2d');
+function resize(){
+  canvas.width = canvas.clientWidth * devicePixelRatio;
+  canvas.height = canvas.clientHeight * devicePixelRatio;
+}
+window.addEventListener('resize', resize);
+resize();
+
+/* ============================== PLAYER ============================== */
+const player = { x: 120, w: 34, h: 46, speed: 340, vx: 0, facing: 1, walkT: 0 };
+let totalExp = 0, expPerCorrect = 100;
+const requiredTotal = TRIALS.reduce((s,t)=>s+t.required,0);
+let trialsCleared = 0;
+
+/* gate x-positions the player cannot cross until cleared */
+TRIALS.forEach(t => t.correctCount = 0);
+TRIALS.forEach(t => t.cleared = false);
+TRIALS.forEach(t => t.qIndex = 0);
+
+let cameraX = 0;
+let activeTrialIdx = -1; // index of trial currently in dialogue
+let dialogueOpen = false;
+let answering = false;
+
+/* ============================== INPUT ============================== */
+const keys = {};
+window.addEventListener('keydown', e=>{
+  keys[e.key.toLowerCase()] = true;
+  if(e.key.toLowerCase()==='e') tryInteract();
+});
+window.addEventListener('keyup', e=>{ keys[e.key.toLowerCase()] = false; });
+
+function tryInteract(){
+  if(dialogueOpen) return;
+  const idx = nearbyTrialIndex();
+  if(idx !== -1 && !TRIALS[idx].cleared){
+    openDialogue(idx);
+  }
+}
+
+function nearbyTrialIndex(){
+  for(let i=0;i<TRIALS.length;i++){
+    if(Math.abs(TRIALS[i].x - player.x) < 90) return i;
+  }
+  return -1;
+}
+
+/* ============================== DIALOGUE UI ============================== */
+const dialogueEl = document.getElementById('dialogue');
+const speechEl = document.getElementById('speechBubble');
+const choicesEl = document.getElementById('choices');
+const continueBtn = document.getElementById('continueBtn');
+const progressNote = document.getElementById('progressNote');
+const kernelName = document.getElementById('kernelName');
+const hintEl = document.getElementById('hint');
+
+function openDialogue(idx){
+  activeTrialIdx = idx;
+  dialogueOpen = true;
+  answering = false;
+  const t = TRIALS[idx];
+  kernelName.textContent = 'KERNEL — ' + t.name;
+  renderQuestion();
+  dialogueEl.classList.add('open');
+}
+
+function closeDialogue(){
+  dialogueEl.classList.remove('open');
+  dialogueOpen = false;
+  activeTrialIdx = -1;
+}
+
+function renderQuestion(){
+  const t = TRIALS[activeTrialIdx];
+  const q = t.questions[t.qIndex % t.questions.length];
+  speechEl.innerHTML = `<div>${escapeHtml(q.q)}</div>`;
+  progressNote.textContent = `${t.correctCount}/${t.required} verified in this trial`;
+  continueBtn.style.display = 'none';
+  choicesEl.innerHTML = '';
+  q.choices.forEach((c,i)=>{
+    const b = document.createElement('button');
+    b.className = 'choiceBtn';
+    b.textContent = c;
+    b.onclick = ()=> submitAnswer(i);
+    choicesEl.appendChild(b);
+  });
+}
+
+function submitAnswer(i){
+  if(answering) return;
+  answering = true;
+  const t = TRIALS[activeTrialIdx];
+  const q = t.questions[t.qIndex % t.questions.length];
+  const btns = [...choicesEl.children];
+  btns.forEach(b=>b.disabled = true);
+  const isCorrect = i === q.correct;
+
+  if(isCorrect){
+    btns[i].classList.add('correct');
+    totalExp += expPerCorrect;
+    t.correctCount++;
+    speechEl.innerHTML = `<span class="status ok">SYSTEM VERIFIED — CORRECT</span><div>${escapeHtml(q.okMsg)}</div>`;
+  } else {
+    btns[i].classList.add('wrong');
+    btns[q.correct].classList.add('correct');
+    speechEl.innerHTML = `<span class="status bad">SYSTEM ERROR — INCORRECT</span><div>${escapeHtml(q.badMsg)}</div>`;
+  }
+  updateHud();
+  progressNote.textContent = `${t.correctCount}/${t.required} verified in this trial`;
+
+  t.qIndex++;
+  continueBtn.style.display = 'inline-block';
+
+  if(t.correctCount >= t.required){
+    t.cleared = true;
+    trialsCleared++;
+    continueBtn.textContent = trialsCleared===TRIALS.length ? 'FINISH →' : 'GATE OPENED — CONTINUE →';
+  } else {
+    continueBtn.textContent = 'CONTINUE →';
+  }
+}
+
+continueBtn.onclick = ()=>{
+  answering = false;
+  const t = TRIALS[activeTrialIdx];
+  if(t.cleared){
+    closeDialogue();
+    if(trialsCleared === TRIALS.length){
+      setTimeout(()=>{ document.getElementById('victory').style.display='flex'; }, 900);
+    }
+  } else {
+    renderQuestion();
+  }
+};
+
+function escapeHtml(s){
+  return s.replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+}
+
+/* ============================== HUD ============================== */
+const expBarFill = document.getElementById('expBarFill');
+const expNum = document.getElementById('expNum');
+const trialCur = document.getElementById('trialCur');
+const trialTotalEl = document.getElementById('trialTotal');
+trialTotalEl.textContent = TRIALS.length;
+
+function updateHud(){
+  const maxExp = requiredTotal * expPerCorrect;
+  expBarFill.style.width = Math.min(100,(totalExp/maxExp)*100) + '%';
+  expNum.textContent = `${totalExp} / ${maxExp}`;
+  trialCur.textContent = Math.min(trialsCleared+1, TRIALS.length);
+}
+updateHud();
+
+/* ============================== COLOR / PROGRESS THEME ============================== */
+// progress 0..1 across whole world, drives background from cold digital -> warm reality
+function worldProgress(){ return Math.min(1, player.x / WORLD_WIDTH); }
+
+function lerp(a,b,t){ return a+(b-a)*t; }
+function lerpColor(c1,c2,t){
+  return [ lerp(c1[0],c2[0],t), lerp(c1[1],c2[1],t), lerp(c1[2],c2[2],t) ];
+}
+function rgb(c){ return `rgb(${c[0]|0},${c[1]|0},${c[2]|0})`; }
+
+const SKY_COLD_TOP    = [10,14,23];
+const SKY_COLD_BOTTOM = [19,27,46];
+const SKY_WARM_TOP    = [255,183,120];
+const SKY_WARM_BOTTOM = [255,138,101];
+
+const GROUND_COLD = [21,28,44];
+const GROUND_WARM = [46,125,90];
+
+/* ============================== PARTICLES ============================== */
+const particles = [];
+for(let i=0;i<90;i++){
+  particles.push({
+    x: Math.random()*WORLD_WIDTH,
+    y: Math.random()*0.7,
+    r: Math.random()*2+1,
+    speed: Math.random()*10+4,
+    phase: Math.random()*Math.PI*2
+  });
+}
+
+/* ============================== GAME LOOP ============================== */
+let lastT = performance.now();
+function frame(now){
+  const dt = Math.min(0.033, (now-lastT)/1000);
+  lastT = now;
+  update(dt);
+  draw();
+  requestAnimationFrame(frame);
+}
+
+function update(dt){
+  if(!dialogueOpen){
+    let move = 0;
+    if(keys['a']||keys['arrowleft']) move -= 1;
+    if(keys['d']||keys['arrowright']) move += 1;
+    if(move !== 0) player.facing = move;
+    player.vx = move * player.speed;
+
+    let nextX = player.x + player.vx*dt;
+    // gate collision: block passing an uncleared trial from the left
+    for(const t of TRIALS){
+      if(!t.cleared && nextX > t.x - 46 && player.x <= t.x - 46){
+        nextX = t.x - 46;
+      }
+    }
+    player.x = Math.max(30, Math.min(WORLD_WIDTH-30, nextX));
+    if(move !== 0) player.walkT += dt*8;
+  }
+
+  // camera
+  const viewW = canvas.width/devicePixelRatio;
+  cameraX = Math.max(0, Math.min(WORLD_WIDTH - viewW, player.x - viewW/2));
+
+  // hint text
+  const idx = nearbyTrialIndex();
+  if(!dialogueOpen && idx !== -1 && !TRIALS[idx].cleared){
+    hintEl.textContent = `Press E to access Trial ${idx+1}: ${TRIALS[idx].name}`;
+    hintEl.classList.add('show');
+  } else if(!dialogueOpen && idx !== -1 && TRIALS[idx].cleared){
+    hintEl.textContent = `Trial ${idx+1} cleared — path open`;
+    hintEl.classList.add('show');
+  } else {
+    hintEl.classList.remove('show');
+  }
+}
+
+function draw(){
+  const W = canvas.width, H = canvas.height;
+  const dpr = devicePixelRatio;
+  const p = worldProgress();
+
+  // sky gradient
+  const top = lerpColor(SKY_COLD_TOP, SKY_WARM_TOP, p);
+  const bot = lerpColor(SKY_COLD_BOTTOM, SKY_WARM_BOTTOM, p);
+  const g = ctx.createLinearGradient(0,0,0,H);
+  g.addColorStop(0, rgb(top));
+  g.addColorStop(1, rgb(bot));
+  ctx.fillStyle = g;
+  ctx.fillRect(0,0,W,H);
+
+  const groundY = H*GROUND_Y_RATIO;
+
+  // parallax grid / bokeh particles
+  particles.forEach(pt=>{
+    const localP = Math.min(1, pt.x / WORLD_WIDTH);
+    const sx = (pt.x - cameraX*0.6) * dpr;
+    if(sx < -20 || sx > W+20) return;
+    const sy = pt.y * groundY;
+    const twinkle = 0.5 + 0.5*Math.sin(performance.now()/600 + pt.phase);
+    const col = lerpColor([53,224,201], [255,214,102], localP);
+    ctx.globalAlpha = 0.25 + 0.35*twinkle;
+    ctx.fillStyle = rgb(col);
+    if(localP < 0.5){
+      ctx.fillRect(sx, sy, pt.r*dpr, pt.r*dpr); // digital: squares
+    } else {
+      ctx.beginPath(); ctx.arc(sx, sy, pt.r*dpr, 0, Math.PI*2); ctx.fill(); // reality: soft dots
+    }
+    ctx.globalAlpha = 1;
+  });
+
+  // ground
+  const groundCol = lerpColor(GROUND_COLD, GROUND_WARM, p);
+  ctx.fillStyle = rgb(groundCol);
+  ctx.fillRect(0, groundY, W, H-groundY);
+  // faint grid lines on ground (digital residue), fading out with progress
+  ctx.strokeStyle = `rgba(53,224,201,${0.18*(1-p)})`;
+  ctx.lineWidth = 1;
+  for(let gx = -((cameraX*dpr)%(40*dpr)); gx < W; gx += 40*dpr){
+    ctx.beginPath(); ctx.moveTo(gx, groundY); ctx.lineTo(gx, H); ctx.stroke();
+  }
+  // top edge highlight
+  ctx.fillStyle = rgb(lerpColor([53,224,201],[255,214,102],p));
+  ctx.fillRect(0, groundY, W, 3*dpr);
+
+  // trial gates
+  TRIALS.forEach((t,i)=>{
+    const sx = (t.x - cameraX)*dpr;
+    if(sx < -120 || sx > W+120) return;
+    drawGate(sx, groundY, dpr, t, i, p);
+  });
+
+  // player
+  drawPlayer((player.x - cameraX)*dpr, groundY, dpr);
+}
+
+function drawGate(sx, groundY, dpr, t, i, worldP){
+  const gateH = 190*dpr;
+  const cleared = t.cleared;
+  const col = cleared ? [255,214,102] : [53,224,201];
+  // pillars
+  ctx.fillStyle = `rgba(${col[0]},${col[1]},${col[2]},.85)`;
+  ctx.fillRect(sx-4*dpr, groundY-gateH, 8*dpr, gateH);
+  // barrier field (only if not cleared)
+  if(!cleared){
+    const t2 = performance.now()/500;
+    ctx.save();
+    ctx.globalAlpha = 0.28 + 0.12*Math.sin(t2+i);
+    ctx.fillStyle = rgb(col);
+    ctx.fillRect(sx-2*dpr, groundY-gateH, 4*dpr, gateH);
+    ctx.restore();
+  }
+  // kernel orb floats beside gate
+  const floatY = groundY - gateH*0.62 + Math.sin(performance.now()/450 + i)*6*dpr;
+  ctx.beginPath();
+  ctx.fillStyle = rgb(col);
+  ctx.shadowColor = rgb(col);
+  ctx.shadowBlur = 18*dpr;
+  ctx.arc(sx, floatY, 13*dpr, 0, Math.PI*2);
+  ctx.fill();
+  ctx.shadowBlur = 0;
+  // inner eye
+  ctx.fillStyle = '#0a0e17';
+  ctx.beginPath(); ctx.arc(sx, floatY, 5*dpr, 0, Math.PI*2); ctx.fill();
+
+  // label
+  ctx.font = `${11*dpr}px 'JetBrains Mono', monospace`;
+  ctx.textAlign = 'center';
+  ctx.fillStyle = cleared ? '#ffe9b0' : '#c9fff5';
+  ctx.fillText(`TRIAL ${i+1}: ${t.name}`, sx, groundY-gateH-14*dpr);
+  ctx.fillStyle = 'rgba(255,255,255,.65)';
+  ctx.fillText(cleared ? 'CLEARED' : `${t.correctCount}/${t.required}`, sx, groundY-gateH+ gateH + 16*dpr);
+}
+
+function drawPlayer(sx, groundY, dpr){
+  const w = player.w*dpr, h = player.h*dpr;
+  const bob = dialogueOpen ? 0 : Math.sin(player.walkT)*3*dpr;
+  const baseY = groundY - h;
+  ctx.save();
+  ctx.translate(sx, baseY + bob);
+  ctx.scale(player.facing, 1);
+
+  // body (capsule)
+  ctx.fillStyle = '#eaf2ff';
+  roundRect(-w/2, h*0.18, w, h*0.6, 8*dpr);
+  ctx.fill();
+  // head
+  ctx.beginPath();
+  ctx.fillStyle = '#5b8cff';
+  ctx.arc(0, h*0.1, w*0.42, 0, Math.PI*2);
+  ctx.fill();
+  // visor
+  ctx.fillStyle = '#0a0e17';
+  roundRect(-w*0.28, h*0.02, w*0.56, h*0.14, 5*dpr);
+  ctx.fill();
+  // legs
+  const legSwing = dialogueOpen ? 0 : Math.sin(player.walkT)*8*dpr;
+  ctx.strokeStyle = '#8ea2c6';
+  ctx.lineWidth = 5*dpr;
+  ctx.beginPath();
+  ctx.moveTo(-w*0.18, h*0.78); ctx.lineTo(-w*0.18+legSwing, h*1.02);
+  ctx.moveTo(w*0.18, h*0.78); ctx.lineTo(w*0.18-legSwing, h*1.02);
+  ctx.stroke();
+
+  ctx.restore();
+}
+
+function roundRect(x,y,w,h,r){
+  ctx.beginPath();
+  ctx.moveTo(x+r,y);
+  ctx.arcTo(x+w,y,x+w,y+h,r);
+  ctx.arcTo(x+w,y+h,x,y+h,r);
+  ctx.arcTo(x,y+h,x,y,r);
+  ctx.arcTo(x,y,x+w,y,r);
+  ctx.closePath();
+}
+
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>
