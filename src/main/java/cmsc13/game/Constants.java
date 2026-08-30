@@ -13,6 +13,9 @@ public final class Constants {
 
     // Pixel-art world grid: 32 columns by 18 rows in the visible viewport.
     public static final int TILE_SIZE = 32;
+
+    /** The 32x32 character art and its hitbox are drawn at this multiple of native size. */
+    public static final int SPRITE_SCALE = 2;
     public static final int VIEWPORT_TILES_WIDE = LOGICAL_WIDTH / TILE_SIZE;
     public static final int VIEWPORT_TILES_HIGH = LOGICAL_HEIGHT / TILE_SIZE;
 
@@ -20,7 +23,7 @@ public final class Constants {
     public static final int FUTURE_WORLD_TILES_WIDE = 480;
     public static final double FUTURE_WORLD_WIDTH = FUTURE_WORLD_TILES_WIDE * TILE_SIZE;
     public static final double GROUND_Y = LOGICAL_HEIGHT - (TILE_SIZE * 4);
-    public static final double GROUND_HEIGHT = TILE_SIZE;
+    public static final double GROUND_HEIGHT = LOGICAL_HEIGHT - GROUND_Y; // fill to the bottom so holes read as pits
     public static final int TRIAL_COUNT = 10;
     private static final int[] TRIAL_TILE_POSITIONS = {
         38, 78, 119, 164, 205, 246, 289, 332, 382, 432
@@ -33,11 +36,11 @@ public final class Constants {
         return TRIAL_TILE_POSITIONS[trialNumber - 1] * TILE_SIZE;
     }
 
-    // Player physics in logical pixels.
+    // Player physics in logical pixels (tuned for the x2 sprite in this 1024x576 viewport).
     public static final double PLAYER_WIDTH = 23;
     public static final double PLAYER_HEIGHT = 28;
     public static final double GRAVITY = 0.6;
-    public static final double JUMP_VELOCITY = -15;
+    public static final double JUMP_VELOCITY = -13;
     public static final double MOVE_SPEED = 5;
-    public static final double FALL_LIMIT = LOGICAL_HEIGHT + 324;
+    public static final double FALL_LIMIT = GROUND_Y + 220; // past this drop, respawn at the last checkpoint
 }

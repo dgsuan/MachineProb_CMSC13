@@ -23,14 +23,21 @@ import javafx.util.Duration;
 public final class GameApplication extends Application {
     private static final double WORLD_WIDTH = Constants.FUTURE_WORLD_WIDTH;
 
-    /** The long map starts as a continuous walkable ground layer. */
+    /**
+     * Solid ground spans; the gaps between them are holes. The opening stretch has a very wide
+     * first pit crossed by two small platforms, then a shorter pit crossed by one small platform,
+     * then continuous ground the rest of the way.
+     */
     private static final List<double[]> GROUND_SEGMENTS = List.of(
-        new double[] {0, WORLD_WIDTH}
+        new double[] {0, 290},
+        new double[] {800, 930},
+        new double[] {1140, WORLD_WIDTH}
     );
-    /** Placeholder platforms for the first section of the long map. */
+    /** Floating platforms: two over the wide first pit (290-800), one over the second pit (930-1140). */
     private static final List<Platform> PLATFORMS = List.of(
-        new Platform(368, 140, 45),
-        new Platform(527, 140, 45)
+        new Platform(400, 402, 90),
+        new Platform(585, 384, 90),
+        new Platform(1005, 396, 90)
     );
 
     private final StackPane root = new StackPane();
@@ -137,7 +144,7 @@ public final class GameApplication extends Application {
         createWorld();
         refreshWall();
         prompt = text("", 16);
-        prompt.setTextFill(Color.WHITE); prompt.setTranslateY(-300);
+        prompt.setTextFill(Color.WHITE); prompt.setTranslateY(-(Constants.LOGICAL_HEIGHT / 2.0 - 48));
         logicalRoot.getChildren().setAll(viewport, prompt);
         logicalRoot.requestFocus();
     }
