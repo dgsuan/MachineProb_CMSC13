@@ -17,6 +17,7 @@ public final class Player {
     private boolean left;
     private boolean right;
     private boolean onGround = true;
+    private double wallLeft = Double.POSITIVE_INFINITY;
 
     public Player() {
         Rectangle body = new Rectangle(WIDTH, HEIGHT, Color.web("#ff8fab"));
@@ -30,12 +31,15 @@ public final class Player {
         if (left) x -= 5;
         if (right) x += 5;
         x = Math.max(0, Math.min(2970, x));
+        if (x + WIDTH > wallLeft) x = wallLeft - WIDTH;
         if (!onGround) velocityY += 0.6;
         y += velocityY;
         if (y >= GROUND_Y - HEIGHT) { y = GROUND_Y - HEIGHT; velocityY = 0; onGround = true; }
         draw();
     }
     public void jump() { if (onGround) { velocityY = -15; onGround = false; } }
+    public void setWallLeft(double worldX) { this.wallLeft = worldX; }
+    public void clearWall() { this.wallLeft = Double.POSITIVE_INFINITY; }
     public void respawnAtTrialOne() { x = 1080; y = GROUND_Y - HEIGHT; velocityY = 0; onGround = true; draw(); }
     public void setLeft(boolean value) { left = value; }
     public void setRight(boolean value) { right = value; }

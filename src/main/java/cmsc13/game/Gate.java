@@ -9,7 +9,7 @@ import javafx.scene.shape.Rectangle;
 public final class Gate {
     private final double x;
     private final Group node = new Group();
-    private final Rectangle body = new Rectangle(70, 90);
+    private final Rectangle body = new Rectangle(70, 170);
     private boolean completed;
 
     public Gate(double x) {
@@ -17,12 +17,14 @@ public final class Gate {
         body.setArcWidth(14); body.setArcHeight(14);
         Label label = new Label("TRIAL 1");
         label.setStyle("-fx-text-fill: white; -fx-font-weight: bold;");
-        label.setLayoutX(8); label.setLayoutY(34);
+        label.setLayoutX(14); label.setLayoutY(0);
         node.getChildren().addAll(body, label);
-        node.setLayoutX(x); node.setLayoutY(510);
+        node.setLayoutX(x); node.setLayoutY(Player.GROUND_Y - 170);
         refresh();
     }
     public boolean isNear(Player player) { return Math.abs(player.getX() - x) < 100; }
+    public double getLeftEdge() { return x; }
+    public boolean isCompleted() { return completed; }
     public void setCompleted(boolean completed) { this.completed = completed; refresh(); }
     public Group getNode() { return node; }
     private void refresh() { body.setFill(completed ? Color.web("#65c18c") : Color.web("#7562a8")); }

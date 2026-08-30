@@ -35,7 +35,7 @@ public final class GameApplication extends Application {
 
     @Override
     public void start(Stage stage) {
-        stage.setTitle("SYSTEM ESCAPE");
+        stage.setTitle("SystemBound: The Paradigm Trials");
         stage.setResizable(false);
         Scene scene = new Scene(root, WIDTH, HEIGHT);
         scene.setOnKeyPressed(event -> onKeyPressed(event.getCode()));
@@ -70,7 +70,7 @@ public final class GameApplication extends Application {
         state = GameState.MENU;
         VBox box = new VBox(18);
         box.setAlignment(Pos.CENTER);
-        Label title = title("SYSTEM ESCAPE", 42);
+        Label title = title("SystemBound: The Paradigm Trials", 42);
         Label subtitle = text("CMSC 13 — JavaFX Game Skeleton", 17);
         Button play = new Button("PLAY");
         play.setDefaultButton(true); play.setOnAction(e -> showWorld());
@@ -93,6 +93,7 @@ public final class GameApplication extends Application {
     private void showWorld() {
         state = GameState.WORLD;
         createWorld();
+        if (trialOneComplete) player.clearWall(); else player.setWallLeft(gate.getLeftEdge());
         prompt = text("", 16);
         prompt.setTextFill(Color.WHITE); prompt.setTranslateY(-300);
         root.getChildren().setAll(viewport, prompt);
