@@ -20,31 +20,37 @@ import javafx.util.Duration;
 
 /** Controls the menu, one world with simple platforming, and the trial quiz loop. */
 public final class GameApplication extends Application {
-    private static final int WIDTH = 1280;
-    private static final int HEIGHT = 720;
-    private static final double WORLD_WIDTH = 3200;
+    /** Logical render size. The world view is scaled up by VIEW_SCALE so a native 32px sprite stays proportionally sized. */
+    private static final int WIDTH = 640;
+    private static final int HEIGHT = 360;
+    private static final int VIEW_SCALE = 2;
+    private static final double WORLD_WIDTH = 1600;
 
     /** Solid ground spans: gaps between them are holes the player can fall through. */
     private static final List<double[]> GROUND_SEGMENTS = List.of(
-        new double[] {0, 1400},
-        new double[] {1700, 2050},
-        new double[] {2350, WORLD_WIDTH}
+        new double[] {0, 700},
+        new double[] {850, 1025},
+        new double[] {1175, WORLD_WIDTH}
     );
-    /** Floating platforms used to cross the two holes. */
+    /** One low floating platform bridges each hole so a single hop clears it. */
     private static final List<Platform> PLATFORMS = List.of(
-        new Platform(1460, 520, 120),
-        new Platform(1620, 460, 120),
-        new Platform(2120, 520, 120),
-        new Platform(2260, 470, 110)
+        new Platform(735, 280, 90),
+        new Platform(1055, 280, 90)
     );
 
     private final StackPane root = new StackPane();
     private final Pane world = new Pane();
     private final Pane viewport = new Pane();
     private final Player player = new Player();
+<<<<<<< Updated upstream
     private final Gate gate1 = new Gate(1, 1200);
     private final Gate gate2 = new Gate(2, 2700);
     private final QuestionManager questionManager = new QuestionManager();
+=======
+    private final Gate gate1 = new Gate(1, 250);
+    private final Gate gate2 = new Gate(2, 500);
+    private final QuestionBank questionBank = new QuestionBank();
+>>>>>>> Stashed changes
     private GameState state = GameState.MENU;
     private Trial trial;
     private Gate activeGate;
@@ -54,7 +60,7 @@ public final class GameApplication extends Application {
     public void start(Stage stage) {
         stage.setTitle("SystemBound: The Paradigm Trials");
         stage.setResizable(false);
-        Scene scene = new Scene(root, WIDTH, HEIGHT);
+        Scene scene = new Scene(root, WIDTH * VIEW_SCALE, HEIGHT * VIEW_SCALE);
         scene.setOnKeyPressed(event -> onKeyPressed(event.getCode()));
         scene.setOnKeyReleased(event -> onKeyReleased(event.getCode()));
         stage.setScene(scene);
@@ -72,7 +78,7 @@ public final class GameApplication extends Application {
         world.setPrefSize(WORLD_WIDTH, HEIGHT);
         world.setStyle("-fx-background-color: linear-gradient(to bottom, #202333, #36394a);");
         for (double[] segment : GROUND_SEGMENTS) {
-            Rectangle ground = new Rectangle(segment[0], Player.GROUND_Y, segment[1] - segment[0], 120);
+            Rectangle ground = new Rectangle(segment[0], Player.GROUND_Y, segment[1] - segment[0], 60);
             ground.setFill(Color.web("#596275"));
             world.getChildren().add(ground);
         }
@@ -80,7 +86,8 @@ public final class GameApplication extends Application {
             world.getChildren().add(platform.getNode());
         }
         Label start = new Label("SYSTEM START");
-        start.setTextFill(Color.WHITE); start.setLayoutX(45); start.setLayoutY(630);
+        start.setStyle("-fx-font-size: 9;");
+        start.setTextFill(Color.WHITE); start.setLayoutX(22); start.setLayoutY(315);
         world.getChildren().addAll(gate1.getNode(), gate2.getNode(), player.getNode(), start);
         player.setLevel(WORLD_WIDTH, GROUND_SEGMENTS, PLATFORMS);
         viewport.getChildren().setAll(world);
@@ -88,6 +95,8 @@ public final class GameApplication extends Application {
         viewport.setMinSize(WIDTH, HEIGHT);
         viewport.setMaxSize(WIDTH, HEIGHT);
         viewport.setClip(new Rectangle(WIDTH, HEIGHT));
+        viewport.setScaleX(VIEW_SCALE);
+        viewport.setScaleY(VIEW_SCALE);
     }
 
     private void showMenu() {
@@ -137,7 +146,7 @@ public final class GameApplication extends Application {
 
     private void updateWorld() {
         player.update();
-        double cameraX = Math.max(0, Math.min(player.getX() - 320, WORLD_WIDTH - WIDTH));
+        double cameraX = Math.max(0, Math.min(player.getX() - WIDTH / 4.0, WORLD_WIDTH - WIDTH));
         world.setTranslateX(-cameraX);
         Gate near = nearbyGate();
         if (near == null) {
@@ -201,7 +210,7 @@ public final class GameApplication extends Application {
         boolean passed = trial.isComplete();
         if (passed) {
             activeGate.setCompleted(true);
-            player.setCheckpoint(activeGate.getLeftEdge() + 100);
+            player.setCheckpoint(activeGate.getLeftEdge() + 50);
             refreshWall();
         }
         Label result = text((passed ? "TRIAL COMPLETE" : "TRIAL FAILED") + "\n\nEXP EARNED: "
@@ -213,7 +222,7 @@ public final class GameApplication extends Application {
     }
 
     private void finishResult() {
-        if (!trial.isComplete()) player.respawnAt(activeGate.getLeftEdge() - 120);
+        if (!trial.isComplete()) player.respawnAt(activeGate.getLeftEdge() - 60);
         showWorld();
     }
 

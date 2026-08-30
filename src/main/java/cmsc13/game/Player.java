@@ -9,6 +9,7 @@ import javafx.scene.shape.Rectangle;
 
 /** Minimal player movement with ground segments, holes, and floating platforms. */
 public final class Player {
+<<<<<<< Updated upstream
     public static final double WIDTH = 30;
     public static final double HEIGHT = 50;
     public static final double GROUND_Y = 600;
@@ -16,6 +17,26 @@ public final class Player {
     private static final double JUMP_VELOCITY = -15;
     private static final double MOVE_SPEED = 5;
     private static final double FALL_LIMIT = 900;
+=======
+    public static final double WIDTH = 23;
+    public static final double HEIGHT = 28;
+    public static final double GROUND_Y = 300;
+    private static final double GRAVITY = 0.3;
+    private static final double JUMP_VELOCITY = -7.5;
+    private static final double MOVE_SPEED = 2.5;
+    private static final double FALL_LIMIT = 450;
+    private static final double SPRITE_SIZE = 32;
+    private static final long IDLE_FRAME_DURATION = 180_000_000L;
+    private static final long RUN_FRAME_DURATION = 95_000_000L;
+    private static final long JUMP_FRAME_DURATION = 90_000_000L;
+    private static final Image[] IDLE_FRAMES = loadFrames("Idle", 4);
+    private static final Image[] RUN_RIGHT_FRAMES = loadFrames("Run_right", 6);
+    private static final Image[] RUN_LEFT_FRAMES = loadFrames("Run_left", 6);
+    private static final Image[] JUMP_RIGHT_FRAMES = loadFrames("Jump_right", 8);
+    // The supplied left-facing jump sprites use the "Jump_leftt" filename prefix.
+    private static final Image[] JUMP_LEFT_FRAMES = loadFrames("Jump_leftt", 8);
+
+>>>>>>> Stashed changes
     private final Group node = new Group();
     private double x = 100;
     private double y = GROUND_Y - HEIGHT;
