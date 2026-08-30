@@ -1,0 +1,27 @@
+package cmsc13.game;
+
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
+
+/** A simple one-way floating platform: the player lands on it from above but can jump up through it. */
+public final class Platform {
+    public static final double THICKNESS = 18;
+    private final double x;
+    private final double y;
+    private final double width;
+    private final Rectangle node;
+
+    public Platform(double x, double y, double width) {
+        this.x = x;
+        this.y = y;
+        this.width = width;
+        node = new Rectangle(width, THICKNESS, Color.web("#8d7ec8"));
+        node.setArcWidth(8); node.setArcHeight(8);
+        node.setLayoutX(x); node.setLayoutY(y);
+    }
+
+    public double getX() { return x; }
+    public double getWidth() { return width; }
+    public double getTop() { return y; }
+    public Rectangle getNode() { return node; }
+}
