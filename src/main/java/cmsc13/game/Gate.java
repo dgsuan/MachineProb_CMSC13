@@ -21,7 +21,7 @@ public final class Gate {
         label.setStyle("-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 6;");
         label.setLayoutX(3); label.setLayoutY(1);
         node.getChildren().addAll(body, label);
-        node.setLayoutX(x); node.setLayoutY(Player.GROUND_Y - 55);
+        node.setLayoutX(x); node.setLayoutY(Constants.GROUND_Y - body.getHeight());
         refresh();
     }
 

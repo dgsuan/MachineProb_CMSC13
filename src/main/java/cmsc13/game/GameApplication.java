@@ -1,5 +1,6 @@
 package cmsc13.game;
 
+import java.util.ArrayList;
 import java.util.List;
 import javafx.animation.AnimationTimer;
 import javafx.animation.PauseTransition;
@@ -20,30 +21,25 @@ import javafx.util.Duration;
 
 /** Controls the menu, one world with simple platforming, and the trial quiz loop. */
 public final class GameApplication extends Application {
-    /** Logical render size. The world view is scaled up by VIEW_SCALE so the native 32px sprite stays proportionally sized. */
-    private static final int WIDTH = 320;
-    private static final int HEIGHT = 180;
-    private static final int VIEW_SCALE = 4;
-    private static final double WORLD_WIDTH = 800;
+    private static final double WORLD_WIDTH = Constants.FUTURE_WORLD_WIDTH;
 
-    /** Solid ground spans: gaps between them are holes the player can fall through. */
+    /** The long map starts as a continuous walkable ground layer. */
     private static final List<double[]> GROUND_SEGMENTS = List.of(
-        new double[] {0, 350},
-        new double[] {425, 512},
-        new double[] {587, WORLD_WIDTH}
+        new double[] {0, WORLD_WIDTH}
     );
-    /** One low floating platform bridges each hole so a single hop clears it. */
+    /** Placeholder platforms for the first section of the long map. */
     private static final List<Platform> PLATFORMS = List.of(
         new Platform(368, 140, 45),
         new Platform(527, 140, 45)
     );
 
     private final StackPane root = new StackPane();
+    /** Fixed logical viewport; the outer root only provides the physical window. */
+    private final StackPane logicalRoot = new StackPane();
     private final Pane world = new Pane();
     private final Pane viewport = new Pane();
     private final Player player = new Player();
-    private final Gate gate1 = new Gate(1, 125);
-    private final Gate gate2 = new Gate(2, 250);
+    private final List<Gate> gates = createGates();
     private final QuestionBank questionBank = new QuestionBank();
     private GameState state = GameState.MENU;
     private Trial trial;
@@ -52,27 +48,37 @@ public final class GameApplication extends Application {
 
     @Override
     public void start(Stage stage) {
-        stage.setTitle("SystemBound: The Paradigm Trials");
-        stage.setResizable(false);
-        Scene scene = new Scene(root, WIDTH * VIEW_SCALE, HEIGHT * VIEW_SCALE);
+        stage.setTitle(Constants.WINDOW_TITLE);
+        stage.setMinWidth(Constants.MIN_WINDOW_WIDTH);
+        stage.setMinHeight(Constants.MIN_WINDOW_HEIGHT);
+        logicalRoot.setMinSize(Constants.LOGICAL_WIDTH, Constants.LOGICAL_HEIGHT);
+        logicalRoot.setPrefSize(Constants.LOGICAL_WIDTH, Constants.LOGICAL_HEIGHT);
+        logicalRoot.setMaxSize(Constants.LOGICAL_WIDTH, Constants.LOGICAL_HEIGHT);
+        root.setStyle("-fx-background-color: black;");
+        root.getChildren().add(logicalRoot);
+        Scene scene = new Scene(root, Constants.LOGICAL_WIDTH, Constants.LOGICAL_HEIGHT);
         scene.setOnKeyPressed(event -> onKeyPressed(event.getCode()));
         scene.setOnKeyReleased(event -> onKeyReleased(event.getCode()));
         stage.setScene(scene);
+        root.widthProperty().addListener((observable, oldValue, newValue) -> updateViewportScale());
+        root.heightProperty().addListener((observable, oldValue, newValue) -> updateViewportScale());
         showMenu();
         new AnimationTimer() {
             @Override public void handle(long now) {
-                if (state == GameState.WORLD) updateWorld();
+                if (state == GameState.WORLD || state == GameState.MENU) updateWorld();
             }
         }.start();
         stage.show();
+        updateViewportScale();
     }
 
     private void createWorld() {
         world.getChildren().clear();
-        world.setPrefSize(WORLD_WIDTH, HEIGHT);
+        world.setPrefSize(WORLD_WIDTH, Constants.LOGICAL_HEIGHT);
         world.setStyle("-fx-background-color: linear-gradient(to bottom, #202333, #36394a);");
         for (double[] segment : GROUND_SEGMENTS) {
-            Rectangle ground = new Rectangle(segment[0], Player.GROUND_Y, segment[1] - segment[0], 30);
+            Rectangle ground = new Rectangle(segment[0], Constants.GROUND_Y,
+                segment[1] - segment[0], Constants.GROUND_HEIGHT);
             ground.setFill(Color.web("#596275"));
             world.getChildren().add(ground);
         }
@@ -80,23 +86,28 @@ public final class GameApplication extends Application {
             world.getChildren().add(platform.getNode());
         }
         Label start = new Label("SYSTEM START");
-        start.setStyle("-fx-font-size: 6;");
-        start.setTextFill(Color.WHITE); start.setLayoutX(11); start.setLayoutY(157);
-        world.getChildren().addAll(gate1.getNode(), gate2.getNode(), player.getNode(), start);
+        start.setTextFill(Color.WHITE); start.setLayoutX(45); start.setLayoutY(Constants.GROUND_Y + 4);
+        for (Gate gate : gates) world.getChildren().add(gate.getNode());
+        world.getChildren().addAll(player.getNode(), start);
         player.setLevel(WORLD_WIDTH, GROUND_SEGMENTS, PLATFORMS);
         viewport.getChildren().setAll(world);
-        viewport.setPrefSize(WIDTH, HEIGHT);
-        viewport.setMinSize(WIDTH, HEIGHT);
-        viewport.setMaxSize(WIDTH, HEIGHT);
-        viewport.setClip(new Rectangle(WIDTH, HEIGHT));
-        viewport.setScaleX(VIEW_SCALE);
-        viewport.setScaleY(VIEW_SCALE);
+        viewport.setPrefSize(Constants.LOGICAL_WIDTH, Constants.LOGICAL_HEIGHT);
+        viewport.setMinSize(Constants.LOGICAL_WIDTH, Constants.LOGICAL_HEIGHT);
+        viewport.setMaxSize(Constants.LOGICAL_WIDTH, Constants.LOGICAL_HEIGHT);
+        viewport.setClip(new Rectangle(Constants.LOGICAL_WIDTH, Constants.LOGICAL_HEIGHT));
     }
 
     private void showMenu() {
         state = GameState.MENU;
+        prompt = null;
+        createWorld();
+        refreshWall();
+        player.setLeft(false);
+        player.setRight(false);
         VBox box = new VBox(18);
         box.setAlignment(Pos.CENTER);
+        // The menu is only an overlay: the live world stays visible behind it.
+        box.setStyle("-fx-background-color: transparent;");
         Label title = title("SystemBound: The Paradigm Trials", 42);
         Label subtitle = text("CMSC 13 — JavaFX Game Skeleton", 17);
         Button play = new Button("PLAY");
@@ -104,7 +115,7 @@ public final class GameApplication extends Application {
         Button help = new Button("HOW TO PLAY"); help.setOnAction(e -> showHowToPlay());
         Button exit = new Button("EXIT"); exit.setOnAction(e -> ((Stage) root.getScene().getWindow()).close());
         box.getChildren().addAll(title, subtitle, play, help, exit);
-        root.getChildren().setAll(box);
+        logicalRoot.getChildren().setAll(viewport, box);
     }
 
     private void showHowToPlay() {
@@ -115,10 +126,10 @@ public final class GameApplication extends Application {
             + "A / Left Arrow — Move left\nD / Right Arrow — Move right\nSpace — Jump onto floating platforms\n"
             + "E — Enter a nearby trial\nEnter — Continue after a trial result\n\n"
             + "Fall into a hole and you respawn at the last checkpoint.\n"
-            + "Earn 3 EXP from 5 questions to clear a trial.", 18);
+            + "Earn 3 EXP from the 14 questions to clear a trial.", 18);
         Button back = new Button("BACK"); back.setOnAction(e -> showMenu());
         box.getChildren().addAll(title("HOW TO PLAY", 32), instructions, back);
-        root.getChildren().setAll(box);
+        logicalRoot.getChildren().setAll(box);
     }
 
     private void showWorld() {
@@ -127,21 +138,28 @@ public final class GameApplication extends Application {
         refreshWall();
         prompt = text("", 16);
         prompt.setTextFill(Color.WHITE); prompt.setTranslateY(-300);
-        root.getChildren().setAll(viewport, prompt);
-        root.requestFocus();
+        logicalRoot.getChildren().setAll(viewport, prompt);
+        logicalRoot.requestFocus();
     }
 
     /** Blocks the player at the first uncleared gate to their right. */
     private void refreshWall() {
-        if (!gate1.isCompleted()) player.setWallLeft(gate1.getLeftEdge());
-        else if (!gate2.isCompleted()) player.setWallLeft(gate2.getLeftEdge());
-        else player.clearWall();
+        for (Gate gate : gates) {
+            if (!gate.isCompleted()) {
+                player.setWallLeft(gate.getLeftEdge());
+                return;
+            }
+        }
+        player.clearWall();
     }
 
     private void updateWorld() {
         player.update();
-        double cameraX = Math.max(0, Math.min(player.getX() - WIDTH / 4.0, WORLD_WIDTH - WIDTH));
+        double cameraX = Math.max(0, Math.min(player.getX() - Constants.LOGICAL_WIDTH / 4,
+            WORLD_WIDTH - Constants.LOGICAL_WIDTH));
         world.setTranslateX(-cameraX);
+        // Menus deliberately have no gameplay prompt, but their background still animates.
+        if (prompt == null) return;
         Gate near = nearbyGate();
         if (near == null) {
             prompt.setText("");
@@ -153,16 +171,25 @@ public final class GameApplication extends Application {
     }
 
     private Gate nearbyGate() {
-        if (gate1.isNear(player)) return gate1;
-        if (gate2.isNear(player)) return gate2;
+        for (Gate gate : gates) {
+            if (gate.isNear(player)) return gate;
+        }
         return null;
+    }
+
+    private static List<Gate> createGates() {
+        List<Gate> gates = new ArrayList<>();
+        for (int trialNumber = 1; trialNumber <= Constants.TRIAL_COUNT; trialNumber++) {
+            gates.add(new Gate(trialNumber, Constants.trialX(trialNumber)));
+        }
+        return gates;
     }
 
     private void startTrial(Gate gate) {
         if (gate == null || gate.isCompleted()) return;
         activeGate = gate;
         state = GameState.TRIAL;
-        trial = new Trial(questionBank, 1);
+        trial = new Trial(questionBank, gate.getTrialNumber());
         showQuestion();
     }
 
@@ -171,7 +198,7 @@ public final class GameApplication extends Application {
         VBox box = new VBox(14);
         box.setAlignment(Pos.CENTER); box.setMaxWidth(880);
         Label exp = text(
-            "TRIAL 1    EXP: " 
+            "TRIAL " + trial.getNumber() + "    EXP: "
             + trial.getExp() 
             + " / " 
             + Trial.REQUIRED_EXP,
@@ -194,7 +221,7 @@ public final class GameApplication extends Application {
             answers.add(button, i % 2, i / 2);
         }
         box.getChildren().addAll(title("TRIAL " + trial.getNumber(), 28), exp, kernel, answers);
-        root.getChildren().setAll(viewport, box);
+        logicalRoot.getChildren().setAll(viewport, box);
     }
 
     private void answerQuestion(int answer) {
@@ -203,7 +230,7 @@ public final class GameApplication extends Application {
         Label playerLine = text("PLAYER:\n\"" + question.getChoices().get(answer) + "\"\n\n"
             + "PLAYER: \"" + (correct ? "Yes!" : "Oh no...") + "\"\n\n"
             + "KERNEL: \"" + (correct ? "Correct. +1 EXP." : "Incorrect. +0 EXP.") + "\"", 19);
-        root.getChildren().setAll(viewport, playerLine);
+        logicalRoot.getChildren().setAll(viewport, playerLine);
         PauseTransition pause = new PauseTransition(Duration.seconds(1.2));
         pause.setOnFinished(e -> {
             trial.nextQuestion();
@@ -225,7 +252,7 @@ public final class GameApplication extends Application {
             + (passed ? "Press ENTER to return to the map."
                       : "The Kernel returns you to the Trial " + trial.getNumber() + " checkpoint.\nPress ENTER to retry."), 25);
         result.setTextFill(passed ? Color.web("#8ee6a1") : Color.web("#ff9a9a"));
-        root.getChildren().setAll(viewport, result);
+        logicalRoot.getChildren().setAll(viewport, result);
     }
 
     private void finishResult() {
@@ -250,6 +277,15 @@ public final class GameApplication extends Application {
     private void onKeyReleased(KeyCode key) {
         if (key == KeyCode.A || key == KeyCode.LEFT) player.setLeft(false);
         if (key == KeyCode.D || key == KeyCode.RIGHT) player.setRight(false);
+    }
+
+    /** Fits the fixed logical viewport into the window with centered letterboxing. */
+    private void updateViewportScale() {
+        if (root.getWidth() <= 0 || root.getHeight() <= 0) return;
+        double scale = Math.min(root.getWidth() / Constants.LOGICAL_WIDTH,
+            root.getHeight() / Constants.LOGICAL_HEIGHT);
+        logicalRoot.setScaleX(scale);
+        logicalRoot.setScaleY(scale);
     }
 
     private Label title(String value, int size) { 
