@@ -3,21 +3,31 @@ package cmsc13.game;
 import java.util.ArrayList;
 import java.util.List;
 import javafx.scene.Group;
-import javafx.scene.paint.Color;
-import javafx.scene.shape.Circle;
-import javafx.scene.shape.Rectangle;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 
 /** Minimal player movement with ground segments, holes, and floating platforms. */
 public final class Player {
     public static final double WIDTH = 23;
     public static final double HEIGHT = 28;
-    public static final double GROUND_Y = 300;
-    private static final double GRAVITY = 0.3;
-    private static final double JUMP_VELOCITY = -7.5;
-    private static final double MOVE_SPEED = 2.5;
-    private static final double FALL_LIMIT = 450;
+    public static final double GROUND_Y = 600;
+    private static final double GRAVITY = 0.6;
+    private static final double JUMP_VELOCITY = -15;
+    private static final double MOVE_SPEED = 5;
+    private static final double FALL_LIMIT = 900;
+    private static final double SPRITE_SIZE = 32;
+    private static final long IDLE_FRAME_DURATION = 180_000_000L;
+    private static final long RUN_FRAME_DURATION = 95_000_000L;
+    private static final long JUMP_FRAME_DURATION = 90_000_000L;
+    private static final Image[] IDLE_FRAMES = loadFrames("Idle", 4);
+    private static final Image[] RUN_RIGHT_FRAMES = loadFrames("Run_right", 6);
+    private static final Image[] RUN_LEFT_FRAMES = loadFrames("Run_left", 6);
+    private static final Image[] JUMP_RIGHT_FRAMES = loadFrames("Jump_right", 8);
+    // The supplied left-facing jump sprites use the "Jump_leftt" filename prefix.
+    private static final Image[] JUMP_LEFT_FRAMES = loadFrames("Jump_leftt", 8);
 
     private final Group node = new Group();
+    private final ImageView sprite = new ImageView();
     private double x = 100;
     private double y = GROUND_Y - HEIGHT;
     private double velocityY;
@@ -29,12 +39,20 @@ public final class Player {
     private double checkpointX = 100;
     private List<double[]> groundSegments = new ArrayList<>();
     private List<Platform> platforms = new ArrayList<>();
+    private AnimationState animationState = AnimationState.IDLE;
+    private int animationFrame;
+    private long lastAnimationUpdate;
+    private boolean facingRight = true;
 
     public Player() {
-        Rectangle body = new Rectangle(WIDTH, HEIGHT, Color.web("#ff8fab"));
-        body.setArcWidth(10); body.setArcHeight(10);
-        Circle head = new Circle(WIDTH / 2, -10, 12, Color.web("#ffc2d1"));
-        node.getChildren().addAll(body, head);
+        sprite.setFitWidth(SPRITE_SIZE);
+        sprite.setFitHeight(SPRITE_SIZE);
+        sprite.setPreserveRatio(true);
+        // Centre the sprite over the collision box and keep its feet on the ground.
+        sprite.setLayoutX((WIDTH - SPRITE_SIZE) / 2);
+        sprite.setLayoutY(HEIGHT - SPRITE_SIZE);
+        sprite.setImage(IDLE_FRAMES[0]);
+        node.getChildren().add(sprite);
         draw();
     }
 
@@ -48,6 +66,8 @@ public final class Player {
     public void update() {
         if (left) x -= MOVE_SPEED;
         if (right) x += MOVE_SPEED;
+        if (left && !right) facingRight = false;
+        if (right && !left) facingRight = true;
         x = Math.max(0, Math.min(worldWidth - WIDTH, x));
         if (x + WIDTH > wallLeft) x = wallLeft - WIDTH;
 
@@ -63,6 +83,7 @@ public final class Player {
             onGround = false;
         }
         if (y > FALL_LIMIT) respawnAtCheckpoint();
+        updateAnimation();
         draw();
     }
 
@@ -101,6 +122,10 @@ public final class Player {
         y = GROUND_Y - HEIGHT;
         velocityY = 0;
         onGround = true;
+        animationState = AnimationState.IDLE;
+        animationFrame = 0;
+        lastAnimationUpdate = 0;
+        sprite.setImage(IDLE_FRAMES[0]);
         draw();
     }
     public void setLeft(boolean value) { left = value; }
@@ -108,4 +133,41 @@ public final class Player {
     public double getX() { return x; }
     public Group getNode() { return node; }
     private void draw() { node.setLayoutX(x); node.setLayoutY(y); }
+
+    private void updateAnimation() {
+        AnimationState nextState = !onGround ? AnimationState.JUMP
+            : left != right ? AnimationState.RUN : AnimationState.IDLE;
+        if (nextState != animationState) {
+            animationState = nextState;
+            animationFrame = 0;
+            lastAnimationUpdate = 0;
+        }
+
+        long now = System.nanoTime();
+        long duration = animationState == AnimationState.IDLE ? IDLE_FRAME_DURATION
+            : animationState == AnimationState.RUN ? RUN_FRAME_DURATION : JUMP_FRAME_DURATION;
+        if (lastAnimationUpdate == 0 || now - lastAnimationUpdate >= duration) {
+            Image[] frames = currentFrames();
+            sprite.setImage(frames[animationFrame]);
+            animationFrame = (animationFrame + 1) % frames.length;
+            lastAnimationUpdate = now;
+        }
+    }
+
+    private Image[] currentFrames() {
+        if (animationState == AnimationState.IDLE) return IDLE_FRAMES;
+        if (animationState == AnimationState.RUN) return facingRight ? RUN_RIGHT_FRAMES : RUN_LEFT_FRAMES;
+        return facingRight ? JUMP_RIGHT_FRAMES : JUMP_LEFT_FRAMES;
+    }
+
+    private static Image[] loadFrames(String prefix, int count) {
+        Image[] frames = new Image[count];
+        for (int index = 0; index < count; index++) {
+            String resource = "/Temp_character/" + prefix + (index + 1) + ".png";
+            frames[index] = new Image(Player.class.getResource(resource).toExternalForm());
+        }
+        return frames;
+    }
+
+    private enum AnimationState { IDLE, RUN, JUMP }
 }

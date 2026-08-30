@@ -1,6 +1,19 @@
 package cmsc13.game;
 
-/** Kept now so the later 140-question bank can distinguish question kinds. */
+/**
+ * Question type enumeration
+ */
 public enum QuestionType {
-    THEORETICAL, PROGRAMMING
+    THEORY("Theoretical"),
+    PROGRAMMING("Programming/Practical");
+    
+    private final String displayName;
+    
+    QuestionType(String displayName) {
+        this.displayName = displayName;
+    }
+    
+    public String getDisplayName() {
+        return displayName;
+    }
 }
