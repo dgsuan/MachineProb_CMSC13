@@ -11,7 +11,7 @@ public final class Gate {
     private final double x;
     private final Group node = new Group();
     private static final double WIDTH = 48;
-    private static final double HEIGHT = 104;
+    private static final double HEIGHT = 200;
     private final Rectangle body = new Rectangle(WIDTH, HEIGHT);
     private boolean completed;
 
