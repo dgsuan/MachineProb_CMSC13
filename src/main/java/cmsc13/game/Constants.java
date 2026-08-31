@@ -47,8 +47,9 @@ public final class Constants {
     }
 
     // Player physics in logical pixels.
-    public static final double PLAYER_WIDTH = 23;
-    public static final double PLAYER_HEIGHT = 28;
+    /** The collision body remains a single 32 x 32 logical tile. */
+    public static final double PLAYER_WIDTH = 32;
+    public static final double PLAYER_HEIGHT = 32;
     public static final double GRAVITY = 0.6;
     public static final double JUMP_VELOCITY = -15;
     public static final double MOVE_SPEED = 5;

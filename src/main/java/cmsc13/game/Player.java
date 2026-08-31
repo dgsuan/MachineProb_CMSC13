@@ -8,10 +8,10 @@ import javafx.scene.image.ImageView;
 
 /** Minimal player movement with ground segments, holes, and floating platforms. */
 public final class Player {
-    public static final double WIDTH = Constants.PLAYER_WIDTH * 2;
-    public static final double HEIGHT = Constants.PLAYER_HEIGHT * 2;
+    public static final double WIDTH = Constants.PLAYER_WIDTH;
+    public static final double HEIGHT = Constants.PLAYER_HEIGHT;
     public static final double GROUND_Y = Constants.GROUND_Y;
-    private static final double SPRITE_SIZE = 32 * 2;
+    private static final double SPRITE_SIZE = 32;
     private static final long IDLE_FRAME_DURATION = 180_000_000L;
     private static final long RUN_FRAME_DURATION = 95_000_000L;
     private static final long JUMP_FRAME_DURATION = 90_000_000L;
