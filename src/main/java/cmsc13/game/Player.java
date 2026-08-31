@@ -109,6 +109,12 @@ public final class Player {
     }
 
     public void jump() { if (onGround) { velocityY = Constants.JUMP_VELOCITY; onGround = false; } }
+    public void hitLeaf() {
+        velocityY = Math.min(velocityY, -8.0);
+        x += facingRight ? -10 : 10;
+        y = Math.max(0, y - 8);
+        onGround = false;
+    }
     public void setWallLeft(double worldX) { this.wallLeft = worldX; }
     public void clearWall() { this.wallLeft = Double.POSITIVE_INFINITY; }
     public void setCheckpoint(double worldX) { this.checkpointX = worldX; }
@@ -127,6 +133,7 @@ public final class Player {
     public void setLeft(boolean value) { left = value; }
     public void setRight(boolean value) { right = value; }
     public double getX() { return x; }
+    public double getY() { return y; }
     public Group getNode() { return node; }
     private void draw() { node.setLayoutX(x); node.setLayoutY(y); }
 

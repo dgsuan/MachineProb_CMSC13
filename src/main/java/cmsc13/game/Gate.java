@@ -27,7 +27,13 @@ public final class Gate {
 
     public double getX() {return this.x;}
     public int getTrialNumber() { return trialNumber; }
-    public boolean isNear(Player player) { return Math.abs(player.getX() - x) < 25; }
+    public boolean isNear(Player player) {
+        double playerLeft = player.getX();
+        double playerRight = playerLeft + Player.WIDTH;
+        double gateLeft = x - 24;
+        double gateRight = x + 28;
+        return playerRight >= gateLeft && playerLeft <= gateRight;
+    }
     public double getLeftEdge() { return x; }
     public boolean isCompleted() { return completed; }
     public void setCompleted(boolean completed) { this.completed = completed; refresh(); }

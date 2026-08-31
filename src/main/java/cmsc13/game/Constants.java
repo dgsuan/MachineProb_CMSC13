@@ -17,10 +17,23 @@ public final class Constants {
     public static final int VIEWPORT_TILES_HIGH = LOGICAL_HEIGHT / TILE_SIZE;
 
     // Long-map layout. All gate positions are tile-aligned and intentionally uneven.
-    public static final int FUTURE_WORLD_TILES_WIDE = 480;
-    public static final double FUTURE_WORLD_WIDTH = FUTURE_WORLD_TILES_WIDE * TILE_SIZE;
-    public static final double GROUND_Y = LOGICAL_HEIGHT - (TILE_SIZE * 4);
-    public static final double GROUND_HEIGHT = TILE_SIZE;
+    public static final int WORLD_TILES_WIDE = 480;
+    public static final double WORLD_WIDTH = WORLD_TILES_WIDE * TILE_SIZE;
+    public static final int GROUND_TILE_HEIGHT = 6;
+    public static final double GROUND_HEIGHT = TILE_SIZE * GROUND_TILE_HEIGHT;
+    public static final double GROUND_Y = LOGICAL_HEIGHT - GROUND_HEIGHT;
+    public static final double SKY_SCROLL_SPEED = 0.10;
+    public static final double MOUNTAIN_SCROLL_SPEED = 0.20;
+    public static final double CLOUD_SCROLL_SPEED = 0.34;
+    public static final int LEAF_COUNT = 34;
+    public static final double LEAF_SWAY_AMPLITUDE = 8.0;
+    public static final double LEAF_SWAY_SPEED = 1.8;
+    public static final double LEAF_HIT_AMPLITUDE = 22.0;
+    public static final double LEAF_HIT_SPEED = 3.4;
+    public static final long LEAF_FRAME_DURATION = 120_000_000L;
+    public static final long LEAF_HIT_FRAME_DURATION = 65_000_000L;
+    public static final double LEAF_COLLISION_WIDTH = 20.0;
+    public static final double LEAF_COLLISION_HEIGHT = 18.0;
     public static final int TRIAL_COUNT = 10;
     private static final int[] TRIAL_TILE_POSITIONS = {
         38, 78, 119, 164, 205, 246, 289, 332, 382, 432
