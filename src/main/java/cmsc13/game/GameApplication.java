@@ -55,7 +55,7 @@ public final class GameApplication extends Application {
     private final List<LeafSprite> leaves = createLeaves();
     private final QuestionBank questionBank = new QuestionBank();
     private static final Image[] LEAF_FRAMES = loadLeafFrames();
-    private final ImageView skyImage = createBackgroundImage("/BackGround/Map_sky-copy.png");
+    private final ImageView skyImage = createBackgroundImage("/BackGround/Map_sky.png");
     private final ImageView mountainLayerFar = createBackgroundImage("/BackGround/Mountains.png");
     private final ImageView mountainLayerNear = createBackgroundImage("/BackGround/Mountains.png");
     private final ImageView cloudLayerFar = createBackgroundImage("/BackGround/Clouds.png");
@@ -126,7 +126,7 @@ public final class GameApplication extends Application {
         skyImage.setFitWidth(WORLD_WIDTH);
         skyImage.setFitHeight(0);
         skyImage.setLayoutX(0);
-        skyImage.setLayoutY(-200);
+        skyImage.setLayoutY(-150);
 
         configureParallaxLayer(mountainLayerFar, 0.62, 40);
         mountainLayerFar.setLayoutX(0);
@@ -318,22 +318,7 @@ public final class GameApplication extends Application {
                 leaf.frameIndex = (leaf.frameIndex + 1) % LEAF_FRAMES.length;
                 leaf.node.setImage(LEAF_FRAMES[leaf.frameIndex]);
             }
-
-            if (!leaf.hit && playerIntersectsLeaf(leaf)) {
-                leaf.hit = true;
-                leaf.hitTimer = 0.8;
-                player.hitLeaf();
-            }
         }
-    }
-
-    private boolean playerIntersectsLeaf(LeafSprite leaf) {
-        double playerCenterX = player.getX() + Player.WIDTH / 2.0;
-        double playerCenterY = player.getY() + Player.HEIGHT / 2.0;
-        double leafCenterX = leaf.node.getLayoutX() + leaf.node.getFitWidth() / 2.0;
-        double leafCenterY = leaf.node.getLayoutY() + leaf.node.getFitHeight() / 2.0;
-        return Math.abs(playerCenterX - leafCenterX) < Constants.LEAF_COLLISION_WIDTH
-            && Math.abs(playerCenterY - leafCenterY) < Constants.LEAF_COLLISION_HEIGHT;
     }
 
     private Gate nearbyGate() {
