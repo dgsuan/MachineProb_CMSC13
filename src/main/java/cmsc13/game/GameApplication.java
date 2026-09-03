@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import javafx.animation.AnimationTimer;
-import javafx.animation.PauseTransition;
 import javafx.animation.FadeTransition;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -55,7 +54,7 @@ public final class GameApplication extends Application {
     private final List<LeafSprite> leaves = createLeaves();
     private final QuestionBank questionBank = new QuestionBank();
     private static final Image[] LEAF_FRAMES = loadLeafFrames();
-    private final ImageView skyImage = createBackgroundImage("/BackGround/Map_sky-copy.png");
+    private final ImageView skyImage = createBackgroundImage("/BackGround/Map_sky.png");
     private final ImageView mountainLayerFar = createBackgroundImage("/BackGround/Mountains.png");
     private final ImageView mountainLayerNear = createBackgroundImage("/BackGround/Mountains.png");
     private final ImageView cloudLayerFar = createBackgroundImage("/BackGround/Clouds.png");
@@ -126,7 +125,7 @@ public final class GameApplication extends Application {
         skyImage.setFitWidth(WORLD_WIDTH);
         skyImage.setFitHeight(0);
         skyImage.setLayoutX(0);
-        skyImage.setLayoutY(-200);
+        skyImage.setLayoutY(-150);
 
         configureParallaxLayer(mountainLayerFar, 0.62, 40);
         mountainLayerFar.setLayoutX(0);
@@ -309,7 +308,6 @@ public final class GameApplication extends Application {
 
             if (leaf.hitTimer > 0) {
                 leaf.hitTimer = Math.max(0, leaf.hitTimer - 0.05);
-                if (leaf.hitTimer == 0) leaf.hit = false;
             }
 
             long frameDelay = leaf.hitTimer > 0 ? Constants.LEAF_HIT_FRAME_DURATION : Constants.LEAF_FRAME_DURATION;
@@ -319,22 +317,17 @@ public final class GameApplication extends Application {
                 leaf.node.setImage(LEAF_FRAMES[leaf.frameIndex]);
             }
 
-            if (!leaf.hit && playerIntersectsLeaf(leaf)) {
-                leaf.hit = true;
-                leaf.hitTimer = 0.8;
-                player.hitLeaf();
-            }
         }
     }
 
-    private boolean playerIntersectsLeaf(LeafSprite leaf) {
-        double playerCenterX = player.getX() + Player.WIDTH / 2.0;
-        double playerCenterY = player.getY() + Player.HEIGHT / 2.0;
-        double leafCenterX = leaf.node.getLayoutX() + leaf.node.getFitWidth() / 2.0;
-        double leafCenterY = leaf.node.getLayoutY() + leaf.node.getFitHeight() / 2.0;
-        return Math.abs(playerCenterX - leafCenterX) < Constants.LEAF_COLLISION_WIDTH
-            && Math.abs(playerCenterY - leafCenterY) < Constants.LEAF_COLLISION_HEIGHT;
-    }
+    // private boolean playerIntersectsLeaf(LeafSprite leaf) {
+    //     double playerCenterX = player.getX() + Player.WIDTH / 2.0;
+    //     double playerCenterY = player.getY() + Player.HEIGHT / 2.0;
+    //     double leafCenterX = leaf.node.getLayoutX() + leaf.node.getFitWidth() / 2.0;
+    //     double leafCenterY = leaf.node.getLayoutY() + leaf.node.getFitHeight() / 2.0;
+    //     return Math.abs(playerCenterX - leafCenterX) < Constants.LEAF_COLLISION_WIDTH
+    //         && Math.abs(playerCenterY - leafCenterY) < Constants.LEAF_COLLISION_HEIGHT;
+    // }
 
     private Gate nearbyGate() {
         for (Gate gate : gates) {
@@ -354,9 +347,11 @@ public final class GameApplication extends Application {
     private static ImageView createKernel() {
         Image image = new Image(GameApplication.class.getResource("/Kernel.png").toExternalForm());
         ImageView result = new ImageView(image);
-        result.setFitWidth(Constants.TILE_SIZE * 5); result.setFitHeight(Constants.TILE_SIZE * 5);
-        result.setPreserveRatio(true); result.setSmooth(false);
-        result.setLayoutY(Constants.GROUND_Y - Constants.TILE_SIZE * 5);
+        result.setFitWidth(Constants.TILE_SIZE * 5); 
+        result.setFitHeight(Constants.TILE_SIZE * 5);
+        result.setPreserveRatio(true); 
+        result.setSmooth(false);
+        result.setLayoutY((Constants.GROUND_Y - Constants.TILE_SIZE * 5) + 50);
         result.setLayoutX(Constants.trialX(1) + Constants.TILE_SIZE * 2);
         return result;
     }
@@ -447,45 +442,45 @@ public final class GameApplication extends Application {
         logicalRoot.getChildren().setAll(viewport, overlay); fadeIn(overlay);
     }
 
-    private void legacyShowQuestion() {
-        Question question = trial.getCurrentQuestion();
-        VBox box = new VBox(14);
-        box.setAlignment(Pos.CENTER); box.setMaxWidth(880);
-        Label exp = text("TRIAL " + trial.getNumber() + "  •  Question " + trial.getQuestionNumber() + "/14    EXP: "
-            + trial.getExp() 
-            + " / " 
-            + Trial.REQUIRED_EXP,
-             18
-        );
+    // private void legacyShowQuestion() {
+    //     Question question = trial.getCurrentQuestion();
+    //     VBox box = new VBox(14);
+    //     box.setAlignment(Pos.CENTER); box.setMaxWidth(880);
+    //     Label exp = text("TRIAL " + trial.getNumber() + "  •  Question " + trial.getQuestionNumber() + "/14    EXP: "
+    //         + trial.getExp() 
+    //         + " / " 
+    //         + Trial.REQUIRED_EXP,
+    //          18
+    //     );
 
-        Label kernel = text(
-            "KERNEL:\n\"" 
-            + question.getQuestionText() 
-            + "\"", 
-            22
-        );
+    //     Label kernel = text(
+    //         "KERNEL:\n\"" 
+    //         + question.getQuestionText() 
+    //         + "\"", 
+    //         22
+    //     );
 
-        GridPane answers = new GridPane(); answers.setAlignment(Pos.CENTER); answers.setHgap(16); answers.setVgap(16);
-        for (int i = 0; i < 4; i++) {
-            int answer = i;
-            Button button = new Button((char) ('A' + i) + ". " + question.getChoices().get(i));
-            button.setPrefWidth(380); button.setPrefHeight(55);
-            button.setWrapText(true); button.setOnAction(e -> answerQuestion(answer));
-            answers.add(button, i % 2, i / 2);
-        }
-        HBox helpers = new HBox(8); helpers.setAlignment(Pos.CENTER);
-        for (HelperAdvisor.Kind kind : HelperAdvisor.Kind.values()) {
-            Button helper = new Button(kind.name()); helper.setOnAction(e -> useHelper(kind)); helpers.getChildren().add(helper);
-        }
-        HBox lifelines = new HBox(10); lifelines.setAlignment(Pos.CENTER);
-        Button peek = new Button(peekUsed ? "PEEK USED" : "PEEK"); peek.setDisable(peekUsed); peek.setOnAction(e -> chooseLifeline(Lifeline.PEEK));
-        Button copy = new Button(copyUsed ? "COPY USED" : "COPY"); copy.setDisable(copyUsed); copy.setOnAction(e -> chooseLifeline(Lifeline.COPY));
-        Button save = new Button(saveUsed ? "SAVE USED" : "SAVE"); save.setDisable(saveUsed); save.setOnAction(e -> chooseLifeline(Lifeline.SAVE));
-        lifelines.getChildren().addAll(peek, copy, save);
-        box.getChildren().addAll(title(trial.getNumber() == Constants.TRIAL_COUNT ? "CORE GATE" : "TRIAL " + trial.getNumber(), 28), exp, kernel, answers, helpers, lifelines);
-        logicalRoot.getChildren().setAll(viewport, box);
-        fadeIn(box);
-    }
+    //     GridPane answers = new GridPane(); answers.setAlignment(Pos.CENTER); answers.setHgap(16); answers.setVgap(16);
+    //     for (int i = 0; i < 4; i++) {
+    //         int answer = i;
+    //         Button button = new Button((char) ('A' + i) + ". " + question.getChoices().get(i));
+    //         button.setPrefWidth(380); button.setPrefHeight(55);
+    //         button.setWrapText(true); button.setOnAction(e -> answerQuestion(answer));
+    //         answers.add(button, i % 2, i / 2);
+    //     }
+    //     HBox helpers = new HBox(8); helpers.setAlignment(Pos.CENTER);
+    //     for (HelperAdvisor.Kind kind : HelperAdvisor.Kind.values()) {
+    //         Button helper = new Button(kind.name()); helper.setOnAction(e -> useHelper(kind)); helpers.getChildren().add(helper);
+    //     }
+    //     HBox lifelines = new HBox(10); lifelines.setAlignment(Pos.CENTER);
+    //     Button peek = new Button(peekUsed ? "PEEK USED" : "PEEK"); peek.setDisable(peekUsed); peek.setOnAction(e -> chooseLifeline(Lifeline.PEEK));
+    //     Button copy = new Button(copyUsed ? "COPY USED" : "COPY"); copy.setDisable(copyUsed); copy.setOnAction(e -> chooseLifeline(Lifeline.COPY));
+    //     Button save = new Button(saveUsed ? "SAVE USED" : "SAVE"); save.setDisable(saveUsed); save.setOnAction(e -> chooseLifeline(Lifeline.SAVE));
+    //     lifelines.getChildren().addAll(peek, copy, save);
+    //     box.getChildren().addAll(title(trial.getNumber() == Constants.TRIAL_COUNT ? "CORE GATE" : "TRIAL " + trial.getNumber(), 28), exp, kernel, answers, helpers, lifelines);
+    //     logicalRoot.getChildren().setAll(viewport, box);
+    //     fadeIn(box);
+    // }
 
     /** Begins terminal-monochrome and gently restores colour as gates are cleared. */
     private void updateWorldColor() {
@@ -503,10 +498,6 @@ public final class GameApplication extends Application {
         boolean correct = trial.answerWithSave(answer, saveArmed);
         totalExp = Math.max(0, totalExp + (correct ? 100 : saveArmed ? 0 : -100));
         refreshHud();
-        Label playerLine = text("PLAYER:\n\"" + question.getChoices().get(answer) + "\"\n\n"
-            + "PLAYER: \"" + (correct ? "Yes!" : "Oh no...") + "\"\n\n"
-            + "KERNEL: \"" + (correct ? "Correct. +1 EXP." : saveArmed ? "SAVE protected your EXP." : "Incorrect. EXP decreased.") + "\"\n\n"
-            + question.getExplanation(), 19);
         Pane feedback = new Pane();
         Label playerBubble = speechBubble("PLAYER\n" + question.getChoices().get(answer), 17, 300);
         playerBubble.setLayoutX(170); playerBubble.setLayoutY(20);
@@ -549,8 +540,15 @@ public final class GameApplication extends Application {
             player.setCheckpoint(activeGate.getLeftEdge() + 25);
             refreshWall();
         }
-        if (passed && activeGate.getTrialNumber() == Constants.TRIAL_COUNT) { showVictory(); return; }
-        if (passed) { playKernelExit(); return; }
+        if (passed && activeGate.getTrialNumber() == Constants.TRIAL_COUNT) { 
+            showVictory(); 
+            return; 
+        }
+        if (passed) { 
+            playKernelExit(); 
+            changeKernelPosition(activeGate.getX());
+            return; 
+        }
         Label result = text((passed ? "TRIAL COMPLETE" : "TRIAL FAILED") + "\n\nTRIAL EXP: "
             + trial.getExp() + " / " + Trial.REQUIRED_EXP + "\n\n"
             + (passed ? "Press ENTER to return to the map."
@@ -716,7 +714,6 @@ public final class GameApplication extends Application {
         private final double baseX;
         private final double baseY;
         private final double phase;
-        private boolean hit;
         private double hitTimer;
         private long lastFrameTime;
         private int frameIndex;
