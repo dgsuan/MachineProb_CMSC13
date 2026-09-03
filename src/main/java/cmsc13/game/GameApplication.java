@@ -10,7 +10,6 @@ import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Application;
 import javafx.geometry.Pos;
-import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -30,19 +29,16 @@ import javafx.geometry.Rectangle2D;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
-/** Controls the menu, one long world with simple platforming, and the trial quiz loop. */
+/** Controls the menu, one world with simple platforming, and the trial quiz loop. */
 public final class GameApplication extends Application {
     private static final double WORLD_WIDTH = Constants.WORLD_WIDTH;
 
-    /** One gate per trial: 8 total, spread unevenly along the map. */
-    private static final double[] GATE_X = {1400, 2600, 3600, 4900, 6100, 7000, 8100, 9200};
-
-    /** Solid ground spans; the gaps between them are holes the player can fall through. */
+    /** The long map starts as a continuous walkable ground layer. */
     private static final List<double[]> GROUND_SEGMENTS = List.of(
         new double[] {0, 1500}, new double[] {1580, 2940}, new double[] {3030, 4700},
         new double[] {4800, 6900}, new double[] {7000, 9400}, new double[] {9500, WORLD_WIDTH}
     );
-    /** Floating platforms that bridge each hole (three over the first, two over the next two). */
+    /** Placeholder platforms for the first section of the long map. */
     private static final List<Platform> PLATFORMS = List.of(
         new Platform(368, 300, 110), new Platform(527, 250, 120), new Platform(1510, 330, 95),
         new Platform(2950, 320, 100), new Platform(4700, 315, 115), new Platform(6890, 325, 120)
@@ -80,14 +76,6 @@ public final class GameApplication extends Application {
     private HelperAdvisor.Advice selectedAdvice;
     private Lifeline selectedLifeline;
 
-    private static List<Gate> createGates() {
-        List<Gate> list = new ArrayList<>();
-        for (int i = 0; i < GATE_X.length; i++) {
-            list.add(new Gate(i + 1, GATE_X[i]));
-        }
-        return list;
-    }
-
     @Override
     public void start(Stage stage) {
         stage.setTitle(Constants.WINDOW_TITLE);
@@ -102,6 +90,8 @@ public final class GameApplication extends Application {
         scene.setOnKeyPressed(this::onKeyPressed);
         scene.setOnKeyReleased(this::onKeyReleased);
         stage.setScene(scene);
+        root.widthProperty().addListener((observable, oldValue, newValue) -> updateViewportScale());
+        root.heightProperty().addListener((observable, oldValue, newValue) -> updateViewportScale());
         showMenu();
         new AnimationTimer() {
             @Override public void handle(long now) {
@@ -113,6 +103,7 @@ public final class GameApplication extends Application {
             }
         }.start();
         stage.show();
+        updateViewportScale();
     }
 
     private void createWorld() {
@@ -181,7 +172,7 @@ public final class GameApplication extends Application {
             world.getChildren().add(leaf.node);
         }
         Label start = new Label("SYSTEM START");
-        start.setTextFill(Color.WHITE); start.setLayoutX(45); start.setLayoutY(630);
+        start.setTextFill(Color.WHITE); start.setLayoutX(45); start.setLayoutY(Constants.GROUND_Y + 4);
         for (Gate gate : gates) world.getChildren().add(gate.getNode());
         world.getChildren().add(kernel);
         world.getChildren().addAll(player.getNode(), start);
@@ -202,7 +193,7 @@ public final class GameApplication extends Application {
         player.setRight(false);
         VBox box = new VBox(18);
         box.setAlignment(Pos.CENTER);
-        // Menu is only an overlay: the live world stays visible behind it.
+        // The menu is only an overlay: the live world stays visible behind it.
         box.setStyle("-fx-background-color: transparent;");
         Label title = title("SystemBound: The Paradigm Trials", 42);
         Label subtitle = text("CMSC 13 — JavaFX Game Skeleton", 17);
@@ -211,7 +202,7 @@ public final class GameApplication extends Application {
         Button help = new Button("HOW TO PLAY"); help.setOnAction(e -> showHowToPlay());
         Button exit = new Button("EXIT"); exit.setOnAction(e -> ((Stage) root.getScene().getWindow()).close());
         box.getChildren().addAll(title, subtitle, play, help, exit);
-        root.getChildren().setAll(viewport, box);
+        logicalRoot.getChildren().setAll(viewport, box);
     }
 
     private void showHowToPlay() {
@@ -225,7 +216,7 @@ public final class GameApplication extends Application {
             + "Earn 3 EXP from the 14 questions to clear a trial.", 18);
         Button back = new Button("BACK"); back.setOnAction(e -> showMenu());
         box.getChildren().addAll(title("HOW TO PLAY", 32), instructions, back);
-        showOverlay(box);
+        logicalRoot.getChildren().setAll(box);
     }
 
     private void showWorld() {
@@ -241,16 +232,26 @@ public final class GameApplication extends Application {
 
     /** Blocks the player at the first uncleared gate to their right. */
     private void refreshWall() {
-        Gate blocking = firstUnclearedGate();
-        if (blocking != null) player.setWallLeft(blocking.getLeftEdge());
-        else player.clearWall();
+        for (Gate gate : gates) {
+            if (!gate.isCompleted()) {
+                player.setWallLeft(gate.getLeftEdge());
+                return;
+            }
+        }
+        player.clearWall();
     }
 
-    private Gate firstUnclearedGate() {
+    private Gate wallCompleted() {
+
+        Gate notCompleteGate = null;
         for (Gate gate : gates) {
-            if (!gate.isCompleted()) return gate;
+            if(!gate.isCompleted()) {
+                notCompleteGate = gate;
+                break;
+            }
         }
-        return null;
+        
+        return notCompleteGate;
     }
 
     private void updateWorld() {
@@ -545,7 +546,7 @@ public final class GameApplication extends Application {
         boolean passed = trial.isComplete();
         if (passed) {
             activeGate.setCompleted(true);
-            player.setCheckpoint(activeGate.getLeftEdge() + 100);
+            player.setCheckpoint(activeGate.getLeftEdge() + 25);
             refreshWall();
         }
         if (passed && activeGate.getTrialNumber() == Constants.TRIAL_COUNT) { showVictory(); return; }
@@ -555,11 +556,11 @@ public final class GameApplication extends Application {
             + (passed ? "Press ENTER to return to the map."
                       : "The Kernel returns you to the Trial " + trial.getNumber() + " checkpoint.\nPress ENTER to retry."), 25);
         result.setTextFill(passed ? Color.web("#8ee6a1") : Color.web("#ff9a9a"));
-        showOverlay(result);
+        logicalRoot.getChildren().setAll(viewport, result);
     }
 
     private void finishResult() {
-        if (!trial.isComplete()) player.respawnAt(activeGate.getLeftEdge() - 120);
+        if (!trial.isComplete()) player.respawnAt(activeGate.getLeftEdge() - 30);
         showWorld();
     }
 
@@ -706,8 +707,8 @@ public final class GameApplication extends Application {
     private Label title(String value, int size) { 
         Label label = text(value, size); label.setStyle("-fx-font-weight: bold; -fx-text-fill: white;"); return label; 
     }
-    private Label text(String value, int size) {
-        Label label = new Label(value); label.setStyle("-fx-font-size: " + size + "; -fx-text-fill: white;"); label.setWrapText(true); label.setTextAlignment(javafx.scene.text.TextAlignment.CENTER); return label;
+    private Label text(String value, int size) { 
+        Label label = new Label(value); label.setStyle("-fx-font-size: " + size + "; -fx-text-fill: white;"); label.setWrapText(true); label.setTextAlignment(javafx.scene.text.TextAlignment.CENTER); return label; 
     }
 
     private static final class LeafSprite {
