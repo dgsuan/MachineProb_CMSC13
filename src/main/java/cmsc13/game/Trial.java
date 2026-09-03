@@ -23,6 +23,15 @@ public final class Trial {
     public boolean answer(int selectedAnswer) {
         boolean correct = getCurrentQuestion().isCorrectAnswer(selectedAnswer);
         if (correct) exp++;
+        else exp = Math.max(0, exp - 1);
+        return correct;
+    }
+
+    /** Applies a lifeline-backed answer without duplicating question correctness logic. */
+    public boolean answerWithSave(int selectedAnswer, boolean saveActive) {
+        boolean correct = getCurrentQuestion().isCorrectAnswer(selectedAnswer);
+        if (correct) exp++;
+        else if (!saveActive) exp = Math.max(0, exp - 1);
         return correct;
     }
     public void nextQuestion() { questionIndex++; }

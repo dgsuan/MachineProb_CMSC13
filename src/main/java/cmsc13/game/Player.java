@@ -8,13 +8,9 @@ import javafx.scene.image.ImageView;
 
 /** Minimal player movement with ground segments, holes, and floating platforms. */
 public final class Player {
-    public static final double WIDTH = 23;
-    public static final double HEIGHT = 28;
-    public static final double GROUND_Y = 600;
-    private static final double GRAVITY = 0.6;
-    private static final double JUMP_VELOCITY = -15;
-    private static final double MOVE_SPEED = 5;
-    private static final double FALL_LIMIT = 900;
+    public static final double WIDTH = Constants.PLAYER_WIDTH;
+    public static final double HEIGHT = Constants.PLAYER_HEIGHT;
+    public static final double GROUND_Y = Constants.GROUND_Y;
     private static final double SPRITE_SIZE = 32;
     private static final long IDLE_FRAME_DURATION = 180_000_000L;
     private static final long RUN_FRAME_DURATION = 95_000_000L;
@@ -112,7 +108,13 @@ public final class Player {
         return false;
     }
 
-    public void jump() { if (onGround) { velocityY = JUMP_VELOCITY; onGround = false; } }
+    public void jump() { if (onGround) { velocityY = Constants.JUMP_VELOCITY; onGround = false; } }
+    public void hitLeaf() {
+        velocityY = Math.min(velocityY, -8.0);
+        x += facingRight ? -10 : 10;
+        y = Math.max(0, y - 8);
+        onGround = false;
+    }
     public void setWallLeft(double worldX) { this.wallLeft = worldX; }
     public void clearWall() { this.wallLeft = Double.POSITIVE_INFINITY; }
     public void setCheckpoint(double worldX) { this.checkpointX = worldX; }
@@ -131,6 +133,7 @@ public final class Player {
     public void setLeft(boolean value) { left = value; }
     public void setRight(boolean value) { right = value; }
     public double getX() { return x; }
+    public double getY() { return y; }
     public Group getNode() { return node; }
     private void draw() { node.setLayoutX(x); node.setLayoutY(y); }
 
