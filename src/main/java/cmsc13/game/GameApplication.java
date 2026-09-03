@@ -55,7 +55,7 @@ public final class GameApplication extends Application {
     private final List<LeafSprite> leaves = createLeaves();
     private final QuestionBank questionBank = new QuestionBank();
     private static final Image[] LEAF_FRAMES = loadLeafFrames();
-    private final ImageView skyImage = createBackgroundImage("/BackGround/Map_sky.png");
+    private final ImageView skyImage = createBackgroundImage("/BackGround/Map_sky-copy.png");
     private final ImageView mountainLayerFar = createBackgroundImage("/BackGround/Mountains.png");
     private final ImageView mountainLayerNear = createBackgroundImage("/BackGround/Mountains.png");
     private final ImageView cloudLayerFar = createBackgroundImage("/BackGround/Clouds.png");
@@ -122,11 +122,11 @@ public final class GameApplication extends Application {
         backgroundPane.setMinSize(WORLD_WIDTH, Constants.LOGICAL_HEIGHT);
         backgroundPane.setMaxSize(WORLD_WIDTH, Constants.LOGICAL_HEIGHT);
 
-        skyImage.setViewport(new Rectangle2D(0, 576 - Constants.GROUND_HEIGHT, 15360, Constants.GROUND_HEIGHT));
+        
         skyImage.setFitWidth(WORLD_WIDTH);
-        skyImage.setFitHeight(576);
+        skyImage.setFitHeight(0);
         skyImage.setLayoutX(0);
-        skyImage.setLayoutY(0);
+        skyImage.setLayoutY(-200);
 
         configureParallaxLayer(mountainLayerFar, 0.62, 40);
         mountainLayerFar.setLayoutX(0);
@@ -286,11 +286,13 @@ public final class GameApplication extends Application {
     private void updateBackgroundParallax(double cameraX) {
         double mountainOffset = cameraX * Constants.MOUNTAIN_SCROLL_SPEED;
         double cloudOffset = cameraX * Constants.CLOUD_SCROLL_SPEED;
+        double skyOffset = cameraX * Constants.SKY_SCROLL_SPEED;
 
         mountainLayerFar.setLayoutX(-mountainOffset);
         mountainLayerNear.setLayoutX(-mountainOffset * 1.5);
         cloudLayerFar.setLayoutX(-cloudOffset);
         cloudLayerNear.setLayoutX(-cloudOffset * 1.5);
+        skyImage.setLayoutX(-skyOffset);
     }
 
     private void updateLeaves() {
@@ -568,8 +570,12 @@ public final class GameApplication extends Application {
         Label line = speechBubble("KERNEL\nTrial complete. I will meet you further in the system.", 19, 430);
         VBox overlay = new VBox(line); overlay.setAlignment(Pos.TOP_CENTER); overlay.setLayoutY(20);
         logicalRoot.getChildren().setAll(viewport, overlay);
-        Timeline exit = new Timeline(new KeyFrame(Duration.millis(45), e -> kernel.setLayoutY(kernel.getLayoutY() + 30)));
+        Timeline exit = new Timeline(new KeyFrame(Duration.millis(45), e -> kernel.setLayoutY(kernel.getLayoutY() + Constants.LOGICAL_HEIGHT)));
         exit.setCycleCount(20); exit.setOnFinished(e -> showWorld()); exit.play();
+    }
+
+    private void changeKernelPosition(double x) {
+        kernel.setLayoutX(x);
     }
 
     private void showVictory() {
@@ -630,7 +636,7 @@ public final class GameApplication extends Application {
         for (Gate gate : gates) {
             gate.setCompleted(true);
         }
-        player.clearWall();
+        player.clearWall(); 
     }
 
     /** Fits the fixed logical viewport into the window with centered letterboxing. */
@@ -644,8 +650,11 @@ public final class GameApplication extends Application {
 
     private void configureParallaxLayer(ImageView layer, double opacity, double y) {
         // Assets are authored at 16000 x 576. Keep their native proportion and do not enlarge them.
-        layer.setFitWidth(16000); layer.setFitHeight(0); layer.setPreserveRatio(true);
-        layer.setOpacity(opacity); layer.setLayoutY(y);
+        layer.setFitWidth(Constants.WORLD_WIDTH); 
+        layer.setFitHeight(0); 
+        layer.setPreserveRatio(false);
+        layer.setOpacity(opacity); 
+        layer.setLayoutY(y);
     }
 
     private void configureHud() {

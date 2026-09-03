@@ -22,8 +22,8 @@ public final class Constants {
     public static final int GROUND_TILE_HEIGHT = 6;
     public static final double GROUND_HEIGHT = TILE_SIZE * GROUND_TILE_HEIGHT;
     public static final double GROUND_Y = LOGICAL_HEIGHT - GROUND_HEIGHT;
-    public static final double SKY_SCROLL_SPEED = 0.10;
-    public static final double MOUNTAIN_SCROLL_SPEED = 0.20;
+    public static final double SKY_SCROLL_SPEED = 1;
+    public static final double MOUNTAIN_SCROLL_SPEED = 1;
     public static final double CLOUD_SCROLL_SPEED = 0.34;
     public static final int LEAF_COUNT = 34;
     public static final double LEAF_SWAY_AMPLITUDE = 8.0;
