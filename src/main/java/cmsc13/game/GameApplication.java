@@ -316,18 +316,8 @@ public final class GameApplication extends Application {
                 leaf.frameIndex = (leaf.frameIndex + 1) % LEAF_FRAMES.length;
                 leaf.node.setImage(LEAF_FRAMES[leaf.frameIndex]);
             }
-
         }
     }
-
-    // private boolean playerIntersectsLeaf(LeafSprite leaf) {
-    //     double playerCenterX = player.getX() + Player.WIDTH / 2.0;
-    //     double playerCenterY = player.getY() + Player.HEIGHT / 2.0;
-    //     double leafCenterX = leaf.node.getLayoutX() + leaf.node.getFitWidth() / 2.0;
-    //     double leafCenterY = leaf.node.getLayoutY() + leaf.node.getFitHeight() / 2.0;
-    //     return Math.abs(playerCenterX - leafCenterX) < Constants.LEAF_COLLISION_WIDTH
-    //         && Math.abs(playerCenterY - leafCenterY) < Constants.LEAF_COLLISION_HEIGHT;
-    // }
 
     private Gate nearbyGate() {
         for (Gate gate : gates) {
