@@ -19,6 +19,7 @@ public final class Player {
     private static final Image[] RUN_RIGHT_FRAMES = loadFrames("Run_right", 6);
     private static final Image[] RUN_LEFT_FRAMES = loadFrames("Run_left", 6);
     private static final Image[] JUMP_RIGHT_FRAMES = loadFrames("Jump_right", 8);
+    // The supplied left-facing jump sprites use the "Jump_leftt" filename prefix.
     private static final Image[] JUMP_LEFT_FRAMES = loadFrames("Jump_leftt", 8);
 
     private final Group node = new Group();
@@ -31,7 +32,7 @@ public final class Player {
     private boolean onGround = true;
     private double wallLeft = Double.POSITIVE_INFINITY;
     private double worldWidth = 3000;
-    private double checkpointX = Constants.TILE_SIZE * 8;
+    private double checkpointX = 100;
     private List<double[]> groundSegments = new ArrayList<>();
     private List<Platform> platforms = new ArrayList<>();
     private AnimationState animationState = AnimationState.IDLE;
@@ -43,7 +44,6 @@ public final class Player {
         sprite.setFitWidth(SPRITE_SIZE);
         sprite.setFitHeight(SPRITE_SIZE);
         sprite.setPreserveRatio(true);
-        sprite.setSmooth(false);
         // Centre the sprite over the collision box and keep its feet on the ground.
         sprite.setLayoutX((WIDTH - SPRITE_SIZE) / 2);
         sprite.setLayoutY(HEIGHT - SPRITE_SIZE);
@@ -60,14 +60,14 @@ public final class Player {
     }
 
     public void update() {
-        if (left) x -= Constants.MOVE_SPEED;
-        if (right) x += Constants.MOVE_SPEED;
+        if (left) x -= MOVE_SPEED;
+        if (right) x += MOVE_SPEED;
         if (left && !right) facingRight = false;
         if (right && !left) facingRight = true;
         x = Math.max(0, Math.min(worldWidth - WIDTH, x));
         if (x + WIDTH > wallLeft) x = wallLeft - WIDTH;
 
-        velocityY += Constants.GRAVITY;
+        velocityY += GRAVITY;
         double nextY = y + velocityY;
         double support = supportSurface();
         if (nextY + HEIGHT >= support) {
@@ -78,7 +78,7 @@ public final class Player {
             y = nextY;
             onGround = false;
         }
-        if (y > Constants.FALL_LIMIT) respawnAtCheckpoint();
+        if (y > FALL_LIMIT) respawnAtCheckpoint();
         updateAnimation();
         draw();
     }
