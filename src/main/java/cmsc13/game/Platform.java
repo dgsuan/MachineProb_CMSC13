@@ -15,7 +15,7 @@ public final class Platform {
         this.x = x;
         this.y = y;
         this.width = width;
-        node = new Rectangle(width, THICKNESS, Color.web("#8d7ec8"));
+        node = new Rectangle(width, THICKNESS, Color.web("#2fb60e"));
         node.setArcWidth(2); node.setArcHeight(2);
         node.setLayoutX(x); node.setLayoutY(y);
     }
