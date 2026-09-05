@@ -127,7 +127,7 @@ public final class GameApplication extends Application {
         skyImage.setLayoutX(0);
         skyImage.setLayoutY(-150);
 
-        configureParallaxLayer(mountainLayerFar, 0.62, 40);
+        configureParallaxLayer(mountainLayerFar, 0.55, 40);
         mountainLayerFar.setLayoutX(0);
         mountainLayerFar.setLayoutY(0);
 
@@ -135,7 +135,7 @@ public final class GameApplication extends Application {
         mountainLayerNear.setLayoutX(0);
         mountainLayerNear.setLayoutY(0);
 
-        configureParallaxLayer(cloudLayerFar, 0.60, 0);
+        configureParallaxLayer(cloudLayerFar, 0.55, 40);
         cloudLayerFar.setLayoutX(0);
         cloudLayerFar.setLayoutY(0);
 
@@ -288,9 +288,9 @@ public final class GameApplication extends Application {
         double skyOffset = cameraX * Constants.SKY_SCROLL_SPEED;
 
         mountainLayerFar.setLayoutX(-mountainOffset);
-        mountainLayerNear.setLayoutX(-mountainOffset * 1.5);
+        mountainLayerNear.setLayoutX(-mountainOffset * 2);
         cloudLayerFar.setLayoutX(-cloudOffset);
-        cloudLayerNear.setLayoutX(-cloudOffset * 1.5);
+        cloudLayerNear.setLayoutX(-cloudOffset * 1.8);
         skyImage.setLayoutX(-skyOffset);
     }
 
@@ -341,7 +341,7 @@ public final class GameApplication extends Application {
         result.setFitHeight(Constants.TILE_SIZE * 5);
         result.setPreserveRatio(true); 
         result.setSmooth(false);
-        result.setLayoutY((Constants.GROUND_Y - Constants.TILE_SIZE * 5) + 50);
+        result.setLayoutY((Constants.GROUND_Y - Constants.TILE_SIZE * 5) + 20);
         result.setLayoutX(Constants.trialX(1) + Constants.TILE_SIZE * 2);
         return result;
     }
@@ -513,7 +513,9 @@ public final class GameApplication extends Application {
         Button back = new Button("BACK TO QUESTION"); back.setOnAction(e -> showQuestion());
         if (selectedLifeline == Lifeline.PEEK) peekUsed = true;
         if (selectedLifeline == Lifeline.COPY) copyUsed = true;
-        if (selectedLifeline == Lifeline.SAVE) { saveUsed = true; saveArmed = true; }
+        if (selectedLifeline == Lifeline.SAVE) { 
+            saveUsed = true; 
+        }
         selectedLifeline = null;
         VBox box = new VBox(15, advice, back); box.setAlignment(Pos.TOP_CENTER); box.setLayoutY(18);
         logicalRoot.getChildren().setAll(viewport, box); fadeIn(box);
@@ -558,7 +560,7 @@ public final class GameApplication extends Application {
         Label line = speechBubble("KERNEL\nTrial complete. I will meet you further in the system.", 19, 430);
         VBox overlay = new VBox(line); overlay.setAlignment(Pos.TOP_CENTER); overlay.setLayoutY(20);
         logicalRoot.getChildren().setAll(viewport, overlay);
-        Timeline exit = new Timeline(new KeyFrame(Duration.millis(45), e -> kernel.setLayoutY(kernel.getLayoutY() + Constants.LOGICAL_HEIGHT)));
+        Timeline exit = new Timeline(new KeyFrame(Duration.millis(200), e -> kernel.setLayoutY(kernel.getLayoutY() + Constants.LOGICAL_HEIGHT)));
         exit.setCycleCount(20); exit.setOnFinished(e -> showWorld()); exit.play();
     }
 
@@ -638,9 +640,9 @@ public final class GameApplication extends Application {
 
     private void configureParallaxLayer(ImageView layer, double opacity, double y) {
         // Assets are authored at 16000 x 576. Keep their native proportion and do not enlarge them.
-        layer.setFitWidth(Constants.WORLD_WIDTH); 
+        layer.setFitWidth(0); 
         layer.setFitHeight(0); 
-        layer.setPreserveRatio(false);
+        layer.setPreserveRatio(true);
         layer.setOpacity(opacity); 
         layer.setLayoutY(y);
     }
