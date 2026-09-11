@@ -6,8 +6,10 @@ import java.util.Random;
 import javafx.animation.AnimationTimer;
 import javafx.animation.FadeTransition;
 import javafx.animation.KeyFrame;
+import javafx.animation.PauseTransition;
 import javafx.animation.Timeline;
 import javafx.application.Application;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -31,6 +33,8 @@ import javafx.util.Duration;
 /** Controls the menu, one world with simple platforming, and the trial quiz loop. */
 public final class GameApplication extends Application {
     private static final double WORLD_WIDTH = Constants.WORLD_WIDTH;
+    /** How long the splash art holds before the "press any key" prompt appears. */
+    private static final double SPLASH_SECONDS = 5;
 
     /** The long map starts as a continuous walkable ground layer. */
     private static final List<double[]> GROUND_SEGMENTS = List.of(
@@ -69,6 +73,7 @@ public final class GameApplication extends Application {
     private final Label expHud = new Label();
     private final Label trialHud = new Label();
     private boolean cursorVisible = true;
+    private boolean splashReady;
     private long lastCursorToggle;
     private int totalExp;
     private boolean peekUsed, copyUsed, saveUsed, saveArmed;
@@ -91,7 +96,7 @@ public final class GameApplication extends Application {
         stage.setScene(scene);
         root.widthProperty().addListener((observable, oldValue, newValue) -> updateViewportScale());
         root.heightProperty().addListener((observable, oldValue, newValue) -> updateViewportScale());
-        showMenu();
+        showSplash();
         new AnimationTimer() {
             @Override public void handle(long now) {
                 if (state == GameState.WORLD || state == GameState.MENU) updateWorld();
@@ -181,6 +186,40 @@ public final class GameApplication extends Application {
         viewport.setMinSize(Constants.LOGICAL_WIDTH, Constants.LOGICAL_HEIGHT);
         viewport.setMaxSize(Constants.LOGICAL_WIDTH, Constants.LOGICAL_HEIGHT);
         viewport.setClip(new Rectangle(Constants.LOGICAL_WIDTH, Constants.LOGICAL_HEIGHT));
+    }
+
+    /** Title card shown on launch: the splash art holds for a few seconds, then waits for any key. */
+    private void showSplash() {
+        state = GameState.LOADING;
+        splashReady = false;
+
+        ImageView splash = createBackgroundImage("/SPLASH SCREEN.png");
+        splash.setFitWidth(Constants.LOGICAL_WIDTH);
+        splash.setFitHeight(Constants.LOGICAL_HEIGHT);
+        splash.setPreserveRatio(true);
+
+        Label continuePrompt = title("PRESS ANY KEY TO CONTINUE", 20);
+        continuePrompt.setVisible(false);
+        StackPane.setAlignment(continuePrompt, Pos.BOTTOM_CENTER);
+        StackPane.setMargin(continuePrompt, new Insets(0, 0, 40, 0));
+
+        StackPane splashScreen = new StackPane(splash, continuePrompt);
+        splashScreen.setStyle("-fx-background-color: black;");
+        splashScreen.setMinSize(Constants.LOGICAL_WIDTH, Constants.LOGICAL_HEIGHT);
+        splashScreen.setPrefSize(Constants.LOGICAL_WIDTH, Constants.LOGICAL_HEIGHT);
+        splashScreen.setMaxSize(Constants.LOGICAL_WIDTH, Constants.LOGICAL_HEIGHT);
+        logicalRoot.getChildren().setAll(splashScreen);
+
+        PauseTransition hold = new PauseTransition(Duration.seconds(SPLASH_SECONDS));
+        hold.setOnFinished(e -> {
+            splashReady = true;
+            continuePrompt.setVisible(true);
+            FadeTransition blink = new FadeTransition(Duration.seconds(.7), continuePrompt);
+            blink.setFromValue(1); blink.setToValue(.15);
+            blink.setCycleCount(FadeTransition.INDEFINITE); blink.setAutoReverse(true);
+            blink.play();
+        });
+        hold.play();
     }
 
     private void showMenu() {
@@ -585,6 +624,11 @@ public final class GameApplication extends Application {
 
     private void onKeyPressed(KeyEvent event) {
         KeyCode key = event.getCode();
+        if (state == GameState.LOADING) {
+            // Any key leaves the splash, but only once the hold has elapsed.
+            if (splashReady) showMenu();
+            return;
+        }
         if (event.isControlDown() && event.isShiftDown()) {
             if (key == KeyCode.T) {
                 completeNearestGate();
