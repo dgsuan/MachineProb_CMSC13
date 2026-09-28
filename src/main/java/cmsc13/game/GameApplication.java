@@ -1,17 +1,31 @@
 package cmsc13.game;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
+import java.util.Properties;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import javafx.animation.AnimationTimer;
 import javafx.animation.FadeTransition;
 import javafx.animation.KeyFrame;
+import javafx.animation.KeyValue;
+import javafx.animation.Interpolator;
 import javafx.animation.Timeline;
 import javafx.application.Application;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.ProgressBar;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
@@ -50,9 +64,15 @@ public final class GameApplication extends Application {
     private final Pane world = new Pane();
     private final Pane viewport = new Pane();
     private final Player player = new Player();
-    private final List<Gate> gates = createGates();
-    private final List<LeafSprite> leaves = createLeaves();
     private final QuestionBank questionBank = new QuestionBank();
+    private final TrialManager trialManager = new TrialManager(questionBank);
+    private final GameMenuView menuView = new GameMenuView();
+    private final List<Gate> gates = createGates(questionBank);
+    private final List<LeafSprite> leaves = createLeaves();
+    /** Question IDs unlocked by correctly answering them during gameplay. */
+    private final Set<Integer> unlockedQuestionIds = new HashSet<>();
+    /** A small properties file stores durable score, gate, and archive progress on this device. */
+    private final Path savePath = Paths.get(System.getProperty("user.home"), ".systembound", "progress.properties");
     private static final Image[] LEAF_FRAMES = loadLeafFrames();
     private final ImageView skyImage = createBackgroundImage("/BackGround/Map_sky.png");
     private final ImageView mountainLayerFar = createBackgroundImage("/BackGround/Mountains.png");
@@ -68,6 +88,10 @@ public final class GameApplication extends Application {
     private final Label terminalHeader = new Label();
     private final Label expHud = new Label();
     private final Label trialHud = new Label();
+    /** Progress indicator for the active trial only; it is intentionally separate from total EXP. */
+    private final ProgressBar trialExpBar = new ProgressBar(0);
+    private final Label trialExpLabel = new Label();
+    private int trialExp;
     private boolean cursorVisible = true;
     private long lastCursorToggle;
     private int totalExp;
@@ -86,11 +110,15 @@ public final class GameApplication extends Application {
         root.setStyle("-fx-background-color: black;");
         root.getChildren().add(logicalRoot);
         Scene scene = new Scene(root, Constants.LOGICAL_WIDTH, Constants.LOGICAL_HEIGHT);
+        scene.getStylesheets().add(GameApplication.class.getResource("/Styles/game.css").toExternalForm());
         scene.setOnKeyPressed(this::onKeyPressed);
         scene.setOnKeyReleased(this::onKeyReleased);
         stage.setScene(scene);
+        // Save immediately when the window closes so a menu or map exit keeps current progress.
+        stage.setOnCloseRequest(event -> saveProgress());
         root.widthProperty().addListener((observable, oldValue, newValue) -> updateViewportScale());
         root.heightProperty().addListener((observable, oldValue, newValue) -> updateViewportScale());
+        loadProgress();
         showMenu();
         new AnimationTimer() {
             @Override public void handle(long now) {
@@ -190,42 +218,49 @@ public final class GameApplication extends Application {
         refreshWall();
         player.setLeft(false);
         player.setRight(false);
-        VBox box = new VBox(18);
-        box.setAlignment(Pos.CENTER);
-        // The menu is only an overlay: the live world stays visible behind it.
-        box.setStyle("-fx-background-color: transparent;");
-        Label title = title("SystemBound: The Paradigm Trials", 42);
-        Label subtitle = text("CMSC 13 — JavaFX Game Skeleton", 17);
-        Button play = new Button("PLAY");
-        play.setDefaultButton(true); play.setOnAction(e -> showWorld());
-        Button help = new Button("HOW TO PLAY"); help.setOnAction(e -> showHowToPlay());
-        Button exit = new Button("EXIT"); exit.setOnAction(e -> ((Stage) root.getScene().getWindow()).close());
-        box.getChildren().addAll(title, subtitle, play, help, exit);
-        logicalRoot.getChildren().setAll(viewport, box);
+        Node menu = menuView.mainMenu(viewport, this::showWorld, this::showHowToPlay,
+            this::showStories, this::showCredits, this::showQuestionBank,
+            () -> ((Stage) root.getScene().getWindow()).close());
+        configureHud();
+        logicalRoot.getChildren().setAll(menu, terminalHeader, expHud);
     }
 
+    /** Opens the locked/unlocked question catalogue. */
+    private void showQuestionBank() {
+        state = GameState.MENU;
+        logicalRoot.getChildren().setAll(new QuestionBankView(questionBank, unlockedQuestionIds, this::showMenu));
+    }
+
+    /** Displays the dedicated help page. */
     private void showHowToPlay() {
         state = GameState.HOW_TO_PLAY;
-        VBox box = new VBox(14);
-        box.setAlignment(Pos.CENTER); box.setMaxWidth(700);
-        Label instructions = text("HOW TO PLAY\n\nMove through the system, cross the gaps, and clear each trial gate.\n\n"
-            + "A / Left Arrow — Move left\nD / Right Arrow — Move right\nSpace — Jump onto floating platforms\n"
-            + "E — Enter a nearby trial\nEnter — Continue after a trial result\n\n"
-            + "Fall into a hole and you respawn at the last checkpoint.\n"
-            + "Earn 3 EXP from the 14 questions to clear a trial.", 18);
-        Button back = new Button("BACK"); back.setOnAction(e -> showMenu());
-        box.getChildren().addAll(title("HOW TO PLAY", 32), instructions, back);
-        logicalRoot.getChildren().setAll(box);
+        logicalRoot.getChildren().setAll(menuView.howToPlay(this::showMenu));
+    }
+
+    /** Opens the placeholder for future plot videos and cutscenes. */
+    private void showStories() {
+        state = GameState.STORIES;
+        logicalRoot.getChildren().setAll(menuView.placeholder("STORIES", this::showMenu));
+    }
+
+    /** Opens the empty credits placeholder. */
+    private void showCredits() {
+        state = GameState.CREDITS;
+        logicalRoot.getChildren().setAll(menuView.placeholder("CREDITS", this::showMenu));
     }
 
     private void showWorld() {
         state = GameState.WORLD;
         createWorld();
         refreshWall();
-        prompt = text("", 16);
-        prompt.setTextFill(Color.WHITE); prompt.setTranslateY(-300);
+        prompt = new Label("Press 'E' to start");
+        prompt.setMouseTransparent(true);
+        prompt.setAlignment(Pos.CENTER);
+        prompt.setStyle("-fx-font-family: 'Consolas'; -fx-font-size: 13; -fx-font-weight: bold; -fx-text-fill: #112630; -fx-background-color: rgba(232,250,255,.95); -fx-background-radius: 12; -fx-padding: 8 12; -fx-border-color: #63d7e8; -fx-border-radius: 12;");
+        world.getChildren().add(prompt);
+        kernel.setLayoutY(Constants.GROUND_Y - Constants.TILE_SIZE * 5 + 20);
         configureHud();
-        logicalRoot.getChildren().setAll(viewport, prompt, terminalHeader, expHud, trialHud, controlsHud());
+        logicalRoot.getChildren().setAll(viewport, terminalHeader, expHud, trialHud, controlsHud());
         logicalRoot.requestFocus();
     }
 
@@ -273,12 +308,12 @@ public final class GameApplication extends Application {
         // Menus deliberately have no gameplay prompt, but their background still animates.
         if (prompt == null) return;
         Gate near = nearbyGate();
-        if (near == null) {
-            prompt.setText("");
-        } else if (near.isCompleted()) {
-            prompt.setText("TRIAL " + near.getTrialNumber() + " COMPLETE");
-        } else {
-            prompt.setText("[ Press E to begin " + (near.getTrialNumber() == Constants.TRIAL_COUNT ? "the Core Trial" : "Trial " + near.getTrialNumber()) + " ]");
+        boolean canStart = near != null && !near.isCompleted();
+        prompt.setVisible(canStart);
+        if (canStart) {
+            prompt.setText("Press 'E' to start Trial " + near.getTrialNumber());
+            prompt.setLayoutX(near.getX() - 20);
+            prompt.setLayoutY(Constants.GROUND_Y - 105);
         }
     }
 
@@ -326,10 +361,11 @@ public final class GameApplication extends Application {
         return null;
     }
 
-    private static List<Gate> createGates() {
+    /** Builds one gate for every trial present in the loaded question bank. */
+    private static List<Gate> createGates(QuestionBank bank) {
         List<Gate> gates = new ArrayList<>();
-        for (int trialNumber = 1; trialNumber <= Constants.TRIAL_COUNT; trialNumber++) {
-            gates.add(new Gate(trialNumber, Constants.trialX(trialNumber)));
+        for (int trialNumber = 1; trialNumber <= bank.getTrialCount(); trialNumber++) {
+            gates.add(new Gate(trialNumber, Constants.trialX(trialNumber), bank.getTrialCount()));
         }
         return gates;
     }
@@ -387,14 +423,6 @@ public final class GameApplication extends Application {
         return imageView;
     }
 
-    // private static void configureBackgroundImage(ImageView imageView, double scrollSpeed, double width, double y, double x) {
-    //     imageView.setFitWidth(width);
-    //     imageView.setFitHeight(Constants.LOGICAL_HEIGHT);
-    //     imageView.setLayoutX(x);
-    //     imageView.setLayoutY(y);
-    //     imageView.setOpacity(0.92);
-    // }
-
     private void startTrial(Gate gate) {
         if (gate == null || gate.isCompleted()) return;
         activeGate = gate;
@@ -402,82 +430,72 @@ public final class GameApplication extends Application {
         state = GameState.TRIAL_CONFIRM;
         Label message = text("KERNEL:\n\"You've reached Trial " + gate.getTrialNumber()
             + ". Do you wish to challenge the system?\"", 23);
-        Button begin = new Button("BEGIN TRIAL"); begin.setOnAction(e -> { state = GameState.TRIAL; trial = new Trial(questionBank, gate.getTrialNumber()); resetLifelines(); showQuestion(); });
+        Button begin = new Button("BEGIN TRIAL"); begin.setOnAction(e -> { state = GameState.TRIAL; trial = trialManager.startTrial(gate.getTrialNumber()); trialExp = 0; trialExpBar.setProgress(0); resetLifelines(); showQuestion(); });
         Button leave = new Button("NOT YET"); leave.setOnAction(e -> showWorld());
-        VBox box = new VBox(16, message, new HBox(14, begin, leave)); box.setAlignment(Pos.CENTER);
+        HBox choices = new HBox(14, begin, leave);
+        choices.setAlignment(Pos.CENTER);
+        VBox box = new VBox(16, message, choices); 
+        box.setAlignment(Pos.CENTER);
+        box.setStyle("-fx-background-color: rgba(10, 20, 32, .86); -fx-padding: 28; -fx-background-radius: 20; -fx-border-color: #63d7e8; -fx-border-radius: 20;");
         logicalRoot.getChildren().setAll(viewport, box);
     }
 
     private void showQuestion() {
         Question question = trial.getCurrentQuestion();
         Pane overlay = new Pane();
-        Label kernel = speechBubble("KERNEL\n" + question.getQuestionText(), 20, 460);
+        Label questionText = new Label("KERNEL\n" + question.getQuestionText());
+        questionText.setWrapText(true);
+        questionText.setStyle("-fx-font-family: 'Consolas'; -fx-font-size: " + (question.getType() == QuestionType.PROGRAMMING ? 15 : 20) + "; -fx-text-fill: #111820; -fx-padding: 12 16 12 16;");
+        ScrollPane questionScroll = new ScrollPane(questionText);
+        questionScroll.setFitToWidth(true);
+        questionScroll.setPrefSize(460, 330);
+        questionScroll.setStyle("-fx-background: rgba(255,255,255,.95); -fx-background-radius: 18; -fx-border-color: #8a95a5; -fx-border-radius: 18;");
+        Pane kernel = new Pane(questionScroll);
+        kernel.setPrefSize(460, 330);
         kernel.setLayoutX(282); kernel.setLayoutY(18);
         GridPane answers = new GridPane(); answers.setHgap(16); answers.setVgap(14);
         for (int i = 0; i < 4; i++) {
             int answer = i;
-            Button button = new Button((char) ('A' + i) + ". " + question.getChoices().get(i));
-            button.setPrefWidth(295); button.setPrefHeight(52); button.setWrapText(true);
+            Label choice = new Label((char) ('A' + i) + ". " + question.getChoices().get(i));
+            choice.setWrapText(true);
+            choice.setStyle("-fx-font-family: 'Consolas'; -fx-font-size: " + (question.getType() == QuestionType.PROGRAMMING ? 11 : 14) + "; -fx-text-fill: #111820;");
+            ScrollPane choiceScroll = new ScrollPane(choice);
+            choiceScroll.setFitToWidth(true);
+            choiceScroll.setPrefViewportHeight(58);
+            choiceScroll.setPrefViewportWidth(260);
+            choiceScroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+            choiceScroll.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+            choiceScroll.setStyle("-fx-background-color: transparent; -fx-background: transparent;");
+            Button button = new Button();
+            button.setGraphic(choiceScroll);
+            button.setPrefWidth(295); button.setPrefHeight(68);
+            // The embedded scroll pane is the visible button face, so forward its mouse click.
+            choiceScroll.setOnMouseClicked(event -> { button.fire(); event.consume(); });
             button.setOnAction(e -> answerQuestion(answer)); answers.add(button, i % 2, i / 2);
         }
         answers.setLayoutX(202); answers.setLayoutY(405);
+        // Keep this trial meter inside the quiz view: it never shows the lifetime score or gate path.
+        configureTrialMeter();
+        VBox trialMeter = new VBox(5, trialExpLabel, trialExpBar);
+        trialMeter.setLayoutX(382); trialMeter.setLayoutY(355);
         VBox lifelines = sidePanel("LIFELINES"); lifelines.setLayoutX(18); lifelines.setLayoutY(175);
-        Button peek = sideButton(peekUsed ? "PEEK USED" : "PEEK", null); peek.setDisable(peekUsed); peek.setOnAction(e -> chooseLifeline(Lifeline.PEEK));
-        Button copy = sideButton(copyUsed ? "COPY USED" : "COPY", null); copy.setDisable(copyUsed); copy.setOnAction(e -> chooseLifeline(Lifeline.COPY));
-        Button save = sideButton(saveUsed ? "SAVE USED" : "SAVE", null); save.setDisable(saveUsed); save.setOnAction(e -> chooseLifeline(Lifeline.SAVE));
+        Button peek = sideButton(peekUsed ? "PEEK USED" : "PEEK", null); peek.setDisable(peekUsed); if (selectedLifeline == Lifeline.PEEK) peek.getStyleClass().add("lifeline-selected"); peek.setOnAction(e -> chooseLifeline(Lifeline.PEEK));
+        Button copy = sideButton(copyUsed ? "COPY USED" : "COPY", null); copy.setDisable(copyUsed); if (selectedLifeline == Lifeline.COPY) copy.getStyleClass().add("lifeline-selected"); copy.setOnAction(e -> chooseLifeline(Lifeline.COPY));
+        Button save = sideButton(saveUsed ? "SAVE USED" : "SAVE", null); save.setDisable(saveUsed); if (selectedLifeline == Lifeline.SAVE) save.getStyleClass().add("lifeline-selected"); save.setOnAction(e -> chooseLifeline(Lifeline.SAVE));
         lifelines.getChildren().addAll(peek, copy, save);
         VBox helpers = sidePanel("HELPERS"); helpers.setLayoutX(840); helpers.setLayoutY(145);
         for (HelperAdvisor.Kind kind : HelperAdvisor.Kind.values()) helpers.getChildren().add(helperButton(kind));
-        overlay.getChildren().addAll(kernel, answers, lifelines, helpers);
+        overlay.getChildren().addAll(kernel, answers, lifelines, helpers, trialMeter);
         logicalRoot.getChildren().setAll(viewport, overlay); fadeIn(overlay);
     }
 
-    // private void legacyShowQuestion() {
-    //     Question question = trial.getCurrentQuestion();
-    //     VBox box = new VBox(14);
-    //     box.setAlignment(Pos.CENTER); box.setMaxWidth(880);
-    //     Label exp = text("TRIAL " + trial.getNumber() + "  •  Question " + trial.getQuestionNumber() + "/14    EXP: "
-    //         + trial.getExp() 
-    //         + " / " 
-    //         + Trial.REQUIRED_EXP,
-    //          18
-    //     );
-
-    //     Label kernel = text(
-    //         "KERNEL:\n\"" 
-    //         + question.getQuestionText() 
-    //         + "\"", 
-    //         22
-    //     );
-
-    //     GridPane answers = new GridPane(); answers.setAlignment(Pos.CENTER); answers.setHgap(16); answers.setVgap(16);
-    //     for (int i = 0; i < 4; i++) {
-    //         int answer = i;
-    //         Button button = new Button((char) ('A' + i) + ". " + question.getChoices().get(i));
-    //         button.setPrefWidth(380); button.setPrefHeight(55);
-    //         button.setWrapText(true); button.setOnAction(e -> answerQuestion(answer));
-    //         answers.add(button, i % 2, i / 2);
-    //     }
-    //     HBox helpers = new HBox(8); helpers.setAlignment(Pos.CENTER);
-    //     for (HelperAdvisor.Kind kind : HelperAdvisor.Kind.values()) {
-    //         Button helper = new Button(kind.name()); helper.setOnAction(e -> useHelper(kind)); helpers.getChildren().add(helper);
-    //     }
-    //     HBox lifelines = new HBox(10); lifelines.setAlignment(Pos.CENTER);
-    //     Button peek = new Button(peekUsed ? "PEEK USED" : "PEEK"); peek.setDisable(peekUsed); peek.setOnAction(e -> chooseLifeline(Lifeline.PEEK));
-    //     Button copy = new Button(copyUsed ? "COPY USED" : "COPY"); copy.setDisable(copyUsed); copy.setOnAction(e -> chooseLifeline(Lifeline.COPY));
-    //     Button save = new Button(saveUsed ? "SAVE USED" : "SAVE"); save.setDisable(saveUsed); save.setOnAction(e -> chooseLifeline(Lifeline.SAVE));
-    //     lifelines.getChildren().addAll(peek, copy, save);
-    //     box.getChildren().addAll(title(trial.getNumber() == Constants.TRIAL_COUNT ? "CORE GATE" : "TRIAL " + trial.getNumber(), 28), exp, kernel, answers, helpers, lifelines);
-    //     logicalRoot.getChildren().setAll(viewport, box);
-    //     fadeIn(box);
-    // }
 
     /** Begins terminal-monochrome and gently restores colour as gates are cleared. */
     private void updateWorldColor() {
         int complete = 0;
         for (Gate gate : gates) if (gate.isCompleted()) complete++;
         ColorAdjust effect = new ColorAdjust();
-        effect.setSaturation(-0.82 + Math.min(1, complete / (double) Constants.TRIAL_COUNT) * 0.82);
+        effect.setSaturation(-0.82 + Math.min(1, complete / (double) Math.max(1, questionBank.getTrialCount())) * 0.82);
         effect.setBrightness(-0.08 + complete * 0.008);
         backgroundPane.setEffect(effect);
     }
@@ -486,18 +504,27 @@ public final class GameApplication extends Application {
         Question question = trial.getCurrentQuestion();
         if (copyUsed && selectedAdvice != null) answer = selectedAdvice.getChoice();
         boolean correct = trial.answerWithSave(answer, saveArmed);
-        totalExp = Math.max(0, totalExp + (correct ? 100 : saveArmed ? 0 : -100));
+        boolean saveProtectedThisAnswer = saveArmed;
+        saveArmed = false;
+        if (correct) unlockedQuestionIds.add(question.getId());
+        totalExp = Math.max(0, Math.min(maximumExp(), totalExp
+            + (correct ? Constants.POINTS_PER_CORRECT_ANSWER
+                : saveProtectedThisAnswer ? 0 : -Constants.POINTS_PER_CORRECT_ANSWER)));
+        trialExp = Math.max(0, trialExp + (correct ? Constants.POINTS_PER_CORRECT_ANSWER
+            : saveProtectedThisAnswer ? 0 : -Constants.POINTS_PER_CORRECT_ANSWER));
+        saveProgress();
         refreshHud();
         Pane feedback = new Pane();
         Label playerBubble = speechBubble("PLAYER\n" + question.getChoices().get(answer), 17, 300);
         playerBubble.setLayoutX(170); playerBubble.setLayoutY(20);
-        Label kernelBubble = speechBubble("KERNEL\n" + (correct ? "Correct. +1 EXP." : saveArmed ? "SAVE protected your EXP." : "Incorrect. EXP decreased.") + "\n" + question.getExplanation(), 17, 450);
+        Label kernelBubble = speechBubble("KERNEL\n" + (correct ? "Correct. +" + Constants.POINTS_PER_CORRECT_ANSWER + " EXP." : saveProtectedThisAnswer ? "SAVE protected your EXP." : "Incorrect. EXP decreased.") + "\n" + question.getExplanation(), 17, 450);
         kernelBubble.setLayoutX(380); kernelBubble.setLayoutY(155);
         Button proceed = new Button("OK — CONTINUE");
         proceed.setStyle("-fx-font-weight: bold; -fx-text-fill: white; -fx-background-color: " + (correct ? "#3d9b61" : "#c94e4e") + ";");
         proceed.setLayoutX(450); proceed.setLayoutY(370);
         proceed.setOnAction(e -> { trial.nextQuestion(); if (trial.isFinished()) showResult(); else showQuestion(); });
         feedback.getChildren().addAll(playerBubble, kernelBubble, proceed);
+        // Kernel response screens intentionally omit all HUD elements.
         logicalRoot.getChildren().setAll(viewport, feedback);
     }
 
@@ -513,8 +540,9 @@ public final class GameApplication extends Application {
         Button back = new Button("BACK TO QUESTION"); back.setOnAction(e -> showQuestion());
         if (selectedLifeline == Lifeline.PEEK) peekUsed = true;
         if (selectedLifeline == Lifeline.COPY) copyUsed = true;
-        if (selectedLifeline == Lifeline.SAVE) { 
-            saveUsed = true; 
+        if (selectedLifeline == Lifeline.SAVE) {
+            saveUsed = true;
+            saveArmed = true;
         }
         selectedLifeline = null;
         VBox box = new VBox(15, advice, back); box.setAlignment(Pos.TOP_CENTER); box.setLayoutY(18);
@@ -526,23 +554,32 @@ public final class GameApplication extends Application {
 
     private void showResult() {
         state = GameState.RESULT;
-        boolean passed = trial.isComplete();
+        int requiredExp = requiredExpForTrial(activeGate.getTrialNumber());
+        boolean passed = trial.isComplete() && totalExp >= requiredExp;
         if (passed) {
             activeGate.setCompleted(true);
             player.setCheckpoint(activeGate.getLeftEdge() + 25);
             refreshWall();
+            saveProgress();
         }
-        if (passed && activeGate.getTrialNumber() == Constants.TRIAL_COUNT) { 
+        int nextUncompletedIndex = gates.size();
+        for (int index = 0; index < gates.size(); index++) {
+            if (!gates.get(index).isCompleted()) { nextUncompletedIndex = index; break; }
+        }
+        double kernelDestination = nextUncompletedIndex < gates.size()
+            ? gates.get(nextUncompletedIndex).getX() + 48
+            : WORLD_WIDTH - Constants.TILE_SIZE * 5;
+        changeKernelPosition(kernelDestination);
+        if (passed && activeGate.getTrialNumber() == questionBank.getTrialCount()) {
             showVictory(); 
             return; 
         }
         if (passed) { 
             playKernelExit(); 
-            changeKernelPosition(activeGate.getX());
             return; 
         }
-        Label result = text((passed ? "TRIAL COMPLETE" : "TRIAL FAILED") + "\n\nTRIAL EXP: "
-            + trial.getExp() + " / " + Trial.REQUIRED_EXP + "\n\n"
+        Label result = text((passed ? "TRIAL COMPLETE" : "TRIAL FAILED") + "\n\nTOTAL EXP: "
+            + totalExp + " / " + requiredExp + "\n\n"
             + (passed ? "Press ENTER to return to the map."
                       : "The Kernel returns you to the Trial " + trial.getNumber() + " checkpoint.\nPress ENTER to retry."), 25);
         result.setTextFill(passed ? Color.web("#8ee6a1") : Color.web("#ff9a9a"));
@@ -564,8 +601,10 @@ public final class GameApplication extends Application {
         exit.setCycleCount(20); exit.setOnFinished(e -> showWorld()); exit.play();
     }
 
+    /** Moves the Kernel to the next uncleared gate or to the end of the map. */
     private void changeKernelPosition(double x) {
         kernel.setLayoutX(x);
+        kernel.setLayoutY(Constants.GROUND_Y - Constants.TILE_SIZE * 5 + 20);
     }
 
     private void showVictory() {
@@ -576,15 +615,20 @@ public final class GameApplication extends Application {
         box.setAlignment(Pos.CENTER);
         Label message = title("SYSTEM BOUNDARY BREACHED", 34);
         Label detail = text("The Kernel releases you into a world restored to color.\nAll paradigm trials completed.", 20);
-        Button replay = new Button("PLAY AGAIN"); replay.setOnAction(e -> { for (Gate gate : gates) gate.setCompleted(false); totalExp = 0; player.respawnAt(Constants.TILE_SIZE * 3); refreshWall(); showWorld(); });
+        Button replay = new Button("PLAY AGAIN"); replay.setOnAction(e -> { for (Gate gate : gates) gate.setCompleted(false); totalExp = 0; player.setCheckpoint(Constants.TILE_SIZE * 3); player.respawnAt(Constants.TILE_SIZE * 3); refreshWall(); saveProgress(); showWorld(); });
         Button menu = new Button("RETURN TO MENU"); menu.setOnAction(e -> showMenu());
         box.getChildren().addAll(message, detail, replay, menu);
-        logicalRoot.getChildren().setAll(viewport, box, flash);
+        logicalRoot.getChildren().setAll(viewport, box, flash, terminalHeader, expHud, trialHud);
         FadeTransition fade = new FadeTransition(Duration.seconds(.35), flash); fade.setFromValue(1); fade.setToValue(0); fade.play();
     }
 
     private void onKeyPressed(KeyEvent event) {
         KeyCode key = event.getCode();
+        // F6 restarts gate progression and lifetime EXP while preserving unlocked archive entries.
+        if (key == KeyCode.F6 && (state == GameState.MENU || state == GameState.WORLD)) {
+            resetGateProgress();
+            return;
+        }
         if (event.isControlDown() && event.isShiftDown()) {
             if (key == KeyCode.T) {
                 completeNearestGate();
@@ -603,7 +647,8 @@ public final class GameApplication extends Application {
             if (key == KeyCode.ESCAPE) showMenu();
         } else if (state == GameState.RESULT && key == KeyCode.ENTER) {
             finishResult();
-        } else if (state == GameState.HOW_TO_PLAY && key == KeyCode.ESCAPE) {
+        } else if ((state == GameState.HOW_TO_PLAY || state == GameState.STORIES || state == GameState.CREDITS)
+                && key == KeyCode.ESCAPE) {
             showMenu();
         }
     }
@@ -620,13 +665,77 @@ public final class GameApplication extends Application {
         gate.setCompleted(true);
         player.setCheckpoint(gate.getLeftEdge() + 25);
         refreshWall();
+        saveProgress();
     }
 
     private void completeAllGates() {
         for (Gate gate : gates) {
             gate.setCompleted(true);
         }
-        player.clearWall(); 
+        player.clearWall();
+        saveProgress();
+    }
+
+    /** Clears trial completion and score but deliberately keeps every earned question unlock. */
+    private void resetGateProgress() {
+        for (Gate gate : gates) gate.setCompleted(false);
+        totalExp = 0;
+        trialExp = 0;
+        player.setCheckpoint(Constants.TILE_SIZE * 3);
+        player.respawnAt(Constants.TILE_SIZE * 3);
+        refreshWall();
+        refreshHud();
+        saveProgress();
+    }
+
+    /** Restores saved progression before the first menu/world scene is assembled. */
+    private void loadProgress() {
+        if (!Files.isRegularFile(savePath)) return;
+        Properties saved = new Properties();
+        try (InputStream input = Files.newInputStream(savePath)) {
+            saved.load(input);
+            totalExp = Math.max(0, Math.min(maximumExp(), Integer.parseInt(saved.getProperty("totalExp", "0"))));
+            String unlocked = saved.getProperty("unlockedQuestionIds", "");
+            for (String value : unlocked.split(",")) {
+                try {
+                    int id = Integer.parseInt(value.trim());
+                    if (questionBank.getAllQuestions().stream().anyMatch(question -> question.getId() == id)) {
+                        unlockedQuestionIds.add(id);
+                    }
+                } catch (NumberFormatException ignored) {
+                    // Ignore a malformed ID without discarding other valid save data.
+                }
+            }
+            double checkpoint = Constants.TILE_SIZE * 3;
+            for (Gate gate : gates) {
+                boolean completed = Boolean.parseBoolean(saved.getProperty("gate." + gate.getTrialNumber(), "false"));
+                gate.setCompleted(completed);
+                if (completed) checkpoint = gate.getLeftEdge() + 25;
+            }
+            player.setCheckpoint(checkpoint);
+            player.respawnAt(checkpoint);
+        } catch (IOException | IllegalArgumentException exception) {
+            System.err.println("Could not load SYSTEMBOUND progress: " + exception.getMessage());
+        }
+    }
+
+    /** Writes score, completed gates, and unlocked question IDs to a per-user save file. */
+    private void saveProgress() {
+        Properties saved = new Properties();
+        saved.setProperty("totalExp", Integer.toString(totalExp));
+        saved.setProperty("unlockedQuestionIds", unlockedQuestionIds.stream().sorted()
+            .map(String::valueOf).collect(java.util.stream.Collectors.joining(",")));
+        for (Gate gate : gates) {
+            saved.setProperty("gate." + gate.getTrialNumber(), Boolean.toString(gate.isCompleted()));
+        }
+        try {
+            Files.createDirectories(savePath.getParent());
+            try (OutputStream output = Files.newOutputStream(savePath)) {
+                saved.store(output, "SYSTEMBOUND progress");
+            }
+        } catch (IOException exception) {
+            System.err.println("Could not save SYSTEMBOUND progress: " + exception.getMessage());
+        }
     }
 
     /** Fits the fixed logical viewport into the window with centered letterboxing. */
@@ -650,7 +759,11 @@ public final class GameApplication extends Application {
     private void configureHud() {
         String style = "-fx-font-family: 'Consolas'; -fx-text-fill: #e9f1ee; -fx-effect: dropshadow(gaussian, #101a22, 2, .9, 0, 1);";
         terminalHeader.setStyle(style + "-fx-font-size: 13;"); terminalHeader.setTranslateX(-350); terminalHeader.setTranslateY(-258);
-        expHud.setStyle(style + "-fx-font-size: 14;"); expHud.setTranslateX(-362); expHud.setTranslateY(-226);
+        terminalHeader.setAlignment(Pos.CENTER_LEFT);
+        terminalHeader.setMouseTransparent(true);
+        expHud.setStyle(style + "-fx-font-size: 14;"); expHud.setTranslateX(-350); expHud.setTranslateY(-226);
+        expHud.setAlignment(Pos.CENTER_LEFT);
+        expHud.setMouseTransparent(true);
         trialHud.setStyle(style + "-fx-font-size: 15; -fx-font-weight: bold;"); trialHud.setTranslateY(252);
         refreshHud();
     }
@@ -686,12 +799,41 @@ public final class GameApplication extends Application {
     }
     private void refreshHud() {
         terminalHeader.setText("PS D:\\SystemBound\\ParadigmTrials> " + (cursorVisible ? "▮" : " "));
-        int filled = Math.min(12, totalExp / 100); StringBuilder bar = new StringBuilder();
-        for (int i = 0; i < 12; i++) bar.append(i < filled ? '█' : '░');
-        expHud.setText("EXP " + totalExp + " / 1200  [" + bar + "]");
+        int maximum = maximumExp();
+        int filled = maximum == 0 ? 0 : (int) Math.round(12.0 * totalExp / maximum);
+        StringBuilder bar = new StringBuilder();
+        for (int i = 0; i < 12; i++) bar.append(i < filled ? '▮' : '▯');
         int current = activeGate == null ? 1 : activeGate.getTrialNumber();
-        trialHud.setText(current == Constants.TRIAL_COUNT ? "CORE TRIAL" : "TRIAL " + current);
+        for (Gate gate : gates) {
+            if (!gate.isCompleted()) { current = gate.getTrialNumber(); break; }
+        }
+        expHud.setText("EXP " + totalExp + " / " + maximum + "  [" + bar + "]");
+        trialHud.setText(current == questionBank.getTrialCount() ? "CORE TRIAL" : "TRIAL " + current);
     }
+
+    /** Maximum score assumes every bank question is answered correctly exactly once. */
+    private int maximumExp() {
+        return questionBank.getTotalQuestions() * Constants.POINTS_PER_CORRECT_ANSWER;
+    }
+
+    /** Each successive trial requires another 600 points in the cumulative score. */
+    private int requiredExpForTrial(int trialNumber) {
+        return trialNumber * Constants.POINTS_PER_TRIAL;
+    }
+
+    /** Sets up the compact per trial meter and refreshes its requirement and fill. */
+    private void configureTrialMeter() {
+        int target = Constants.POINTS_PER_TRIAL;
+        trialExpLabel.setText("TRIAL EXP  " + trialExp + " / " + target);
+        trialExpLabel.setStyle("-fx-text-fill: #e9f1ee; -fx-font-weight: bold; -fx-font-size: 13;");
+        trialExpBar.setPrefWidth(260);
+        trialExpBar.setStyle("-fx-accent: #63d7e8;");
+        double progressTarget = Math.min(1.0, trialExp / (double) target);
+        Timeline fill = new Timeline(new KeyFrame(Duration.millis(420),
+            new KeyValue(trialExpBar.progressProperty(), progressTarget, Interpolator.EASE_BOTH)));
+        fill.play();
+    }
+
     private static void fadeIn(javafx.scene.Node node) { FadeTransition transition = new FadeTransition(Duration.millis(180), node); transition.setFromValue(0); transition.setToValue(1); transition.play(); }
 
     private Label title(String value, int size) { 

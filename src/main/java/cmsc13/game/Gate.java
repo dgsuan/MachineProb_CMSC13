@@ -10,6 +10,7 @@ public final class Gate {
     private static final Image[] INCOMPLETE = frames("/Gate/incompleted", 6);
     private static final Image[] COMPLETE = frames("/Gate/completed", 5);
     private final int trialNumber;
+    private final boolean coreGate;
     private final double x;
     private final Group node = new Group();
     private final ImageView sprite = new ImageView();
@@ -17,10 +18,12 @@ public final class Gate {
     private long lastFrame;
     private int frame;
 
-    public Gate(int trialNumber, double x) {
+    /** Creates a gate and marks the final question-bank trial as the core gate. */
+    public Gate(int trialNumber, double x, int trialCount) {
         this.trialNumber = trialNumber; this.x = x;
+        this.coreGate = trialNumber == trialCount;
         sprite.setFitWidth(48); sprite.setFitHeight(64); sprite.setPreserveRatio(true); sprite.setSmooth(false);
-        Label label = new Label(trialNumber == Constants.TRIAL_COUNT ? "CORE" : "T" + trialNumber);
+        Label label = new Label(coreGate ? "CORE" : "T" + trialNumber);
         label.setStyle("-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 8; -fx-effect: dropshadow(gaussian, black, 2, .8, 0, 1);");
         label.setLayoutX(9); label.setLayoutY(19);
         node.getChildren().addAll(sprite, label);

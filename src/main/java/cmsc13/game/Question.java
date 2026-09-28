@@ -17,19 +17,25 @@ public class Question {
     private int difficulty; // 1-5
     private int trialId;
     
+    // New fields for programming questions
+    private String progType; 
+    private String progLang; 
+    
     public Question(
         int id,
-        QuestionType type,
+        QuestionType type2,
         String topic,
         String questionText,
         List<String> choices,
         int correctAnswerIndex,
         String explanation,
         int difficulty,
-        int trialId
+        int trialId,
+        String progType,
+        String progLang
     ) {
         this.id = id;
-        this.type = type;
+        this.type = type2;
         this.topic = topic;
         this.questionText = questionText;
         this.choices = choices;
@@ -37,6 +43,8 @@ public class Question {
         this.explanation = explanation;
         this.difficulty = difficulty;
         this.trialId = trialId;
+        this.progType = progType;
+        this.progLang = progLang;
     }
     
     public boolean isCorrectAnswer(int selectedIndex) {
@@ -53,10 +61,20 @@ public class Question {
     public String getExplanation() { return explanation; }
     public int getDifficulty() { return difficulty; }
     public int getTrialId() { return trialId; }
-    public String getCorrectChoiceText() { return choices.get(correctAnswerIndex); }
+    
+    // New Getters for programming properties
+    public String getProgType() { return progType; }
+    public String getProgLang() { return progLang; }
+    
+    public String getCorrectChoiceText() { 
+        if (choices != null && correctAnswerIndex >= 0 && correctAnswerIndex < choices.size()) {
+            return choices.get(correctAnswerIndex); 
+        }
+        return null; 
+    }
     
     public String getChoiceLetter(int index) {
-        char[] letters = {'A', 'B', 'C', 'D'};
-        return String.valueOf(letters[Math.min(index, 3)]);
+        // Dynamically returns 'A', 'B', 'C', 'D' depending on the index provided
+        return String.valueOf((char) ('A' + index));
     }
 }

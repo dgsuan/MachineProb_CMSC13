@@ -1,0 +1,35 @@
+.root, .label, .button, .list-cell, .text-area, .text-field, .check-box, .radio-button {
+    -fx-font-family: "Consolas";
+}
+
+.button {
+    -fx-background-color: transparent;
+    -fx-background-image: url("/Buttons/btn_idle.png");
+    -fx-background-repeat: no-repeat;
+    -fx-background-position: center;
+    -fx-background-size: 100% 100%;
+    -fx-background-insets: 0;
+    -fx-background-radius: 0;
+    -fx-padding: 8 16 10 16;
+    -fx-text-fill: #12252e;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+}
+
+.button:hover, .button:focused {
+    -fx-background-image: url("/Buttons/btn_hover.png");
+}
+
+.button:pressed {
+    -fx-background-image: url("/Buttons/btn_pressed.png");
+    -fx-translate-y: 1;
+}
+
+.button:disabled {
+    -fx-opacity: 0.58;
+    -fx-cursor: default;
+}
+
+.button.lifeline-selected, .button.lifeline-selected:hover {
+    -fx-background-image: url("/Buttons/btn_pressed.png");
+}

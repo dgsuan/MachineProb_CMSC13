@@ -28,6 +28,8 @@ public final class Player {
     private double velocityY;
     private boolean left;
     private boolean right;
+    /** Prevents movement input from cancelling a fall into a pit; reset at checkpoint respawn. */
+    private boolean fallInputLocked;
     private boolean onGround = true;
     private double wallLeft = Double.POSITIVE_INFINITY;
     private double worldWidth = 3000;
@@ -60,8 +62,8 @@ public final class Player {
     }
 
     public void update() {
-        if (left) x -= Constants.MOVE_SPEED;
-        if (right) x += Constants.MOVE_SPEED;
+        if (!fallInputLocked && left) x -= Constants.MOVE_SPEED;
+        if (!fallInputLocked && right) x += Constants.MOVE_SPEED;
         if (left && !right) facingRight = false;
         if (right && !left) facingRight = true;
         x = Math.max(0, Math.min(worldWidth - WIDTH, x));
@@ -77,6 +79,12 @@ public final class Player {
         } else {
             y = nextY;
             onGround = false;
+        }
+        // Once the player drops below the ground plane over a gap, ignore movement until respawn.
+        if (y > GROUND_Y + 8 && !onSolidGround()) {
+            fallInputLocked = true;
+            left = false;
+            right = false;
         }
         if (y > Constants.FALL_LIMIT) respawnAtCheckpoint();
         updateAnimation();
@@ -124,6 +132,7 @@ public final class Player {
         y = GROUND_Y - HEIGHT;
         velocityY = 0;
         onGround = true;
+        fallInputLocked = false;
         animationState = AnimationState.IDLE;
         animationFrame = 0;
         lastAnimationUpdate = 0;
