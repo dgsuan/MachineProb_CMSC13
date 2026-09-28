@@ -8,13 +8,9 @@ import javafx.scene.image.ImageView;
 
 /** Minimal player movement with ground segments, holes, and floating platforms. */
 public final class Player {
-    public static final double WIDTH = 23;
-    public static final double HEIGHT = 28;
-    public static final double GROUND_Y = 600;
-    private static final double GRAVITY = 0.6;
-    private static final double JUMP_VELOCITY = -15;
-    private static final double MOVE_SPEED = 5;
-    private static final double FALL_LIMIT = 900;
+    public static final double WIDTH = Constants.PLAYER_WIDTH;
+    public static final double HEIGHT = Constants.PLAYER_HEIGHT;
+    public static final double GROUND_Y = Constants.GROUND_Y;
     private static final double SPRITE_SIZE = 32;
     private static final long IDLE_FRAME_DURATION = 180_000_000L;
     private static final long RUN_FRAME_DURATION = 95_000_000L;
@@ -23,7 +19,6 @@ public final class Player {
     private static final Image[] RUN_RIGHT_FRAMES = loadFrames("Run_right", 6);
     private static final Image[] RUN_LEFT_FRAMES = loadFrames("Run_left", 6);
     private static final Image[] JUMP_RIGHT_FRAMES = loadFrames("Jump_right", 8);
-    // The supplied left-facing jump sprites use the "Jump_leftt" filename prefix.
     private static final Image[] JUMP_LEFT_FRAMES = loadFrames("Jump_leftt", 8);
 
     private final Group node = new Group();
@@ -33,10 +28,12 @@ public final class Player {
     private double velocityY;
     private boolean left;
     private boolean right;
+    /** Prevents movement input from cancelling a fall into a pit; reset at checkpoint respawn. */
+    private boolean fallInputLocked;
     private boolean onGround = true;
     private double wallLeft = Double.POSITIVE_INFINITY;
     private double worldWidth = 3000;
-    private double checkpointX = 100;
+    private double checkpointX = Constants.TILE_SIZE * 8;
     private List<double[]> groundSegments = new ArrayList<>();
     private List<Platform> platforms = new ArrayList<>();
     private AnimationState animationState = AnimationState.IDLE;
@@ -48,6 +45,7 @@ public final class Player {
         sprite.setFitWidth(SPRITE_SIZE);
         sprite.setFitHeight(SPRITE_SIZE);
         sprite.setPreserveRatio(true);
+        sprite.setSmooth(false);
         // Centre the sprite over the collision box and keep its feet on the ground.
         sprite.setLayoutX((WIDTH - SPRITE_SIZE) / 2);
         sprite.setLayoutY(HEIGHT - SPRITE_SIZE);
@@ -64,14 +62,14 @@ public final class Player {
     }
 
     public void update() {
-        if (left) x -= MOVE_SPEED;
-        if (right) x += MOVE_SPEED;
+        if (!fallInputLocked && left) x -= Constants.MOVE_SPEED;
+        if (!fallInputLocked && right) x += Constants.MOVE_SPEED;
         if (left && !right) facingRight = false;
         if (right && !left) facingRight = true;
         x = Math.max(0, Math.min(worldWidth - WIDTH, x));
         if (x + WIDTH > wallLeft) x = wallLeft - WIDTH;
 
-        velocityY += GRAVITY;
+        velocityY += Constants.GRAVITY;
         double nextY = y + velocityY;
         double support = supportSurface();
         if (nextY + HEIGHT >= support) {
@@ -82,7 +80,13 @@ public final class Player {
             y = nextY;
             onGround = false;
         }
-        if (y > FALL_LIMIT) respawnAtCheckpoint();
+        // Once the player drops below the ground plane over a gap, ignore movement until respawn.
+        if (y > GROUND_Y + 8 && !onSolidGround()) {
+            fallInputLocked = true;
+            left = false;
+            right = false;
+        }
+        if (y > Constants.FALL_LIMIT) respawnAtCheckpoint();
         updateAnimation();
         draw();
     }
@@ -112,7 +116,13 @@ public final class Player {
         return false;
     }
 
-    public void jump() { if (onGround) { velocityY = JUMP_VELOCITY; onGround = false; } }
+    public void jump() { if (onGround) { velocityY = Constants.JUMP_VELOCITY; onGround = false; } }
+    public void hitLeaf() {
+        velocityY = Math.min(velocityY, -8.0);
+        x += facingRight ? -10 : 10;
+        y = Math.max(0, y - 8);
+        onGround = false;
+    }
     public void setWallLeft(double worldX) { this.wallLeft = worldX; }
     public void clearWall() { this.wallLeft = Double.POSITIVE_INFINITY; }
     public void setCheckpoint(double worldX) { this.checkpointX = worldX; }
@@ -122,6 +132,7 @@ public final class Player {
         y = GROUND_Y - HEIGHT;
         velocityY = 0;
         onGround = true;
+        fallInputLocked = false;
         animationState = AnimationState.IDLE;
         animationFrame = 0;
         lastAnimationUpdate = 0;
@@ -131,6 +142,7 @@ public final class Player {
     public void setLeft(boolean value) { left = value; }
     public void setRight(boolean value) { right = value; }
     public double getX() { return x; }
+    public double getY() { return y; }
     public Group getNode() { return node; }
     private void draw() { node.setLayoutX(x); node.setLayoutY(y); }
 
