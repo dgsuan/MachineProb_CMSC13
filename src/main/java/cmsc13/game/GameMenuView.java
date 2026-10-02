@@ -51,7 +51,6 @@ final class GameMenuView {
         Label heading = heading("HOW TO PLAY");
         Label controls = new Label("MOVE\nA / D or ← / →\n\nJUMP\nSPACE\n\nTRIAL GATES\nWalk close to a gate, then press E.\nAnswer questions to earn EXP and unlock the next gate.\n\nPITFALLS\nA fall sends you back to your last checkpoint.");
         controls.setWrapText(true);
-        controls.setMaxWidth(620);
         controls.setStyle("-fx-font-family: 'Consolas'; -fx-font-size: 17; -fx-text-fill: #e4eff4; -fx-text-alignment: center; -fx-line-spacing: 5;");
         VBox card = new VBox(22, heading, controls, button("BACK TO MENU", onBack));
         card.setAlignment(Pos.CENTER);

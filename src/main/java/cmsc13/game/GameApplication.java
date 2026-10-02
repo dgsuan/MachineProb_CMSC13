@@ -3,6 +3,7 @@ package cmsc13.game;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
 import java.util.Properties;
@@ -24,9 +25,14 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.Node;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Dialog;
+import javafx.scene.control.DialogPane;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -48,7 +54,7 @@ import javafx.util.Duration;
 public final class GameApplication extends Application {
     private static final double WORLD_WIDTH = Constants.WORLD_WIDTH;
     /** How long the splash art holds before the "press any key" prompt appears. */
-    private static final double SPLASH_SECONDS = 5;
+    private static final double SPLASH_SECONDS = 3;
 
     /** The long map starts as a continuous walkable ground layer. */
     private static final List<double[]> GROUND_SEGMENTS = List.of(
@@ -259,9 +265,27 @@ public final class GameApplication extends Application {
         player.setRight(false);
         Node menu = menuView.mainMenu(viewport, this::showWorld, this::showHowToPlay,
             this::showStories, this::showCredits, this::showQuestionBank,
-            () -> ((Stage) root.getScene().getWindow()).close());
+            this::exit);
         configureHud();
         logicalRoot.getChildren().setAll(menu, terminalHeader, expHud);
+    }
+
+    private void exit() {
+        Alert alert = new Alert(AlertType.CONFIRMATION);
+        alert.setTitle("EXIT");
+        alert.setContentText("Are you sure you want to exit the app?");
+        alert.setGraphic(null);
+
+        Optional<ButtonType> result = alert.showAndWait();
+
+        // fix this or apply this...
+        // DialogPane dialogPane = alert.getDialogPane();
+        // dialogPane.getStylesheets().add(GameApplication.class.getResource("/Styles/game.css").toExternalForm());
+        // dialogPane.getStyleClass().add("my-custom-alert");
+
+        if(result.isPresent() && result.get() == ButtonType.OK) {
+            ((Stage) root.getScene().getWindow()).close();
+        }  
     }
 
     /** Opens the locked/unlocked question catalogue. */
