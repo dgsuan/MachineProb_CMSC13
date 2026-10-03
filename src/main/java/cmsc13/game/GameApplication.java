@@ -98,6 +98,7 @@ public final class GameApplication extends Application {
     private int trialExp;
     private boolean cursorVisible = true;
     private boolean splashReady;
+    private boolean reviewOpen;
     private long lastCursorToggle;
     private int totalExp;
     private boolean peekUsed, copyUsed, saveUsed, saveArmed;
@@ -251,6 +252,7 @@ public final class GameApplication extends Application {
     }
 
     private void showMenu() {
+        reviewOpen = false;
         state = GameState.MENU;
         prompt = null;
         createWorld();
@@ -264,10 +266,11 @@ public final class GameApplication extends Application {
         logicalRoot.getChildren().setAll(menu, terminalHeader, expHud);
     }
 
-    /** Opens the locked/unlocked question catalogue. */
+    /** Opens the course-style review hub. */
     private void showQuestionBank() {
         state = GameState.MENU;
-        logicalRoot.getChildren().setAll(new QuestionBankView(questionBank, unlockedQuestionIds, this::showMenu));
+        reviewOpen = true;
+        logicalRoot.getChildren().setAll(new QuestionBankView(questionBank, this::showMenu));
     }
 
     /** Displays the dedicated help page. */
@@ -689,6 +692,8 @@ public final class GameApplication extends Application {
             if (key == KeyCode.SPACE) player.jump();
             if (key == KeyCode.E) startTrial(nearbyGate());
             if (key == KeyCode.ESCAPE) showMenu();
+        } else if (reviewOpen && key == KeyCode.ESCAPE) {
+            showMenu();
         } else if (state == GameState.RESULT && key == KeyCode.ENTER) {
             finishResult();
         } else if ((state == GameState.HOW_TO_PLAY || state == GameState.STORIES || state == GameState.CREDITS)

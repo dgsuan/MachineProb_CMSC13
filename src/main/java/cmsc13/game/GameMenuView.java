@@ -34,7 +34,7 @@ final class GameMenuView {
         // The viewport is only a visual backdrop. Let pointer events pass through to menu controls.
         backdrop.setMouseTransparent(true);
         StackPane menu = new StackPane(backdrop, menuItems);
-        Button bank = button("QUESTION BANK", onQuestionBank);
+        Button bank = button("REVIEW TOPICS", onQuestionBank);
         Button stories = button("STORIES", onStories);
         HBox archiveLinks = new HBox(10, stories, bank);
         archiveLinks.setMouseTransparent(false);
