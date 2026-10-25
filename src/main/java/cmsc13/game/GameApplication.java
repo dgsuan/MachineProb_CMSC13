@@ -74,6 +74,9 @@ public final class GameApplication extends Application {
     private final Pane world = new Pane();
     private final Pane viewport = new Pane();
     private final Player player = new Player();
+    private final SoundManager sound = new SoundManager();
+    private int lastSpokenQuestionId = -1;
+    private boolean muteKeyHeld;
     private final QuestionBank questionBank = new QuestionBank();
     private final TrialManager trialManager = new TrialManager(questionBank);
     private final GameMenuView menuView = new GameMenuView();
@@ -125,6 +128,11 @@ public final class GameApplication extends Application {
         scene.getStylesheets().add(GameApplication.class.getResource("/Styles/game.css").toExternalForm());
         scene.setOnKeyPressed(this::onKeyPressed);
         scene.setOnKeyReleased(this::onKeyReleased);
+        scene.addEventFilter(javafx.event.ActionEvent.ACTION, event -> {
+            if (event.getTarget() instanceof Button) sound.play(SoundManager.Effect.CLICK);
+        });
+        player.setOnJump(() -> sound.play(SoundManager.Effect.JUMP));
+        player.setOnFall(() -> sound.play(SoundManager.Effect.RESPAWN));
         stage.setScene(scene);
         // Save immediately when the window closes so a menu or map exit keeps current progress.
         stage.setOnCloseRequest(event -> saveProgress());
@@ -134,6 +142,8 @@ public final class GameApplication extends Application {
         showSplash();
         new AnimationTimer() {
             @Override public void handle(long now) {
+                sound.updateMusic(state, activeGate != null
+                    && activeGate.getTrialNumber() == questionBank.getTrialCount());
                 if (state == GameState.WORLD || state == GameState.MENU) updateWorld();
                 for (Gate gate : gates) gate.tick(now);
                 if (now - lastCursorToggle > 550_000_000L) {
@@ -270,6 +280,11 @@ public final class GameApplication extends Application {
             this::exit);
         configureHud();
         logicalRoot.getChildren().setAll(menu, terminalHeader, expHud);
+    }
+
+    @Override
+    public void stop() {
+        sound.stop();
     }
 
     private void exit() {
@@ -492,6 +507,8 @@ public final class GameApplication extends Application {
     private void startTrial(Gate gate) {
         if (gate == null || gate.isCompleted()) return;
         activeGate = gate;
+        lastSpokenQuestionId = -1;
+        sound.play(SoundManager.Effect.GATE);
         kernel.setLayoutX(gate.getX() + Constants.TILE_SIZE * 2);
         state = GameState.TRIAL_CONFIRM;
         Label message = text("KERNEL:\n\"You've reached Trial " + gate.getTrialNumber()
@@ -508,6 +525,10 @@ public final class GameApplication extends Application {
 
     private void showQuestion() {
         Question question = trial.getCurrentQuestion();
+        if (question.getId() != lastSpokenQuestionId) {
+            sound.play(SoundManager.Effect.DIALOGUE);
+            lastSpokenQuestionId = question.getId();
+        }
         Pane overlay = new Pane();
         Label questionText = new Label("KERNEL\n" + question.getQuestionText());
         questionText.setWrapText(true);
@@ -570,6 +591,7 @@ public final class GameApplication extends Application {
         Question question = trial.getCurrentQuestion();
         if (copyUsed && selectedAdvice != null) answer = selectedAdvice.getChoice();
         boolean correct = trial.answerWithSave(answer, saveArmed);
+        sound.play(correct ? SoundManager.Effect.CORRECT : SoundManager.Effect.INCORRECT);
         boolean saveProtectedThisAnswer = saveArmed;
         saveArmed = false;
         if (correct) unlockedQuestionIds.add(question.getId());
@@ -601,6 +623,7 @@ public final class GameApplication extends Application {
             VBox box = new VBox(15, prompt, back); box.setAlignment(Pos.TOP_CENTER); box.setLayoutY(20);
             logicalRoot.getChildren().setAll(viewport, box); return;
         }
+        sound.play(SoundManager.Effect.HELPER);
         selectedAdvice = new HelperAdvisor(kind).advise(trial.getCurrentQuestion());
         Label advice = speechBubble(kind.name() + "\n" + selectedAdvice.getMessage() + "\nConfidence: " + selectedAdvice.getConfidence() + "%", 18, 390);
         Button back = new Button("BACK TO QUESTION"); back.setOnAction(e -> showQuestion());
@@ -622,6 +645,10 @@ public final class GameApplication extends Application {
         state = GameState.RESULT;
         int requiredExp = requiredExpForTrial(activeGate.getTrialNumber());
         boolean passed = trial.isComplete() && totalExp >= requiredExp;
+        if (!passed) sound.play(SoundManager.Effect.FAILURE);
+        else if (activeGate.getTrialNumber() != questionBank.getTrialCount()) {
+            sound.play(SoundManager.Effect.COMPLETE);
+        }
         if (passed) {
             activeGate.setCompleted(true);
             player.setCheckpoint(activeGate.getLeftEdge() + 25);
@@ -690,6 +717,16 @@ public final class GameApplication extends Application {
 
     private void onKeyPressed(KeyEvent event) {
         KeyCode key = event.getCode();
+        if (key == KeyCode.F7) {
+            if (!muteKeyHeld) {
+                muteKeyHeld = true;
+                sound.setMuted(!sound.isMuted());
+                refreshHud();
+                saveProgress();
+            }
+            event.consume();
+            return;
+        }
         if (state == GameState.LOADING) {
             // Any key leaves the splash, but only once the hold has elapsed.
             if (splashReady) showMenu();
@@ -728,6 +765,7 @@ public final class GameApplication extends Application {
 
     private void onKeyReleased(KeyEvent event) {
         KeyCode key = event.getCode();
+        if (key == KeyCode.F7) muteKeyHeld = false;
         if (key == KeyCode.A || key == KeyCode.LEFT) player.setLeft(false);
         if (key == KeyCode.D || key == KeyCode.RIGHT) player.setRight(false);
     }
@@ -767,6 +805,7 @@ public final class GameApplication extends Application {
         Properties saved = new Properties();
         try (InputStream input = Files.newInputStream(savePath)) {
             saved.load(input);
+            sound.setMuted(Boolean.parseBoolean(saved.getProperty("audioMuted", "false")));
             totalExp = Math.max(0, Math.min(maximumExp(), Integer.parseInt(saved.getProperty("totalExp", "0"))));
             String unlocked = saved.getProperty("unlockedQuestionIds", "");
             for (String value : unlocked.split(",")) {
@@ -795,6 +834,7 @@ public final class GameApplication extends Application {
     /** Writes score, completed gates, and unlocked question IDs to a per-user save file. */
     private void saveProgress() {
         Properties saved = new Properties();
+        saved.setProperty("audioMuted", Boolean.toString(sound.isMuted()));
         saved.setProperty("totalExp", Integer.toString(totalExp));
         saved.setProperty("unlockedQuestionIds", unlockedQuestionIds.stream().sorted()
             .map(String::valueOf).collect(java.util.stream.Collectors.joining(",")));
@@ -880,7 +920,8 @@ public final class GameApplication extends Application {
         for (Gate gate : gates) {
             if (!gate.isCompleted()) { current = gate.getTrialNumber(); break; }
         }
-        expHud.setText("EXP " + totalExp + " / " + maximum + "  [" + bar + "]");
+        expHud.setText("EXP " + totalExp + " / " + maximum + "  [" + bar + "]"
+            + (sound.isMuted() ? "   SOUND OFF [F7]" : "   SOUND ON [F7]"));
         trialHud.setText(current == questionBank.getTrialCount() ? "CORE TRIAL" : "TRIAL " + current);
     }
 

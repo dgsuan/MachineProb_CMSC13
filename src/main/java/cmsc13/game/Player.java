@@ -40,6 +40,11 @@ public final class Player {
     private int animationFrame;
     private long lastAnimationUpdate;
     private boolean facingRight = true;
+    private Runnable onJump = () -> { };
+    private Runnable onFall = () -> { };
+
+    public void setOnJump(Runnable action) { onJump = action; }
+    public void setOnFall(Runnable action) { onFall = action; }
 
     public Player() {
         sprite.setFitWidth(SPRITE_SIZE);
@@ -86,7 +91,10 @@ public final class Player {
             left = false;
             right = false;
         }
-        if (y > Constants.FALL_LIMIT) respawnAtCheckpoint();
+        if (y > Constants.FALL_LIMIT) {
+            onFall.run();
+            respawnAtCheckpoint();
+        }
         updateAnimation();
         draw();
     }
@@ -116,7 +124,13 @@ public final class Player {
         return false;
     }
 
-    public void jump() { if (onGround) { velocityY = Constants.JUMP_VELOCITY; onGround = false; } }
+    public void jump() {
+        if (onGround) {
+            velocityY = Constants.JUMP_VELOCITY;
+            onGround = false;
+            onJump.run();
+        }
+    }
     public void hitLeaf() {
         velocityY = Math.min(velocityY, -8.0);
         x += facingRight ? -10 : 10;

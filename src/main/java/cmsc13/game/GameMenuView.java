@@ -49,7 +49,7 @@ final class GameMenuView {
     /** Creates the illustrated controls/help screen. */
     Node howToPlay(Runnable onBack) {
         Label heading = heading("HOW TO PLAY");
-        Label controls = new Label("MOVE\nA / D or ← / →\n\nJUMP\nSPACE\n\nTRIAL GATES\nWalk close to a gate, then press E.\nAnswer questions to earn EXP and unlock the next gate.\n\nPITFALLS\nA fall sends you back to your last checkpoint.");
+        Label controls = new Label("MOVE\nA / D or ← / →\n\nJUMP / SOUND\nSPACE to jump / F7 to mute or unmute\n\nTRIAL GATES\nWalk close to a gate, then press E.\nAnswer questions to earn EXP and unlock the next gate.\n\nPITFALLS\nA fall sends you back to your last checkpoint.");
         controls.setWrapText(true);
         controls.setStyle("-fx-font-family: 'Consolas'; -fx-font-size: 17; -fx-text-fill: #e4eff4; -fx-text-alignment: center; -fx-line-spacing: 5;");
         VBox card = new VBox(22, heading, controls, button("BACK TO MENU", onBack));

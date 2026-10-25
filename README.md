@@ -26,10 +26,10 @@ From the project folder, run:
 mvn clean javafx:run
 ```
 
-To compile and run the automated checks without opening the game window:
+To compile without opening the game window:
 
 ```powershell
-mvn clean test
+mvn clean compile
 ```
 
 ## Controls
@@ -42,6 +42,7 @@ mvn clean test
 | `E` | Enter Trial 1 when near the gate |
 | `Enter` | Return to the map after a trial result |
 | `Esc` | Return to the main menu from the world |
+| `F7` | Mute/unmute music and sound effects (remembered between launches) |
 
 Quiz answers and menu options use clickable JavaFX buttons.
 
@@ -89,8 +90,20 @@ Each JSON object contains `id`, `type`, `topic`, `questionText`, `choices`,
   Topic names must match the course topics listed in `QuestionBank`.
 
 Loading checks for missing fields, invalid answers, duplicate IDs, and invalid
-question data before the game uses the bank. Run `mvn test` after editing.
+question data before the game uses the bank.
 
 The file is bundled into the game by Maven. Restart after editing it during
 development; rebuild the packaged game to distribute updated questions.
 No Java question arrays need to be edited.
+
+## Sound and music
+
+The game includes 10 original electronic effects and five background themes,
+following the proposal's sound mapping: splash, menu, exploration, core, and
+victory. Answers, helpers, gates, trial results, buttons, jumps, and pitfall
+respawns have distinct feedback. Music fades between themes and plays more
+quietly during questions. Press F7 to toggle all audio.
+
+Assets are in `src/resources/Audio`; its README documents the event mapping.
+`SoundManager.java` controls playback and cleanup. Regenerate the original
+assets with `python tools/generate_audio.py` (no extra Python packages needed).
