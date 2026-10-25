@@ -56,12 +56,41 @@ src/main/java/cmsc13/game/
 - Gate.java                Proximity-based Trial 1 gate
 - Trial.java               Question progress and EXP evaluation
 - Question.java            Reusable question data model
-- QuestionManager.java     Five sample Topic 1 questions
+- QuestionBank.java        Loads and validates questions from JSON
 - QuestionType.java        Future theory/programming classification
 ```
 
 ## Expanding the game later
 
-To add Trial 2, add a second `Gate`, store its questions in `QuestionManager`, and create a `Trial` from that question list. Player movement, the world viewport, and the quiz UI can remain the same.
+Edit question content in `src/resources/questions.json`. The existing `QuestionBank` selects questions by trial ID for the game and review screens.
 
 The player and gate currently use JavaFX shapes. Replace the visual nodes in `Player` and `Gate` with images or sprites later without changing the trial logic.
+
+## Editing the question bank
+
+Question content lives in `src/resources/questions.json`. Java loads this file
+once when the game creates its `QuestionBank`; the trial and review screens use
+the resulting `Question` objects.
+
+Each JSON object contains `id`, `type`, `topic`, `questionText`, `choices`,
+`correctAnswerIndex`, `explanation`, `difficulty`, `trialId`, `progType`, and
+`progLang`. Match those names exactly.
+
+- Use unique positive IDs and types `THEORY` or `PROGRAMMING`.
+- Supply four non-empty choices. Answer indexes start at zero: A = 0, B = 1,
+  C = 2, D = 3. If you reorder choices, update the answer index.
+- Keep difficulty between 1 and 5 and trial IDs between 1 and 8.
+- Programming questions need `progType` (for example, `Type A`) and
+  `progLang` (for example, `Java`). Theory questions use `null` for these.
+- In strings, write line breaks as `\n` and embedded double quotes as `\"`.
+  JSON does not allow comments or trailing commas.
+- The existing course checks require 145 questions: 70 theory and 75
+  programming, including 10 theory questions in each of Trials 1 through 7.
+  Topic names must match the course topics listed in `QuestionBank`.
+
+Loading checks for missing fields, invalid answers, duplicate IDs, and invalid
+question data before the game uses the bank. Run `mvn test` after editing.
+
+The file is bundled into the game by Maven. Restart after editing it during
+development; rebuild the packaged game to distribute updated questions.
+No Java question arrays need to be edited.
