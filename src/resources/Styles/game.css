@@ -1,8 +1,8 @@
-.root, .label, .button, .list-cell, .text-area, .text-field, .check-box, .radio-button {
+.my-custom-alert, .root, .label, .button, .list-cell, .text-area, .text-field, .check-box, .radio-button {
     -fx-font-family: "Consolas";
 }
 
-.button {
+.my-custom-alert .button, .button {
     -fx-background-color: transparent;
     -fx-background-image: url("/Buttons/btn_idle.png");
     -fx-background-repeat: no-repeat;
@@ -16,16 +16,16 @@
     -fx-cursor: hand;
 }
 
-.button:hover, .button:focused {
+.my-custom-alert .button:hover, .my-custom-alert .button:focused, .button:hover, .button:focused {
     -fx-background-image: url("/Buttons/btn_hover.png");
 }
 
-.button:pressed {
+.my-custom-alert .button:pressed, .button:pressed {
     -fx-background-image: url("/Buttons/btn_pressed.png");
     -fx-translate-y: 1;
 }
 
-.button:disabled {
+.my-custom-alert .button:disabled, .button:disabled {
     -fx-opacity: 0.58;
     -fx-cursor: default;
 }

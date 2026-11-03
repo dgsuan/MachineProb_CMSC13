@@ -1,0 +1,2612 @@
+[
+  {
+    "id": 1,
+    "type": "THEORY",
+    "topic": "Introduction to Programming Paradigms",
+    "questionText": "What is a programming paradigm?",
+    "choices": [
+      "A debugging tool",
+      "A style and approach to programming",
+      "A specific language",
+      "An operating system"
+    ],
+    "correctAnswerIndex": 1,
+    "explanation": "A paradigm is a fundamental style of programming.",
+    "difficulty": 2,
+    "trialId": 1,
+    "progType": null,
+    "progLang": null
+  },
+  {
+    "id": 2,
+    "type": "THEORY",
+    "topic": "Introduction to Programming Paradigms",
+    "questionText": "Which of the following is NOT a standard programming paradigm?",
+    "choices": [
+      "Procedural",
+      "Functional",
+      "Alphabetical",
+      "Object-Oriented"
+    ],
+    "correctAnswerIndex": 2,
+    "explanation": "Alphabetical is not a programming paradigm.",
+    "difficulty": 2,
+    "trialId": 1,
+    "progType": null,
+    "progLang": null
+  },
+  {
+    "id": 3,
+    "type": "THEORY",
+    "topic": "Introduction to Programming Paradigms",
+    "questionText": "What does imperative programming focus on?",
+    "choices": [
+      "What the result should be",
+      "How to achieve the result step-by-step",
+      "Mathematical functions",
+      "Object interactions"
+    ],
+    "correctAnswerIndex": 1,
+    "explanation": "Imperative focuses on the exact steps.",
+    "difficulty": 2,
+    "trialId": 1,
+    "progType": null,
+    "progLang": null
+  },
+  {
+    "id": 4,
+    "type": "THEORY",
+    "topic": "Introduction to Programming Paradigms",
+    "questionText": "What does declarative programming focus on?",
+    "choices": [
+      "How to execute loops",
+      "Hardware memory",
+      "What the desired outcome is",
+      "Mutable state"
+    ],
+    "correctAnswerIndex": 2,
+    "explanation": "Declarative describes the outcome, not the steps.",
+    "difficulty": 2,
+    "trialId": 1,
+    "progType": null,
+    "progLang": null
+  },
+  {
+    "id": 5,
+    "type": "THEORY",
+    "topic": "Introduction to Programming Paradigms",
+    "questionText": "Which paradigm treats computation as the evaluation of mathematical functions?",
+    "choices": [
+      "Functional",
+      "Event-Driven",
+      "Procedural",
+      "Object-Oriented"
+    ],
+    "correctAnswerIndex": 0,
+    "explanation": "Functional programming is based on math functions.",
+    "difficulty": 2,
+    "trialId": 1,
+    "progType": null,
+    "progLang": null
+  },
+  {
+    "id": 6,
+    "type": "THEORY",
+    "topic": "Introduction to Programming Paradigms",
+    "questionText": "Which paradigm relies on triggers like user clicks?",
+    "choices": [
+      "Declarative",
+      "Functional",
+      "Event-Driven",
+      "Procedural"
+    ],
+    "correctAnswerIndex": 2,
+    "explanation": "Event-driven reacts to events.",
+    "difficulty": 2,
+    "trialId": 1,
+    "progType": null,
+    "progLang": null
+  },
+  {
+    "id": 7,
+    "type": "THEORY",
+    "topic": "Introduction to Programming Paradigms",
+    "questionText": "What is the main benefit of multi-paradigm languages?",
+    "choices": [
+      "They are immune to bugs",
+      "They use the right tool for different problems",
+      "They run faster",
+      "They don't need compilers"
+    ],
+    "correctAnswerIndex": 1,
+    "explanation": "Different paradigms solve different problems better.",
+    "difficulty": 2,
+    "trialId": 1,
+    "progType": null,
+    "progLang": null
+  },
+  {
+    "id": 8,
+    "type": "THEORY",
+    "topic": "Introduction to Programming Paradigms",
+    "questionText": "Which of the following is an imperative paradigm?",
+    "choices": [
+      "SQL",
+      "Functional",
+      "Procedural",
+      "HTML"
+    ],
+    "correctAnswerIndex": 2,
+    "explanation": "Procedural is a type of imperative programming.",
+    "difficulty": 2,
+    "trialId": 1,
+    "progType": null,
+    "progLang": null
+  },
+  {
+    "id": 9,
+    "type": "THEORY",
+    "topic": "Introduction to Programming Paradigms",
+    "questionText": "What encapsulates data and behavior together?",
+    "choices": [
+      "A pure function",
+      "A procedure",
+      "An object",
+      "A declarative query"
+    ],
+    "correctAnswerIndex": 2,
+    "explanation": "Objects group state and behavior.",
+    "difficulty": 2,
+    "trialId": 1,
+    "progType": null,
+    "progLang": null
+  },
+  {
+    "id": 10,
+    "type": "THEORY",
+    "topic": "Introduction to Programming Paradigms",
+    "questionText": "Why is state change a concern in programming paradigms?",
+    "choices": [
+      "It makes code run too fast",
+      "It can cause side effects and bugs",
+      "It requires more RAM",
+      "It is never allowed"
+    ],
+    "correctAnswerIndex": 1,
+    "explanation": "Managing mutable state is a key difference between paradigms.",
+    "difficulty": 2,
+    "trialId": 1,
+    "progType": null,
+    "progLang": null
+  },
+  {
+    "id": 11,
+    "type": "PROGRAMMING",
+    "topic": "Introduction to Programming Paradigms",
+    "questionText": "Given:\nint a = 5;\nint b = 3;\nprintf(\"%d\", a + b * 2);",
+    "choices": [
+      "11",
+      "16",
+      "10",
+      "8"
+    ],
+    "correctAnswerIndex": 0,
+    "explanation": "Standard order of operations.",
+    "difficulty": 3,
+    "trialId": 1,
+    "progType": "Type A",
+    "progLang": "C"
+  },
+  {
+    "id": 12,
+    "type": "PROGRAMMING",
+    "topic": "Introduction to Programming Paradigms",
+    "questionText": "Given:\nSystem.out.println(10 / 2 + 5);",
+    "choices": [
+      "15",
+      "10",
+      "5",
+      "Error"
+    ],
+    "correctAnswerIndex": 1,
+    "explanation": "Division before addition.",
+    "difficulty": 3,
+    "trialId": 1,
+    "progType": "Type A",
+    "progLang": "Java"
+  },
+  {
+    "id": 13,
+    "type": "PROGRAMMING",
+    "topic": "Introduction to Programming Paradigms",
+    "questionText": "Output: 20",
+    "choices": [
+      "int x = 5;\nprintf(\"%d\", x + 10);",
+      "int x = 10;\nprintf(\"%d\", x * 2);",
+      "int x = 20;\nprintf(\"%d\", x / 2);",
+      "int x = 2;\nprintf(\"%d\", x + 2);"
+    ],
+    "correctAnswerIndex": 1,
+    "explanation": "10 * 2 = 20.",
+    "difficulty": 3,
+    "trialId": 1,
+    "progType": "Type B",
+    "progLang": "C"
+  },
+  {
+    "id": 14,
+    "type": "PROGRAMMING",
+    "topic": "Introduction to Programming Paradigms",
+    "questionText": "Given:\nint x = 5;\n____;\nSystem.out.println(x); \n// Expected: 6",
+    "choices": [
+      "x + 1;",
+      "x++;",
+      "x = 5;",
+      "x--;"
+    ],
+    "correctAnswerIndex": 1,
+    "explanation": "x++ increments the value by 1.",
+    "difficulty": 3,
+    "trialId": 1,
+    "progType": "Type C",
+    "progLang": "Java"
+  },
+  {
+    "id": 15,
+    "type": "THEORY",
+    "topic": "Procedural Programming",
+    "questionText": "What is the fundamental building block of procedural programming?",
+    "choices": [
+      "Classes",
+      "Procedures/Functions",
+      "Events",
+      "Queries"
+    ],
+    "correctAnswerIndex": 1,
+    "explanation": "Procedural logic is grouped into procedures.",
+    "difficulty": 2,
+    "trialId": 2,
+    "progType": null,
+    "progLang": null
+  },
+  {
+    "id": 16,
+    "type": "THEORY",
+    "topic": "Procedural Programming",
+    "questionText": "Which of these relies heavily on mutable state?",
+    "choices": [
+      "Functional",
+      "Procedural",
+      "Declarative",
+      "Logic"
+    ],
+    "correctAnswerIndex": 1,
+    "explanation": "Procedural uses mutable variables.",
+    "difficulty": 2,
+    "trialId": 2,
+    "progType": null,
+    "progLang": null
+  },
+  {
+    "id": 17,
+    "type": "THEORY",
+    "topic": "Procedural Programming",
+    "questionText": "What is 'scope' in procedural programming?",
+    "choices": [
+      "The speed of the program",
+      "Where a variable is accessible",
+      "The size of the file",
+      "The number of functions"
+    ],
+    "correctAnswerIndex": 1,
+    "explanation": "Scope defines variable visibility.",
+    "difficulty": 2,
+    "trialId": 2,
+    "progType": null,
+    "progLang": null
+  },
+  {
+    "id": 18,
+    "type": "THEORY",
+    "topic": "Procedural Programming",
+    "questionText": "Which language is classically procedural?",
+    "choices": [
+      "C",
+      "Haskell",
+      "SQL",
+      "Prolog"
+    ],
+    "correctAnswerIndex": 0,
+    "explanation": "C is the classic procedural language.",
+    "difficulty": 2,
+    "trialId": 2,
+    "progType": null,
+    "progLang": null
+  },
+  {
+    "id": 19,
+    "type": "THEORY",
+    "topic": "Procedural Programming",
+    "questionText": "What does 'pass by value' mean?",
+    "choices": [
+      "Passing the memory address",
+      "Passing a copy of the data",
+      "Passing a function",
+      "Passing a class"
+    ],
+    "correctAnswerIndex": 1,
+    "explanation": "Pass by value copies the variable.",
+    "difficulty": 2,
+    "trialId": 2,
+    "progType": null,
+    "progLang": null
+  },
+  {
+    "id": 20,
+    "type": "THEORY",
+    "topic": "Procedural Programming",
+    "questionText": "What is structured programming?",
+    "choices": [
+      "Programming with classes",
+      "Avoiding goto by using loops and conditionals",
+      "Using only global variables",
+      "Using CSS"
+    ],
+    "correctAnswerIndex": 1,
+    "explanation": "Structured programming relies on blocks like if/while.",
+    "difficulty": 2,
+    "trialId": 2,
+    "progType": null,
+    "progLang": null
+  },
+  {
+    "id": 21,
+    "type": "THEORY",
+    "topic": "Procedural Programming",
+    "questionText": "What is a major risk of global variables?",
+    "choices": [
+      "They are too slow",
+      "They cannot hold integers",
+      "Any procedure can modify them, causing bugs",
+      "They require too much memory"
+    ],
+    "correctAnswerIndex": 2,
+    "explanation": "Global state is hard to track.",
+    "difficulty": 2,
+    "trialId": 2,
+    "progType": null,
+    "progLang": null
+  },
+  {
+    "id": 22,
+    "type": "THEORY",
+    "topic": "Procedural Programming",
+    "questionText": "How do procedures communicate primarily?",
+    "choices": [
+      "Through global state only",
+      "Through parameters and return values",
+      "Through inheritance",
+      "Through HTML"
+    ],
+    "correctAnswerIndex": 1,
+    "explanation": "Parameters pass data in, return values pass it out.",
+    "difficulty": 2,
+    "trialId": 2,
+    "progType": null,
+    "progLang": null
+  },
+  {
+    "id": 23,
+    "type": "THEORY",
+    "topic": "Procedural Programming",
+    "questionText": "What is a side effect in procedural code?",
+    "choices": [
+      "A comment",
+      "A syntax error",
+      "Modifying state outside the local environment",
+      "A loop"
+    ],
+    "correctAnswerIndex": 2,
+    "explanation": "Functions modifying external state cause side effects.",
+    "difficulty": 2,
+    "trialId": 2,
+    "progType": null,
+    "progLang": null
+  },
+  {
+    "id": 24,
+    "type": "THEORY",
+    "topic": "Procedural Programming",
+    "questionText": "Which control structure is NOT typical of procedural code?",
+    "choices": [
+      "If-else",
+      "While loop",
+      "Switch",
+      "Pattern matching monads"
+    ],
+    "correctAnswerIndex": 3,
+    "explanation": "Monads are functional concepts.",
+    "difficulty": 2,
+    "trialId": 2,
+    "progType": null,
+    "progLang": null
+  },
+  {
+    "id": 25,
+    "type": "PROGRAMMING",
+    "topic": "Procedural Programming",
+    "questionText": "Given:\nint i = 0;\nwhile (i < 3) {\n    printf(\"%d\", i);\n    i++;\n}",
+    "choices": [
+      "0123",
+      "012",
+      "123",
+      "12"
+    ],
+    "correctAnswerIndex": 1,
+    "explanation": "Loop stops when i is 3.",
+    "difficulty": 3,
+    "trialId": 2,
+    "progType": "Type A",
+    "progLang": "C"
+  },
+  {
+    "id": 26,
+    "type": "PROGRAMMING",
+    "topic": "Procedural Programming",
+    "questionText": "Given:\npublic void run() {\n    System.out.print(\"A\");\n}",
+    "choices": [
+      "Error",
+      "Nothing",
+      "A",
+      "run"
+    ],
+    "correctAnswerIndex": 2,
+    "explanation": "Prints A.",
+    "difficulty": 3,
+    "trialId": 2,
+    "progType": "Type A",
+    "progLang": "Java"
+  },
+  {
+    "id": 27,
+    "type": "PROGRAMMING",
+    "topic": "Procedural Programming",
+    "questionText": "Output: Hello",
+    "choices": [
+      "printf(\"Hello\");",
+      "printf(Hello);",
+      "print Hello;",
+      "echo Hello;"
+    ],
+    "correctAnswerIndex": 0,
+    "explanation": "Standard C print syntax.",
+    "difficulty": 3,
+    "trialId": 2,
+    "progType": "Type B",
+    "progLang": "C"
+  },
+  {
+    "id": 28,
+    "type": "PROGRAMMING",
+    "topic": "Procedural Programming",
+    "questionText": "Output: 5.0",
+    "choices": [
+      "System.out.print(5);",
+      "System.out.print(5.0);",
+      "System.out.print(\"5\");",
+      "All of the above output visually 5.0"
+    ],
+    "correctAnswerIndex": 1,
+    "explanation": "Prints float/double literal.",
+    "difficulty": 3,
+    "trialId": 2,
+    "progType": "Type B",
+    "progLang": "Java"
+  },
+  {
+    "id": 29,
+    "type": "PROGRAMMING",
+    "topic": "Procedural Programming",
+    "questionText": "Given:\nx = 10\n____\nprint(x)  \n# Expected: 20",
+    "choices": [
+      "x + 10",
+      "x * 2",
+      "x = x * 2",
+      "x = 20 + x"
+    ],
+    "correctAnswerIndex": 2,
+    "explanation": "Reassigns x to 20.",
+    "difficulty": 3,
+    "trialId": 2,
+    "progType": "Type C",
+    "progLang": "Python"
+  },
+  {
+    "id": 30,
+    "type": "THEORY",
+    "topic": "Functional Programming",
+    "questionText": "What is a pure function?",
+    "choices": [
+      "A function with no variables",
+      "A function that always returns the same output for same input with no side effects",
+      "A function that runs fast",
+      "A void function"
+    ],
+    "correctAnswerIndex": 1,
+    "explanation": "Deterministic and side-effect free.",
+    "difficulty": 2,
+    "trialId": 3,
+    "progType": null,
+    "progLang": null
+  },
+  {
+    "id": 31,
+    "type": "THEORY",
+    "topic": "Functional Programming",
+    "questionText": "What is immutability?",
+    "choices": [
+      "Variables can only be integers",
+      "Once created, data cannot be modified",
+      "Code cannot be refactored",
+      "Functions cannot be deleted"
+    ],
+    "correctAnswerIndex": 1,
+    "explanation": "Immutability means unchanging state.",
+    "difficulty": 2,
+    "trialId": 3,
+    "progType": null,
+    "progLang": null
+  },
+  {
+    "id": 32,
+    "type": "THEORY",
+    "topic": "Functional Programming",
+    "questionText": "What is a higher-order function?",
+    "choices": [
+      "A very complex function",
+      "A function that takes or returns another function",
+      "A function at the top of the file",
+      "A recursive function"
+    ],
+    "correctAnswerIndex": 1,
+    "explanation": "Functions treating functions as data.",
+    "difficulty": 2,
+    "trialId": 3,
+    "progType": null,
+    "progLang": null
+  },
+  {
+    "id": 33,
+    "type": "THEORY",
+    "topic": "Functional Programming",
+    "questionText": "How are loops typically replaced in pure functional languages?",
+    "choices": [
+      "With GOTO",
+      "With recursion",
+      "With classes",
+      "With events"
+    ],
+    "correctAnswerIndex": 1,
+    "explanation": "Recursion replaces iterative loops.",
+    "difficulty": 2,
+    "trialId": 3,
+    "progType": null,
+    "progLang": null
+  },
+  {
+    "id": 34,
+    "type": "THEORY",
+    "topic": "Functional Programming",
+    "questionText": "What does the 'map' function generally do?",
+    "choices": [
+      "Finds a location",
+      "Filters out bad data",
+      "Applies a function to every item in a list",
+      "Reduces a list to a single value"
+    ],
+    "correctAnswerIndex": 2,
+    "explanation": "Map transforms every element.",
+    "difficulty": 2,
+    "trialId": 3,
+    "progType": null,
+    "progLang": null
+  },
+  {
+    "id": 35,
+    "type": "THEORY",
+    "topic": "Functional Programming",
+    "questionText": "What does 'reduce' or 'fold' do?",
+    "choices": [
+      "Deletes elements",
+      "Combines all elements into a single accumulated value",
+      "Sorts the list",
+      "Copies the list"
+    ],
+    "correctAnswerIndex": 1,
+    "explanation": "Accumulates elements.",
+    "difficulty": 2,
+    "trialId": 3,
+    "progType": null,
+    "progLang": null
+  },
+  {
+    "id": 36,
+    "type": "THEORY",
+    "topic": "Functional Programming",
+    "questionText": "What does 'filter' do?",
+    "choices": [
+      "Removes items that don't match a condition",
+      "Changes the data type of items",
+      "Sorts items alphabetically",
+      "Adds new items"
+    ],
+    "correctAnswerIndex": 0,
+    "explanation": "Keeps only matching items.",
+    "difficulty": 2,
+    "trialId": 3,
+    "progType": null,
+    "progLang": null
+  },
+  {
+    "id": 37,
+    "type": "THEORY",
+    "topic": "Functional Programming",
+    "questionText": "First-class functions mean:",
+    "choices": [
+      "Functions get priority CPU time",
+      "Functions can be assigned to variables and passed around",
+      "Functions are error-free",
+      "Functions are public"
+    ],
+    "correctAnswerIndex": 1,
+    "explanation": "Functions act like regular values.",
+    "difficulty": 2,
+    "trialId": 3,
+    "progType": null,
+    "progLang": null
+  },
+  {
+    "id": 38,
+    "type": "THEORY",
+    "topic": "Functional Programming",
+    "questionText": "Which is a benefit of functional programming?",
+    "choices": [
+      "Easier parallel processing due to immutability",
+      "Less memory usage",
+      "Faster single-thread execution",
+      "Easier UI design"
+    ],
+    "correctAnswerIndex": 0,
+    "explanation": "No shared mutable state makes threading safe.",
+    "difficulty": 2,
+    "trialId": 3,
+    "progType": null,
+    "progLang": null
+  },
+  {
+    "id": 39,
+    "type": "THEORY",
+    "topic": "Functional Programming",
+    "questionText": "Which language heavily influenced functional concepts?",
+    "choices": [
+      "C",
+      "Assembly",
+      "LISP",
+      "HTML"
+    ],
+    "correctAnswerIndex": 2,
+    "explanation": "LISP is an early functional language.",
+    "difficulty": 2,
+    "trialId": 3,
+    "progType": null,
+    "progLang": null
+  },
+  {
+    "id": 40,
+    "type": "PROGRAMMING",
+    "topic": "Functional Programming",
+    "questionText": "Given:\nint f(int x) {\n    return x * x;\n}\n\nprintf(\"%d\", f(3));",
+    "choices": [
+      "6",
+      "9",
+      "3",
+      "Error"
+    ],
+    "correctAnswerIndex": 1,
+    "explanation": "3 squared is 9.",
+    "difficulty": 3,
+    "trialId": 3,
+    "progType": "Type A",
+    "progLang": "C"
+  },
+  {
+    "id": 41,
+    "type": "PROGRAMMING",
+    "topic": "Functional Programming",
+    "questionText": "Given:\ndef f(x):\n    return x + 1\n\n____\n# Expected: 6",
+    "choices": [
+      "print(f(5))",
+      "print(f(6))",
+      "print(5)",
+      "print(x + 1)"
+    ],
+    "correctAnswerIndex": 0,
+    "explanation": "Calls f(5) to get 6.",
+    "difficulty": 3,
+    "trialId": 3,
+    "progType": "Type C",
+    "progLang": "Python"
+  },
+  {
+    "id": 42,
+    "type": "PROGRAMMING",
+    "topic": "Functional Programming",
+    "questionText": "Given:\nSystem.out.print(Math.max(2, 5));",
+    "choices": [
+      "2",
+      "5",
+      "7",
+      "Error"
+    ],
+    "correctAnswerIndex": 1,
+    "explanation": "Returns the maximum value.",
+    "difficulty": 3,
+    "trialId": 3,
+    "progType": "Type A",
+    "progLang": "Java"
+  },
+  {
+    "id": 43,
+    "type": "PROGRAMMING",
+    "topic": "Functional Programming",
+    "questionText": "Output: 10",
+    "choices": [
+      "System.out.print(5 + 4);",
+      "System.out.print(2 * 5);",
+      "System.out.print(10 / 2);",
+      "System.out.print(10 % 2);"
+    ],
+    "correctAnswerIndex": 1,
+    "explanation": "2 * 5 equals 10.",
+    "difficulty": 3,
+    "trialId": 3,
+    "progType": "Type B",
+    "progLang": "Java"
+  },
+  {
+    "id": 44,
+    "type": "PROGRAMMING",
+    "topic": "Functional Programming",
+    "questionText": "Output: 120 (Factorial of 5)",
+    "choices": [
+      "def fact(n):\n    return n",
+      "def fact(n):\n    return 120",
+      "def fact(n):\n    return 1 if n == 0 else n * fact(n - 1)\n\nprint(fact(5))",
+      "print(5 * 4)"
+    ],
+    "correctAnswerIndex": 2,
+    "explanation": "Standard recursive factorial.",
+    "difficulty": 3,
+    "trialId": 3,
+    "progType": "Type B",
+    "progLang": "Python"
+  },
+  {
+    "id": 45,
+    "type": "PROGRAMMING",
+    "topic": "Functional Programming",
+    "questionText": "Given:\nconst add = (a, b) => a + b;\nconsole.log(____); \n// Expected 7",
+    "choices": [
+      "add(3, 4)",
+      "add(7)",
+      "add(3)(4)",
+      "add[3, 4]"
+    ],
+    "correctAnswerIndex": 0,
+    "explanation": "Standard arrow function call.",
+    "difficulty": 3,
+    "trialId": 3,
+    "progType": "Type C",
+    "progLang": "JavaScript"
+  },
+  {
+    "id": 46,
+    "type": "THEORY",
+    "topic": "Object-Oriented Programming",
+    "questionText": "What is a Class?",
+    "choices": [
+      "A variable",
+      "A blueprint for creating objects",
+      "A database table",
+      "A function"
+    ],
+    "correctAnswerIndex": 1,
+    "explanation": "Classes define structure and behavior.",
+    "difficulty": 2,
+    "trialId": 4,
+    "progType": null,
+    "progLang": null
+  },
+  {
+    "id": 47,
+    "type": "THEORY",
+    "topic": "Object-Oriented Programming",
+    "questionText": "What is Encapsulation?",
+    "choices": [
+      "Hiding internal state and requiring all interaction to be performed through an object's methods",
+      "Inheriting from a parent",
+      "Multiple methods with same name",
+      "Writing long functions"
+    ],
+    "correctAnswerIndex": 0,
+    "explanation": "Bundles data and restricts access.",
+    "difficulty": 2,
+    "trialId": 4,
+    "progType": null,
+    "progLang": null
+  },
+  {
+    "id": 48,
+    "type": "THEORY",
+    "topic": "Object-Oriented Programming",
+    "questionText": "What is Inheritance?",
+    "choices": [
+      "When a class copies code from a file",
+      "When a subclass derives properties and behaviors from a superclass",
+      "When objects share memory",
+      "When a method calls itself"
+    ],
+    "correctAnswerIndex": 1,
+    "explanation": "Allows class hierarchies.",
+    "difficulty": 2,
+    "trialId": 4,
+    "progType": null,
+    "progLang": null
+  },
+  {
+    "id": 49,
+    "type": "THEORY",
+    "topic": "Object-Oriented Programming",
+    "questionText": "What is Polymorphism?",
+    "choices": [
+      "Objects being immutable",
+      "A single interface representing different underlying forms",
+      "Hiding data",
+      "Multiple inheritance"
+    ],
+    "correctAnswerIndex": 1,
+    "explanation": "Means 'many forms'.",
+    "difficulty": 2,
+    "trialId": 4,
+    "progType": null,
+    "progLang": null
+  },
+  {
+    "id": 50,
+    "type": "THEORY",
+    "topic": "Object-Oriented Programming",
+    "questionText": "What does Abstraction do?",
+    "choices": [
+      "Hides complex implementation details, showing only essential features",
+      "Makes code run slower",
+      "Prevents class creation",
+      "Requires all variables to be public"
+    ],
+    "correctAnswerIndex": 0,
+    "explanation": "Reduces complexity.",
+    "difficulty": 2,
+    "trialId": 4,
+    "progType": null,
+    "progLang": null
+  },
+  {
+    "id": 51,
+    "type": "THEORY",
+    "topic": "Object-Oriented Programming",
+    "questionText": "What is a Constructor?",
+    "choices": [
+      "A method to delete an object",
+      "A special method used to initialize an object",
+      "A type of variable",
+      "An interface"
+    ],
+    "correctAnswerIndex": 1,
+    "explanation": "Sets up initial state.",
+    "difficulty": 2,
+    "trialId": 4,
+    "progType": null,
+    "progLang": null
+  },
+  {
+    "id": 52,
+    "type": "THEORY",
+    "topic": "Object-Oriented Programming",
+    "questionText": "What is an instance?",
+    "choices": [
+      "A function call",
+      "A specific realization of any object created from a class",
+      "A class definition",
+      "A global variable"
+    ],
+    "correctAnswerIndex": 1,
+    "explanation": "An object built from a class.",
+    "difficulty": 2,
+    "trialId": 4,
+    "progType": null,
+    "progLang": null
+  },
+  {
+    "id": 53,
+    "type": "THEORY",
+    "topic": "Object-Oriented Programming",
+    "questionText": "What does the 'this' or 'self' keyword refer to?",
+    "choices": [
+      "The parent class",
+      "The current instance of the object",
+      "A global scope",
+      "A static method"
+    ],
+    "correctAnswerIndex": 1,
+    "explanation": "Refers to the current object context.",
+    "difficulty": 2,
+    "trialId": 4,
+    "progType": null,
+    "progLang": null
+  },
+  {
+    "id": 54,
+    "type": "THEORY",
+    "topic": "Object-Oriented Programming",
+    "questionText": "What is method overriding?",
+    "choices": [
+      "Having two methods with different parameters",
+      "A subclass providing a specific implementation of a parent's method",
+      "Deleting a method",
+      "Calling a method repeatedly"
+    ],
+    "correctAnswerIndex": 1,
+    "explanation": "Replaces inherited behavior.",
+    "difficulty": 2,
+    "trialId": 4,
+    "progType": null,
+    "progLang": null
+  },
+  {
+    "id": 55,
+    "type": "THEORY",
+    "topic": "Object-Oriented Programming",
+    "questionText": "Which is an access modifier?",
+    "choices": [
+      "Static",
+      "Void",
+      "Private",
+      "Class"
+    ],
+    "correctAnswerIndex": 2,
+    "explanation": "Private controls visibility.",
+    "difficulty": 2,
+    "trialId": 4,
+    "progType": null,
+    "progLang": null
+  },
+  {
+    "id": 56,
+    "type": "PROGRAMMING",
+    "topic": "Object-Oriented Programming",
+    "questionText": "Given:\nstruct Point {\n    int x;\n    int y;\n};\n\nstruct Point p = {1, 2};\nprintf(\"%d\", p.y);",
+    "choices": [
+      "1",
+      "2",
+      "3",
+      "Error"
+    ],
+    "correctAnswerIndex": 1,
+    "explanation": "Accesses the y member.",
+    "difficulty": 3,
+    "trialId": 4,
+    "progType": "Type A",
+    "progLang": "C"
+  },
+  {
+    "id": 57,
+    "type": "PROGRAMMING",
+    "topic": "Object-Oriented Programming",
+    "questionText": "Given:\nstruct A {\n    int val;\n};\n\nstruct A obj;\n____; \n// Expected val=5",
+    "choices": [
+      "obj.val = 5;",
+      "obj->val = 5;",
+      "A.val = 5;",
+      "val = 5;"
+    ],
+    "correctAnswerIndex": 0,
+    "explanation": "Dot operator sets member.",
+    "difficulty": 3,
+    "trialId": 4,
+    "progType": "Type C",
+    "progLang": "C"
+  },
+  {
+    "id": 58,
+    "type": "PROGRAMMING",
+    "topic": "Object-Oriented Programming",
+    "questionText": "Given:\nclass A {\n    int x = 1;\n}\n\nA obj = new A();\nSystem.out.print(obj.x);",
+    "choices": [
+      "0",
+      "1",
+      "Null",
+      "Error"
+    ],
+    "correctAnswerIndex": 1,
+    "explanation": "Accesses object field.",
+    "difficulty": 3,
+    "trialId": 4,
+    "progType": "Type A",
+    "progLang": "Java"
+  },
+  {
+    "id": 59,
+    "type": "PROGRAMMING",
+    "topic": "Object-Oriented Programming",
+    "questionText": "Given:\nclass Dog extends Animal {\n    ____\n} \n// Expected to override speak()",
+    "choices": [
+      "public void speak() { }",
+      "override speak()",
+      "function speak()",
+      "Dog speak()"
+    ],
+    "correctAnswerIndex": 0,
+    "explanation": "Standard method signature overrides parent.",
+    "difficulty": 3,
+    "trialId": 4,
+    "progType": "Type C",
+    "progLang": "Java"
+  },
+  {
+    "id": 60,
+    "type": "PROGRAMMING",
+    "topic": "Object-Oriented Programming",
+    "questionText": "Output: Meow",
+    "choices": [
+      "class Cat:\n    def sound():\n        return 'Meow'\n\nprint(Cat().sound())",
+      "class Cat:\n    def sound(self):\n        return 'Meow'\n\nprint(Cat().sound())",
+      "print('Bark')",
+      "class Cat:\n    sound = 'Meow'"
+    ],
+    "correctAnswerIndex": 1,
+    "explanation": "Self is required in Python methods.",
+    "difficulty": 3,
+    "trialId": 4,
+    "progType": "Type B",
+    "progLang": "Python"
+  },
+  {
+    "id": 61,
+    "type": "PROGRAMMING",
+    "topic": "Object-Oriented Programming",
+    "questionText": "Output: True",
+    "choices": [
+      "print(isinstance(\"hi\", str))",
+      "print(type(\"hi\") == int)",
+      "print(\"hi\".isString())",
+      "print(typeof(\"hi\"))"
+    ],
+    "correctAnswerIndex": 0,
+    "explanation": "Checks if string is instance of str.",
+    "difficulty": 3,
+    "trialId": 4,
+    "progType": "Type B",
+    "progLang": "Python"
+  },
+  {
+    "id": 62,
+    "type": "PROGRAMMING",
+    "topic": "Object-Oriented Programming",
+    "questionText": "Given:\nclass Car {\n    constructor(make) {\n        ____\n    }\n} \n// Expected to set make",
+    "choices": [
+      "this.make = make;",
+      "Car.make = make;",
+      "make = make;",
+      "self.make = make;"
+    ],
+    "correctAnswerIndex": 0,
+    "explanation": "JS uses 'this' to set properties.",
+    "difficulty": 3,
+    "trialId": 4,
+    "progType": "Type C",
+    "progLang": "JavaScript"
+  },
+  {
+    "id": 63,
+    "type": "THEORY",
+    "topic": "Imperative vs Declarative Programming",
+    "questionText": "Imperative programming is analogous to:",
+    "choices": [
+      "A restaurant order",
+      "A step-by-step recipe",
+      "A mathematical equation",
+      "A spreadsheet"
+    ],
+    "correctAnswerIndex": 1,
+    "explanation": "Imperative gives explicit instructions.",
+    "difficulty": 2,
+    "trialId": 5,
+    "progType": null,
+    "progLang": null
+  },
+  {
+    "id": 64,
+    "type": "THEORY",
+    "topic": "Imperative vs Declarative Programming",
+    "questionText": "Declarative programming is analogous to:",
+    "choices": [
+      "A step-by-step recipe",
+      "Ordering a meal at a restaurant",
+      "Building an engine",
+      "Driving a manual car"
+    ],
+    "correctAnswerIndex": 1,
+    "explanation": "You ask for what you want, not how to make it.",
+    "difficulty": 2,
+    "trialId": 5,
+    "progType": null,
+    "progLang": null
+  },
+  {
+    "id": 65,
+    "type": "THEORY",
+    "topic": "Imperative vs Declarative Programming",
+    "questionText": "Which language is primarily declarative?",
+    "choices": [
+      "C",
+      "Java",
+      "SQL",
+      "Python"
+    ],
+    "correctAnswerIndex": 2,
+    "explanation": "SQL queries what data you want.",
+    "difficulty": 2,
+    "trialId": 5,
+    "progType": null,
+    "progLang": null
+  },
+  {
+    "id": 66,
+    "type": "THEORY",
+    "topic": "Imperative vs Declarative Programming",
+    "questionText": "HTML is considered declarative because:",
+    "choices": [
+      "It uses tags",
+      "It describes structure without control flow steps",
+      "It runs in a browser",
+      "It is old"
+    ],
+    "correctAnswerIndex": 1,
+    "explanation": "HTML dictates structure, not rendering steps.",
+    "difficulty": 2,
+    "trialId": 5,
+    "progType": null,
+    "progLang": null
+  },
+  {
+    "id": 67,
+    "type": "THEORY",
+    "topic": "Imperative vs Declarative Programming",
+    "questionText": "State changes are prominent in:",
+    "choices": [
+      "Declarative",
+      "Functional",
+      "Imperative",
+      "Logic"
+    ],
+    "correctAnswerIndex": 2,
+    "explanation": "Imperative mutates state constantly.",
+    "difficulty": 2,
+    "trialId": 5,
+    "progType": null,
+    "progLang": null
+  },
+  {
+    "id": 68,
+    "type": "THEORY",
+    "topic": "Imperative vs Declarative Programming",
+    "questionText": "Regex (Regular Expressions) represents which paradigm?",
+    "choices": [
+      "Declarative",
+      "Imperative",
+      "Object-Oriented",
+      "Procedural"
+    ],
+    "correctAnswerIndex": 0,
+    "explanation": "Regex describes a pattern to match.",
+    "difficulty": 2,
+    "trialId": 5,
+    "progType": null,
+    "progLang": null
+  },
+  {
+    "id": 69,
+    "type": "THEORY",
+    "topic": "Imperative vs Declarative Programming",
+    "questionText": "Which code is more readable for complex filtering?",
+    "choices": [
+      "Nested for-loops",
+      "Declarative filter/map chains",
+      "While loops with break statements",
+      "Goto statements"
+    ],
+    "correctAnswerIndex": 1,
+    "explanation": "Declarative shows intent clearly.",
+    "difficulty": 2,
+    "trialId": 5,
+    "progType": null,
+    "progLang": null
+  },
+  {
+    "id": 70,
+    "type": "THEORY",
+    "topic": "Imperative vs Declarative Programming",
+    "questionText": "CSS describes:",
+    "choices": [
+      "How to compute pixels",
+      "What the visual styling should be",
+      "How to download fonts",
+      "When to execute scripts"
+    ],
+    "correctAnswerIndex": 1,
+    "explanation": "CSS is declarative styling.",
+    "difficulty": 2,
+    "trialId": 5,
+    "progType": null,
+    "progLang": null
+  },
+  {
+    "id": 71,
+    "type": "THEORY",
+    "topic": "Imperative vs Declarative Programming",
+    "questionText": "Under the hood, declarative languages are executed by:",
+    "choices": [
+      "Magic",
+      "Declarative hardware",
+      "Imperative implementations",
+      "Object-oriented databases"
+    ],
+    "correctAnswerIndex": 2,
+    "explanation": "Compilers/interpreters execute them imperatively.",
+    "difficulty": 2,
+    "trialId": 5,
+    "progType": null,
+    "progLang": null
+  },
+  {
+    "id": 72,
+    "type": "THEORY",
+    "topic": "Imperative vs Declarative Programming",
+    "questionText": "Which paradigm focuses on the 'How'?",
+    "choices": [
+      "Logic",
+      "Functional",
+      "Declarative",
+      "Imperative"
+    ],
+    "correctAnswerIndex": 3,
+    "explanation": "Imperative focuses on the steps (how).",
+    "difficulty": 2,
+    "trialId": 5,
+    "progType": null,
+    "progLang": null
+  },
+  {
+    "id": 73,
+    "type": "PROGRAMMING",
+    "topic": "Imperative vs Declarative Programming",
+    "questionText": "Given:\nint a = 0;\nfor (int i = 0; i < 3; i++) {\n    a += i;\n}\nprintf(\"%d\", a);",
+    "choices": [
+      "0",
+      "3",
+      "6",
+      "2"
+    ],
+    "correctAnswerIndex": 1,
+    "explanation": "0 + 1 + 2 = 3.",
+    "difficulty": 3,
+    "trialId": 5,
+    "progType": "Type A",
+    "progLang": "C"
+  },
+  {
+    "id": 74,
+    "type": "PROGRAMMING",
+    "topic": "Imperative vs Declarative Programming",
+    "questionText": "Output: 10",
+    "choices": [
+      "int x = 5;\nx *= 2;\nprintf(\"%d\", x);",
+      "printf(\"10\");",
+      "int x = 10;\nprintf(\"%d\", x);",
+      "All of the above"
+    ],
+    "correctAnswerIndex": 3,
+    "explanation": "All snippets print 10.",
+    "difficulty": 3,
+    "trialId": 5,
+    "progType": "Type B",
+    "progLang": "C"
+  },
+  {
+    "id": 75,
+    "type": "PROGRAMMING",
+    "topic": "Imperative vs Declarative Programming",
+    "questionText": "Given:\nint x = 1;\n____; \n// Expected: x is now 5",
+    "choices": [
+      "x += 4;",
+      "x = 5;",
+      "Both A and B",
+      "x == 5;"
+    ],
+    "correctAnswerIndex": 2,
+    "explanation": "Both assignment and compound assignment work.",
+    "difficulty": 3,
+    "trialId": 5,
+    "progType": "Type C",
+    "progLang": "C"
+  },
+  {
+    "id": 76,
+    "type": "PROGRAMMING",
+    "topic": "Imperative vs Declarative Programming",
+    "questionText": "Given:\nList<String> l = Arrays.asList(\"A\", \"B\");\nSystem.out.print(l.size());",
+    "choices": [
+      "1",
+      "2",
+      "3",
+      "Error"
+    ],
+    "correctAnswerIndex": 1,
+    "explanation": "List has 2 elements.",
+    "difficulty": 3,
+    "trialId": 5,
+    "progType": "Type A",
+    "progLang": "Java"
+  },
+  {
+    "id": 77,
+    "type": "PROGRAMMING",
+    "topic": "Imperative vs Declarative Programming",
+    "questionText": "Output: HELLO",
+    "choices": [
+      "System.out.print(\"hello\".toUpperCase());",
+      "System.out.print(\"HELLO\");",
+      "Both A and B",
+      "System.out.print(toUpper(\"hello\"));"
+    ],
+    "correctAnswerIndex": 2,
+    "explanation": "Both produce HELLO.",
+    "difficulty": 3,
+    "trialId": 5,
+    "progType": "Type B",
+    "progLang": "Java"
+  },
+  {
+    "id": 78,
+    "type": "PROGRAMMING",
+    "topic": "Imperative vs Declarative Programming",
+    "questionText": "Given:\nprint([x * 2 for x in [1, 2, 3]])",
+    "choices": [
+      "[1, 2, 3]",
+      "[2, 4, 6]",
+      "Error",
+      "[x*2]"
+    ],
+    "correctAnswerIndex": 1,
+    "explanation": "List comprehension is declarative.",
+    "difficulty": 3,
+    "trialId": 5,
+    "progType": "Type A",
+    "progLang": "Python"
+  },
+  {
+    "id": 79,
+    "type": "PROGRAMMING",
+    "topic": "Imperative vs Declarative Programming",
+    "questionText": "Given:\nevens = list(filter(lambda x: ____, [1, 2, 3, 4])) \n# Expected: [2, 4]",
+    "choices": [
+      "x % 2 == 0",
+      "x == 2",
+      "x / 2",
+      "x > 0"
+    ],
+    "correctAnswerIndex": 0,
+    "explanation": "Filters for even numbers.",
+    "difficulty": 3,
+    "trialId": 5,
+    "progType": "Type C",
+    "progLang": "Python"
+  },
+  {
+    "id": 80,
+    "type": "PROGRAMMING",
+    "topic": "Imperative vs Declarative Programming",
+    "questionText": "Output: 3",
+    "choices": [
+      "console.log([1, 2, 3].length);",
+      "console.log(3);",
+      "Both A and B",
+      "console.log(length([1, 2, 3]));"
+    ],
+    "correctAnswerIndex": 2,
+    "explanation": "Both output 3.",
+    "difficulty": 3,
+    "trialId": 5,
+    "progType": "Type B",
+    "progLang": "JavaScript"
+  },
+  {
+    "id": 81,
+    "type": "THEORY",
+    "topic": "Event-Driven Programming",
+    "questionText": "What triggers execution in event-driven programming?",
+    "choices": [
+      "A while loop",
+      "Sequential lines of code",
+      "Events like user actions or sensor outputs",
+      "A compiler"
+    ],
+    "correctAnswerIndex": 2,
+    "explanation": "Events drive the flow.",
+    "difficulty": 2,
+    "trialId": 6,
+    "progType": null,
+    "progLang": null
+  },
+  {
+    "id": 82,
+    "type": "THEORY",
+    "topic": "Event-Driven Programming",
+    "questionText": "What is a callback function?",
+    "choices": [
+      "A function that calls itself",
+      "A function passed as an argument to be executed when an event occurs",
+      "A function that returns an error",
+      "A procedural sequence"
+    ],
+    "correctAnswerIndex": 1,
+    "explanation": "Callbacks handle events.",
+    "difficulty": 2,
+    "trialId": 6,
+    "progType": null,
+    "progLang": null
+  },
+  {
+    "id": 83,
+    "type": "THEORY",
+    "topic": "Event-Driven Programming",
+    "questionText": "What is an event listener?",
+    "choices": [
+      "Hardware that listens to audio",
+      "An object/function that waits for an event to occur",
+      "A database table",
+      "A CSS style"
+    ],
+    "correctAnswerIndex": 1,
+    "explanation": "Listeners wait for triggers.",
+    "difficulty": 2,
+    "trialId": 6,
+    "progType": null,
+    "progLang": null
+  },
+  {
+    "id": 84,
+    "type": "THEORY",
+    "topic": "Event-Driven Programming",
+    "questionText": "What is the 'Event Loop'?",
+    "choices": [
+      "A bug causing infinite loops",
+      "A programming mechanism that waits for and dispatches events",
+      "A loop that creates events",
+      "A testing framework"
+    ],
+    "correctAnswerIndex": 1,
+    "explanation": "The core of async environments like Node.js.",
+    "difficulty": 2,
+    "trialId": 6,
+    "progType": null,
+    "progLang": null
+  },
+  {
+    "id": 85,
+    "type": "THEORY",
+    "topic": "Event-Driven Programming",
+    "questionText": "Event-driven architecture is most common in:",
+    "choices": [
+      "Batch processing",
+      "Scientific computing",
+      "GUI applications",
+      "Compilers"
+    ],
+    "correctAnswerIndex": 2,
+    "explanation": "GUIs rely on user interactions.",
+    "difficulty": 2,
+    "trialId": 6,
+    "progType": null,
+    "progLang": null
+  },
+  {
+    "id": 86,
+    "type": "THEORY",
+    "topic": "Event-Driven Programming",
+    "questionText": "What is synchronous execution?",
+    "choices": [
+      "Code running at the same time",
+      "Code executing one line at a time, blocking until finished",
+      "Code reacting to events",
+      "Code in multiple files"
+    ],
+    "correctAnswerIndex": 1,
+    "explanation": "Synchronous code blocks.",
+    "difficulty": 2,
+    "trialId": 6,
+    "progType": null,
+    "progLang": null
+  },
+  {
+    "id": 87,
+    "type": "THEORY",
+    "topic": "Event-Driven Programming",
+    "questionText": "What is asynchronous execution?",
+    "choices": [
+      "Code that executes without blocking the main thread",
+      "Code that fails randomly",
+      "Code that runs on a timer",
+      "Code that cannot be debugged"
+    ],
+    "correctAnswerIndex": 0,
+    "explanation": "Async code allows other tasks to run.",
+    "difficulty": 2,
+    "trialId": 6,
+    "progType": null,
+    "progLang": null
+  },
+  {
+    "id": 88,
+    "type": "THEORY",
+    "topic": "Event-Driven Programming",
+    "questionText": "What is a 'Promise' (e.g., in JS)?",
+    "choices": [
+      "A comment in code",
+      "An object representing eventual completion or failure of an async operation",
+      "A variable type",
+      "A strict mode feature"
+    ],
+    "correctAnswerIndex": 1,
+    "explanation": "Promises handle async results.",
+    "difficulty": 2,
+    "trialId": 6,
+    "progType": null,
+    "progLang": null
+  },
+  {
+    "id": 89,
+    "type": "THEORY",
+    "topic": "Event-Driven Programming",
+    "questionText": "How are events decoupled from their triggers?",
+    "choices": [
+      "Through inheritance",
+      "By using event emitters and pub/sub patterns",
+      "By removing variables",
+      "Through recursion"
+    ],
+    "correctAnswerIndex": 1,
+    "explanation": "Pub/sub separates concern.",
+    "difficulty": 2,
+    "trialId": 6,
+    "progType": null,
+    "progLang": null
+  },
+  {
+    "id": 90,
+    "type": "THEORY",
+    "topic": "Event-Driven Programming",
+    "questionText": "What is 'Callback Hell'?",
+    "choices": [
+      "A compiler error",
+      "Deeply nested callbacks making code hard to read",
+      "When no events fire",
+      "A syntax error"
+    ],
+    "correctAnswerIndex": 1,
+    "explanation": "Nesting makes async code complex.",
+    "difficulty": 2,
+    "trialId": 6,
+    "progType": null,
+    "progLang": null
+  },
+  {
+    "id": 91,
+    "type": "PROGRAMMING",
+    "topic": "Event-Driven Programming",
+    "questionText": "Given:\nvoid cb() {\n    printf(\"Hi\");\n}\n\nvoid run(void (*f)()) {\n    f();\n}\n\nint main() {\n    run(cb);\n}",
+    "choices": [
+      "Error",
+      "cb",
+      "Hi",
+      "Nothing"
+    ],
+    "correctAnswerIndex": 2,
+    "explanation": "Function pointer acts as a callback.",
+    "difficulty": 3,
+    "trialId": 6,
+    "progType": "Type A",
+    "progLang": "C"
+  },
+  {
+    "id": 92,
+    "type": "PROGRAMMING",
+    "topic": "Event-Driven Programming",
+    "questionText": "Output: 1",
+    "choices": [
+      "printf(\"%d\", 1);",
+      "int x = 1;\nprintf(\"%d\", x);",
+      "Both A and B",
+      "printf(1);"
+    ],
+    "correctAnswerIndex": 2,
+    "explanation": "Both print 1 properly.",
+    "difficulty": 3,
+    "trialId": 6,
+    "progType": "Type B",
+    "progLang": "C"
+  },
+  {
+    "id": 93,
+    "type": "PROGRAMMING",
+    "topic": "Event-Driven Programming",
+    "questionText": "Given:\nint arr[] = {1, 2};\nprintf(\"%d\", ____); \n// Expected: 2",
+    "choices": [
+      "arr[1]",
+      "arr[2]",
+      "arr[0]",
+      "arr"
+    ],
+    "correctAnswerIndex": 0,
+    "explanation": "Array index 1 holds 2.",
+    "difficulty": 3,
+    "trialId": 6,
+    "progType": "Type C",
+    "progLang": "C"
+  },
+  {
+    "id": 94,
+    "type": "PROGRAMMING",
+    "topic": "Event-Driven Programming",
+    "questionText": "Given:\nJButton b = new JButton();\nb.addActionListener(e -> System.out.print(\"C\")); \n// If clicked?",
+    "choices": [
+      "Error",
+      "C",
+      "Nothing",
+      "b"
+    ],
+    "correctAnswerIndex": 1,
+    "explanation": "Lambda acts as event handler.",
+    "difficulty": 3,
+    "trialId": 6,
+    "progType": "Type A",
+    "progLang": "Java"
+  },
+  {
+    "id": 95,
+    "type": "PROGRAMMING",
+    "topic": "Event-Driven Programming",
+    "questionText": "Output: Event",
+    "choices": [
+      "System.out.print(\"Event\");",
+      "String s = \"Event\";\nSystem.out.print(s);",
+      "Both A and B",
+      "print(\"Event\");"
+    ],
+    "correctAnswerIndex": 2,
+    "explanation": "Both print Event.",
+    "difficulty": 3,
+    "trialId": 6,
+    "progType": "Type B",
+    "progLang": "Java"
+  },
+  {
+    "id": 96,
+    "type": "PROGRAMMING",
+    "topic": "Event-Driven Programming",
+    "questionText": "Given:\nThread t = new Thread(() -> ____);\nt.start(); \n// Expected to print Run",
+    "choices": [
+      "System.out.print(\"Run\")",
+      "print(\"Run\")",
+      "return \"Run\"",
+      "\"Run\""
+    ],
+    "correctAnswerIndex": 0,
+    "explanation": "Runnable body executes.",
+    "difficulty": 3,
+    "trialId": 6,
+    "progType": "Type C",
+    "progLang": "Java"
+  },
+  {
+    "id": 97,
+    "type": "PROGRAMMING",
+    "topic": "Event-Driven Programming",
+    "questionText": "Given:\ndef handler():\n    print(\"Click\")\n\nbutton_click = handler\nbutton_click()",
+    "choices": [
+      "Click",
+      "handler",
+      "Error",
+      "Nothing"
+    ],
+    "correctAnswerIndex": 0,
+    "explanation": "Function assigned and called.",
+    "difficulty": 3,
+    "trialId": 6,
+    "progType": "Type A",
+    "progLang": "Python"
+  },
+  {
+    "id": 98,
+    "type": "PROGRAMMING",
+    "topic": "Event-Driven Programming",
+    "questionText": "Output: Async",
+    "choices": [
+      "print(\"Async\")",
+      "import asyncio\nprint(\"Async\")",
+      "Both A and B",
+      "console.log(\"Async\")"
+    ],
+    "correctAnswerIndex": 2,
+    "explanation": "Both print Async.",
+    "difficulty": 3,
+    "trialId": 6,
+    "progType": "Type B",
+    "progLang": "Python"
+  },
+  {
+    "id": 99,
+    "type": "PROGRAMMING",
+    "topic": "Event-Driven Programming",
+    "questionText": "Given:\ndocument.getElementById('btn').addEventListener('click', ____); \n// Expected to log 'Hi'",
+    "choices": [
+      "() => console.log('Hi')",
+      "console.log('Hi')",
+      "print('Hi')",
+      "function() {}"
+    ],
+    "correctAnswerIndex": 0,
+    "explanation": "Arrow function acts as callback.",
+    "difficulty": 3,
+    "trialId": 6,
+    "progType": "Type C",
+    "progLang": "JavaScript"
+  },
+  {
+    "id": 100,
+    "type": "THEORY",
+    "topic": "Component Mappings between Programming Paradigms",
+    "questionText": "In OOP, behavior is represented by methods. What is the equivalent in functional programming?",
+    "choices": [
+      "Global variables",
+      "Pure functions",
+      "Classes",
+      "Interfaces"
+    ],
+    "correctAnswerIndex": 1,
+    "explanation": "Pure functions define behavior without object state.",
+    "difficulty": 2,
+    "trialId": 7,
+    "progType": null,
+    "progLang": null
+  },
+  {
+    "id": 101,
+    "type": "THEORY",
+    "topic": "Component Mappings between Programming Paradigms",
+    "questionText": "What maps to a 'loop' in pure functional programming?",
+    "choices": [
+      "If-statements",
+      "Classes",
+      "Recursion and higher-order functions",
+      "Switch cases"
+    ],
+    "correctAnswerIndex": 2,
+    "explanation": "Functional uses map/reduce or recursion instead of loops.",
+    "difficulty": 2,
+    "trialId": 7,
+    "progType": null,
+    "progLang": null
+  },
+  {
+    "id": 102,
+    "type": "THEORY",
+    "topic": "Component Mappings between Programming Paradigms",
+    "questionText": "An object (state + behavior) can be simulated in functional programming using:",
+    "choices": [
+      "Closures",
+      "Integers",
+      "While loops",
+      "Strings"
+    ],
+    "correctAnswerIndex": 0,
+    "explanation": "Closures capture state and expose functions.",
+    "difficulty": 2,
+    "trialId": 7,
+    "progType": null,
+    "progLang": null
+  },
+  {
+    "id": 103,
+    "type": "THEORY",
+    "topic": "Component Mappings between Programming Paradigms",
+    "questionText": "A procedural 'struct' or 'record' maps to what in OOP?",
+    "choices": [
+      "A method",
+      "An event",
+      "A class with attributes (and possibly methods)",
+      "A generic type"
+    ],
+    "correctAnswerIndex": 2,
+    "explanation": "Structs hold data; classes hold data + behavior.",
+    "difficulty": 2,
+    "trialId": 7,
+    "progType": null,
+    "progLang": null
+  },
+  {
+    "id": 104,
+    "type": "THEORY",
+    "topic": "Component Mappings between Programming Paradigms",
+    "questionText": "What is the declarative equivalent of imperative array iteration?",
+    "choices": [
+      "SQL queries or Array.map/filter",
+      "Nested loops",
+      "Pointers",
+      "Global arrays"
+    ],
+    "correctAnswerIndex": 0,
+    "explanation": "Declarative uses higher-order collection methods.",
+    "difficulty": 2,
+    "trialId": 7,
+    "progType": null,
+    "progLang": null
+  },
+  {
+    "id": 105,
+    "type": "THEORY",
+    "topic": "Component Mappings between Programming Paradigms",
+    "questionText": "In event-driven code, a callback maps to what OOP concept?",
+    "choices": [
+      "A primitive integer",
+      "An implementation of a Listener/Observer interface",
+      "A static property",
+      "A constructor"
+    ],
+    "correctAnswerIndex": 1,
+    "explanation": "Listeners handle callbacks in OOP.",
+    "difficulty": 2,
+    "trialId": 7,
+    "progType": null,
+    "progLang": null
+  },
+  {
+    "id": 106,
+    "type": "THEORY",
+    "topic": "Component Mappings between Programming Paradigms",
+    "questionText": "How does functional immutability map to OOP?",
+    "choices": [
+      "By making all fields public",
+      "By using final/readonly properties and returning new objects",
+      "By using void methods",
+      "By deleting classes"
+    ],
+    "correctAnswerIndex": 1,
+    "explanation": "Immutable objects represent functional state.",
+    "difficulty": 2,
+    "trialId": 7,
+    "progType": null,
+    "progLang": null
+  },
+  {
+    "id": 107,
+    "type": "THEORY",
+    "topic": "Component Mappings between Programming Paradigms",
+    "questionText": "Polymorphism in OOP (interfaces) maps to what in functional programming?",
+    "choices": [
+      "Variables",
+      "Loops",
+      "Higher-order functions or Type Classes",
+      "Null values"
+    ],
+    "correctAnswerIndex": 2,
+    "explanation": "Type classes/function passing provide polymorphism.",
+    "difficulty": 2,
+    "trialId": 7,
+    "progType": null,
+    "progLang": null
+  },
+  {
+    "id": 108,
+    "type": "THEORY",
+    "topic": "Component Mappings between Programming Paradigms",
+    "questionText": "Why do we map components between paradigms?",
+    "choices": [
+      "To prove one is better",
+      "To understand how to translate solutions across different architectural styles",
+      "To confuse developers",
+      "To slow down execution"
+    ],
+    "correctAnswerIndex": 1,
+    "explanation": "It helps translate concepts.",
+    "difficulty": 2,
+    "trialId": 7,
+    "progType": null,
+    "progLang": null
+  },
+  {
+    "id": 109,
+    "type": "THEORY",
+    "topic": "Component Mappings between Programming Paradigms",
+    "questionText": "A declarative SQL 'WHERE' clause maps to which functional concept?",
+    "choices": [
+      "map",
+      "reduce",
+      "filter",
+      "forEach"
+    ],
+    "correctAnswerIndex": 2,
+    "explanation": "Filter removes items that do not match, like WHERE.",
+    "difficulty": 2,
+    "trialId": 7,
+    "progType": null,
+    "progLang": null
+  },
+  {
+    "id": 110,
+    "type": "PROGRAMMING",
+    "topic": "Component Mappings between Programming Paradigms",
+    "questionText": "Given:\nint x = 10;\nint *p = &x;\nprintf(\"%d\", *p);",
+    "choices": [
+      "Address of x",
+      "10",
+      "Pointer error",
+      "0"
+    ],
+    "correctAnswerIndex": 1,
+    "explanation": "Dereferencing gets the value.",
+    "difficulty": 3,
+    "trialId": 7,
+    "progType": "Type A",
+    "progLang": "C"
+  },
+  {
+    "id": 111,
+    "type": "PROGRAMMING",
+    "topic": "Component Mappings between Programming Paradigms",
+    "questionText": "Given:\nchar c = 'A';\nprintf(\"%c\", c + 1);",
+    "choices": [
+      "A",
+      "B",
+      "65",
+      "66"
+    ],
+    "correctAnswerIndex": 1,
+    "explanation": "Character arithmetic advances to B.",
+    "difficulty": 3,
+    "trialId": 7,
+    "progType": "Type A",
+    "progLang": "C"
+  },
+  {
+    "id": 112,
+    "type": "PROGRAMMING",
+    "topic": "Component Mappings between Programming Paradigms",
+    "questionText": "Output: 5",
+    "choices": [
+      "printf(\"%d\", 5);",
+      "int x = 5;\nprintf(\"%d\", x);",
+      "Both A and B",
+      "printf(5);"
+    ],
+    "correctAnswerIndex": 2,
+    "explanation": "Both print 5 safely.",
+    "difficulty": 3,
+    "trialId": 7,
+    "progType": "Type B",
+    "progLang": "C"
+  },
+  {
+    "id": 113,
+    "type": "PROGRAMMING",
+    "topic": "Component Mappings between Programming Paradigms",
+    "questionText": "Given:\nint a = 2;\n____;\nprintf(\"%d\", a); \n// Expected: 4",
+    "choices": [
+      "a = a * 2",
+      "a += 2",
+      "Both A and B",
+      "a = 4"
+    ],
+    "correctAnswerIndex": 2,
+    "explanation": "Both double the value.",
+    "difficulty": 3,
+    "trialId": 7,
+    "progType": "Type C",
+    "progLang": "C"
+  },
+  {
+    "id": 114,
+    "type": "PROGRAMMING",
+    "topic": "Component Mappings between Programming Paradigms",
+    "questionText": "Given:\nString s = \"Hi\";\nSystem.out.print(s.length());",
+    "choices": [
+      "1",
+      "2",
+      "3",
+      "Error"
+    ],
+    "correctAnswerIndex": 1,
+    "explanation": "Length of 'Hi' is 2.",
+    "difficulty": 3,
+    "trialId": 7,
+    "progType": "Type A",
+    "progLang": "Java"
+  },
+  {
+    "id": 115,
+    "type": "PROGRAMMING",
+    "topic": "Component Mappings between Programming Paradigms",
+    "questionText": "Output: true",
+    "choices": [
+      "System.out.print(1 == 1);",
+      "System.out.print(\"a\".equals(\"a\"));",
+      "Both A and B",
+      "System.out.print(true);"
+    ],
+    "correctAnswerIndex": 2,
+    "explanation": "Both evaluate to true.",
+    "difficulty": 3,
+    "trialId": 7,
+    "progType": "Type B",
+    "progLang": "Java"
+  },
+  {
+    "id": 116,
+    "type": "PROGRAMMING",
+    "topic": "Component Mappings between Programming Paradigms",
+    "questionText": "Given:\nint[] a = {1, 2};\n____; // Expected a[0] to be 5",
+    "choices": [
+      "a[0] = 5;",
+      "a[1] = 5;",
+      "a.set(0, 5);",
+      "a[0] == 5;"
+    ],
+    "correctAnswerIndex": 0,
+    "explanation": "Array assignment.",
+    "difficulty": 3,
+    "trialId": 7,
+    "progType": "Type C",
+    "progLang": "Java"
+  },
+  {
+    "id": 117,
+    "type": "PROGRAMMING",
+    "topic": "Component Mappings between Programming Paradigms",
+    "questionText": "Given:\nprint(len([1, 2, 3]))",
+    "choices": [
+      "1",
+      "2",
+      "3",
+      "Error"
+    ],
+    "correctAnswerIndex": 2,
+    "explanation": "Length is 3.",
+    "difficulty": 3,
+    "trialId": 7,
+    "progType": "Type A",
+    "progLang": "Python"
+  },
+  {
+    "id": 118,
+    "type": "PROGRAMMING",
+    "topic": "Component Mappings between Programming Paradigms",
+    "questionText": "Output: dict",
+    "choices": [
+      "print(type({}))",
+      "print(type(dict()))",
+      "Both A and B",
+      "print({})"
+    ],
+    "correctAnswerIndex": 2,
+    "explanation": "Both are dictionary types.",
+    "difficulty": 3,
+    "trialId": 7,
+    "progType": "Type B",
+    "progLang": "Python"
+  },
+  {
+    "id": 119,
+    "type": "PROGRAMMING",
+    "topic": "Component Mappings between Programming Paradigms",
+    "questionText": "Output: NaN",
+    "choices": [
+      "console.log(parseInt('a'));",
+      "console.log(0/0);",
+      "Both A and B",
+      "console.log(NaN);"
+    ],
+    "correctAnswerIndex": 2,
+    "explanation": "Both produce Not-A-Number.",
+    "difficulty": 3,
+    "trialId": 7,
+    "progType": "Type B",
+    "progLang": "JavaScript"
+  },
+  {
+    "id": 120,
+    "type": "PROGRAMMING",
+    "topic": "Component Mappings between Programming Paradigms",
+    "questionText": "Given:\nlet x = 5;\n____;\nconsole.log(x); \n// Expected 10",
+    "choices": [
+      "x *= 2;",
+      "x = 10;",
+      "Both A and B",
+      "x == 10;"
+    ],
+    "correctAnswerIndex": 2,
+    "explanation": "Both assignments result in 10.",
+    "difficulty": 3,
+    "trialId": 7,
+    "progType": "Type C",
+    "progLang": "JavaScript"
+  },
+  {
+    "id": 121,
+    "type": "PROGRAMMING",
+    "topic": "Comprehensive Programming Mastery",
+    "questionText": "Given:\nprintf(\"%d\", 10 % 3);",
+    "choices": [
+      "0",
+      "1",
+      "3",
+      "10"
+    ],
+    "correctAnswerIndex": 1,
+    "explanation": "Modulo arithmetic.",
+    "difficulty": 3,
+    "trialId": 8,
+    "progType": "Type A",
+    "progLang": "C"
+  },
+  {
+    "id": 122,
+    "type": "PROGRAMMING",
+    "topic": "Comprehensive Programming Mastery",
+    "questionText": "Given:\nint a = 5, b = 2;\nprintf(\"%f\", (float)a / b);",
+    "choices": [
+      "2.0",
+      "2.5",
+      "2",
+      "Error"
+    ],
+    "correctAnswerIndex": 1,
+    "explanation": "Casting ensures float division.",
+    "difficulty": 3,
+    "trialId": 8,
+    "progType": "Type A",
+    "progLang": "C"
+  },
+  {
+    "id": 123,
+    "type": "PROGRAMMING",
+    "topic": "Comprehensive Programming Mastery",
+    "questionText": "Output: A",
+    "choices": [
+      "printf(\"%c\", 65);",
+      "printf(\"A\");",
+      "Both",
+      "None"
+    ],
+    "correctAnswerIndex": 2,
+    "explanation": "ASCII 65 is A.",
+    "difficulty": 3,
+    "trialId": 8,
+    "progType": "Type B",
+    "progLang": "C"
+  },
+  {
+    "id": 124,
+    "type": "PROGRAMMING",
+    "topic": "Comprehensive Programming Mastery",
+    "questionText": "Output: 15",
+    "choices": [
+      "printf(\"%d\", 10 + 5);",
+      "int x = 15;\nprintf(\"%d\", x);",
+      "Both",
+      "None"
+    ],
+    "correctAnswerIndex": 2,
+    "explanation": "Both output 15.",
+    "difficulty": 3,
+    "trialId": 8,
+    "progType": "Type B",
+    "progLang": "C"
+  },
+  {
+    "id": 125,
+    "type": "PROGRAMMING",
+    "topic": "Comprehensive Programming Mastery",
+    "questionText": "Given:\nchar str[] = \"Hi\";\n____; // Expected: change 'i' to 'a'",
+    "choices": [
+      "str[1] = 'a';",
+      "str[0] = 'a';",
+      "str = \"Ha\";",
+      "str[2] = 'a';"
+    ],
+    "correctAnswerIndex": 0,
+    "explanation": "Index 1 modifies the second character.",
+    "difficulty": 3,
+    "trialId": 8,
+    "progType": "Type C",
+    "progLang": "C"
+  },
+  {
+    "id": 126,
+    "type": "PROGRAMMING",
+    "topic": "Comprehensive Programming Mastery",
+    "questionText": "Given:\nint x = 10;\nif (____) {\n    printf(\"Yes\");\n} // Expected: Yes",
+    "choices": [
+      "x == 10",
+      "x > 5",
+      "Both",
+      "x < 5"
+    ],
+    "correctAnswerIndex": 2,
+    "explanation": "Both conditions are true.",
+    "difficulty": 3,
+    "trialId": 8,
+    "progType": "Type C",
+    "progLang": "C"
+  },
+  {
+    "id": 127,
+    "type": "PROGRAMMING",
+    "topic": "Comprehensive Programming Mastery",
+    "questionText": "Given:\nint i = 0;\ndo {\n    i++;\n} while (____); // Expected to loop until i becomes 2",
+    "choices": [
+      "i < 2",
+      "i < 1",
+      "i == 0",
+      "i > 5"
+    ],
+    "correctAnswerIndex": 0,
+    "explanation": "Loop continues while i<2.",
+    "difficulty": 3,
+    "trialId": 8,
+    "progType": "Type C",
+    "progLang": "C"
+  },
+  {
+    "id": 128,
+    "type": "PROGRAMMING",
+    "topic": "Comprehensive Programming Mastery",
+    "questionText": "Given:\nSystem.out.print(\"a\" + \"b\");",
+    "choices": [
+      "a b",
+      "ab",
+      "Error",
+      "a+b"
+    ],
+    "correctAnswerIndex": 1,
+    "explanation": "String concatenation.",
+    "difficulty": 3,
+    "trialId": 8,
+    "progType": "Type A",
+    "progLang": "Java"
+  },
+  {
+    "id": 129,
+    "type": "PROGRAMMING",
+    "topic": "Comprehensive Programming Mastery",
+    "questionText": "Given:\nSystem.out.print(Math.abs(-5));",
+    "choices": [
+      "-5",
+      "5",
+      "0",
+      "Error"
+    ],
+    "correctAnswerIndex": 1,
+    "explanation": "Absolute value.",
+    "difficulty": 3,
+    "trialId": 8,
+    "progType": "Type A",
+    "progLang": "Java"
+  },
+  {
+    "id": 130,
+    "type": "PROGRAMMING",
+    "topic": "Comprehensive Programming Mastery",
+    "questionText": "Given:\nString s = null;\nSystem.out.print(s);",
+    "choices": [
+      "null",
+      "Error",
+      "Nothing",
+      "s"
+    ],
+    "correctAnswerIndex": 0,
+    "explanation": "Prints the string 'null'.",
+    "difficulty": 3,
+    "trialId": 8,
+    "progType": "Type A",
+    "progLang": "Java"
+  },
+  {
+    "id": 131,
+    "type": "PROGRAMMING",
+    "topic": "Comprehensive Programming Mastery",
+    "questionText": "Output: 100",
+    "choices": [
+      "System.out.print(10 * 10);",
+      "System.out.print(\"100\");",
+      "Both",
+      "None"
+    ],
+    "correctAnswerIndex": 2,
+    "explanation": "Both output 100.",
+    "difficulty": 3,
+    "trialId": 8,
+    "progType": "Type B",
+    "progLang": "Java"
+  },
+  {
+    "id": 132,
+    "type": "PROGRAMMING",
+    "topic": "Comprehensive Programming Mastery",
+    "questionText": "Output: false",
+    "choices": [
+      "System.out.print(1 == 2);",
+      "System.out.print(!true);",
+      "Both",
+      "None"
+    ],
+    "correctAnswerIndex": 2,
+    "explanation": "Both evaluate to false.",
+    "difficulty": 3,
+    "trialId": 8,
+    "progType": "Type B",
+    "progLang": "Java"
+  },
+  {
+    "id": 133,
+    "type": "PROGRAMMING",
+    "topic": "Comprehensive Programming Mastery",
+    "questionText": "Output: 0",
+    "choices": [
+      "System.out.print(0);",
+      "System.out.print(1 % 1);",
+      "Both",
+      "None"
+    ],
+    "correctAnswerIndex": 2,
+    "explanation": "Both result in 0.",
+    "difficulty": 3,
+    "trialId": 8,
+    "progType": "Type B",
+    "progLang": "Java"
+  },
+  {
+    "id": 134,
+    "type": "PROGRAMMING",
+    "topic": "Comprehensive Programming Mastery",
+    "questionText": "Given:\nint x = 5;\n____;\nSystem.out.print(x); \n// Expected 4",
+    "choices": [
+      "x--;",
+      "x -= 1;",
+      "Both",
+      "x == 4;"
+    ],
+    "correctAnswerIndex": 2,
+    "explanation": "Both decrement x by 1.",
+    "difficulty": 3,
+    "trialId": 8,
+    "progType": "Type C",
+    "progLang": "Java"
+  },
+  {
+    "id": 135,
+    "type": "PROGRAMMING",
+    "topic": "Comprehensive Programming Mastery",
+    "questionText": "Given:\nString s = \"Hello\";\nchar c = ____; \n// Expected c to be 'e'",
+    "choices": [
+      "s.charAt(1);",
+      "s.charAt(0);",
+      "s[1];",
+      "s.indexOf('e');"
+    ],
+    "correctAnswerIndex": 0,
+    "explanation": "charAt(1) gets 'e'.",
+    "difficulty": 3,
+    "trialId": 8,
+    "progType": "Type C",
+    "progLang": "Java"
+  },
+  {
+    "id": 136,
+    "type": "PROGRAMMING",
+    "topic": "Comprehensive Programming Mastery",
+    "questionText": "Given:\nArrayList<Integer> list = new ArrayList<>();\n____; \n// Expected list to have 1 item",
+    "choices": [
+      "list.add(1);",
+      "list.push(1);",
+      "list.insert(1);",
+      "list[0] = 1;"
+    ],
+    "correctAnswerIndex": 0,
+    "explanation": "Java ArrayList uses add().",
+    "difficulty": 3,
+    "trialId": 8,
+    "progType": "Type C",
+    "progLang": "Java"
+  },
+  {
+    "id": 137,
+    "type": "PROGRAMMING",
+    "topic": "Comprehensive Programming Mastery",
+    "questionText": "Given:\nprint(\"ab\" * 3)",
+    "choices": [
+      "ababab",
+      "ab3",
+      "Error",
+      "ab ab ab"
+    ],
+    "correctAnswerIndex": 0,
+    "explanation": "String multiplication repeats.",
+    "difficulty": 3,
+    "trialId": 8,
+    "progType": "Type A",
+    "progLang": "Python"
+  },
+  {
+    "id": 138,
+    "type": "PROGRAMMING",
+    "topic": "Comprehensive Programming Mastery",
+    "questionText": "Output: 5",
+    "choices": [
+      "print(len(\"hello\"))",
+      "print(2 + 3)",
+      "Both",
+      "None"
+    ],
+    "correctAnswerIndex": 2,
+    "explanation": "Both output 5.",
+    "difficulty": 3,
+    "trialId": 8,
+    "progType": "Type B",
+    "progLang": "Python"
+  },
+  {
+    "id": 139,
+    "type": "PROGRAMMING",
+    "topic": "Comprehensive Programming Mastery",
+    "questionText": "Output: [1, 2]",
+    "choices": [
+      "print([1, 2])",
+      "print(list((1, 2)))",
+      "Both",
+      "None"
+    ],
+    "correctAnswerIndex": 2,
+    "explanation": "Both create lists.",
+    "difficulty": 3,
+    "trialId": 8,
+    "progType": "Type B",
+    "progLang": "Python"
+  },
+  {
+    "id": 140,
+    "type": "PROGRAMMING",
+    "topic": "Comprehensive Programming Mastery",
+    "questionText": "Given:\nx = [1, 2, 3]\n____\n\n# Expected x is [1, 2, 3, 4]",
+    "choices": [
+      "x.append(4)",
+      "x.add(4)",
+      "x.push(4)",
+      "x + 4"
+    ],
+    "correctAnswerIndex": 0,
+    "explanation": "Python lists use append().",
+    "difficulty": 3,
+    "trialId": 8,
+    "progType": "Type C",
+    "progLang": "Python"
+  },
+  {
+    "id": 141,
+    "type": "PROGRAMMING",
+    "topic": "Comprehensive Programming Mastery",
+    "questionText": "Given:\nd = {'a': 1}\n____\n\n# Expected d['a'] is 2",
+    "choices": [
+      "d['a'] = 2",
+      "d.a = 2",
+      "d(a) = 2",
+      "d['a'] == 2"
+    ],
+    "correctAnswerIndex": 0,
+    "explanation": "Dictionary assignment.",
+    "difficulty": 3,
+    "trialId": 8,
+    "progType": "Type C",
+    "progLang": "Python"
+  },
+  {
+    "id": 142,
+    "type": "PROGRAMMING",
+    "topic": "Comprehensive Programming Mastery",
+    "questionText": "Given:\nconsole.log(typeof \"123\");",
+    "choices": [
+      "number",
+      "string",
+      "object",
+      "undefined"
+    ],
+    "correctAnswerIndex": 1,
+    "explanation": "It's a string primitive.",
+    "difficulty": 3,
+    "trialId": 8,
+    "progType": "Type A",
+    "progLang": "JavaScript"
+  },
+  {
+    "id": 143,
+    "type": "PROGRAMMING",
+    "topic": "Comprehensive Programming Mastery",
+    "questionText": "Output: undefined",
+    "choices": [
+      "let x;\nconsole.log(x);",
+      "console.log(undefined);",
+      "Both",
+      "console.log(null);"
+    ],
+    "correctAnswerIndex": 2,
+    "explanation": "Uninitialized variables are undefined.",
+    "difficulty": 3,
+    "trialId": 8,
+    "progType": "Type B",
+    "progLang": "JavaScript"
+  },
+  {
+    "id": 144,
+    "type": "PROGRAMMING",
+    "topic": "Comprehensive Programming Mastery",
+    "questionText": "Given:\nlet arr = [1];\n____; \n// Expected arr is [1, 2]",
+    "choices": [
+      "arr.push(2);",
+      "arr.add(2);",
+      "arr.append(2);",
+      "arr[2] = 2;"
+    ],
+    "correctAnswerIndex": 0,
+    "explanation": "JS arrays use push().",
+    "difficulty": 3,
+    "trialId": 8,
+    "progType": "Type C",
+    "progLang": "JavaScript"
+  },
+  {
+    "id": 145,
+    "type": "PROGRAMMING",
+    "topic": "Comprehensive Programming Mastery",
+    "questionText": "Given:\nconst obj = {a: 1};\n____; \n// Expected obj.a is 2",
+    "choices": [
+      "obj.a = 2;",
+      "obj['a'] = 2;",
+      "Both",
+      "obj == 2;"
+    ],
+    "correctAnswerIndex": 2,
+    "explanation": "Both bracket and dot notation work.",
+    "difficulty": 3,
+    "trialId": 8,
+    "progType": "Type C",
+    "progLang": "JavaScript"
+  }
+]
