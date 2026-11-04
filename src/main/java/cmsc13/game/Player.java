@@ -238,9 +238,11 @@ public final class Player {
             jumpElapsedTicks++;
             animationFrame = Math.min(JUMP_FRAMES.length - 1,
                     jumpElapsedTicks * JUMP_FRAMES.length / JUMP_DURATION_TICKS);
+            sprite.setScaleX(facingRight ? 1 : -1);
             sprite.setImage(JUMP_FRAMES[animationFrame]);
             return;
         }
+        sprite.setScaleX(1);
         AnimationState groundState = moving
                 ? (facingRight ? AnimationState.WALK_FORWARD : AnimationState.WALK_BACKWARD)
                 : AnimationState.IDLE;
@@ -283,6 +285,7 @@ public final class Player {
         }
         return frames;
     }
+
 
     private enum AnimationState {
         IDLE, WALK_FORWARD, WALK_BACKWARD, JUMP

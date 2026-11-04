@@ -122,6 +122,10 @@ public final class GameApplication extends Application {
     private final Label terminalHeader = new Label();
     private final Label expHud = new Label();
     private final Label trialHud = new Label();
+    private final Label livesHud = new Label();
+    private final Label soundHud = new Label();
+    private int mainLives = 5;
+    private boolean systemCleared;
     /**
      * Progress indicator for the active trial only; it is intentionally
      * separate from total EXP.
@@ -392,9 +396,9 @@ public final class GameApplication extends Application {
         prompt.setAlignment(Pos.CENTER);
         prompt.setStyle("-fx-font-family: 'Consolas'; -fx-font-size: 13; -fx-font-weight: bold; -fx-text-fill: #112630; -fx-background-color: rgba(232,250,255,.95); -fx-background-radius: 12; -fx-padding: 8 12; -fx-border-color: #63d7e8; -fx-border-radius: 12;");
         world.getChildren().add(prompt);
-        kernel.setLayoutY(Constants.GROUND_Y - Constants.TILE_SIZE * 5 + 20);
+        kernel.setLayoutY(Constants.GROUND_Y - Constants.TILE_SIZE * 5 + 10);
         configureHud();
-        logicalRoot.getChildren().setAll(viewport, terminalHeader, expHud, trialHud, controlsHud());
+        logicalRoot.getChildren().setAll(viewport, terminalHeader, expHud, trialHud, livesHud, soundHud, controlsHud());
         logicalRoot.requestFocus();
     }
 
@@ -446,13 +450,14 @@ public final class GameApplication extends Application {
             return;
         }
         Gate near = nearbyGate();
-        boolean canStart = near != null && !near.isCompleted();
+        boolean canStart = near != null && (!near.isCompleted() || systemCleared);
         prompt.setVisible(canStart);
         if (canStart) {
             prompt.setText("Press 'E' to start Trial " + near.getTrialNumber());
             prompt.setLayoutX(near.getX() - 20);
             prompt.setLayoutY(Constants.GROUND_Y - 105);
         }
+        prompt.setVisible(canStart && state == GameState.WORLD);
     }
 
     private void updateBackgroundParallax(double cameraX) {
@@ -583,10 +588,11 @@ public final class GameApplication extends Application {
     }
 
     private void startTrial(Gate gate) {
-        if (gate == null || gate.isCompleted()) {
+        if (gate == null || (gate.isCompleted() && !systemCleared)) {
             return;
         }
         activeGate = gate;
+        if (prompt != null) prompt.setVisible(false);
         lastSpokenQuestionId = -1;
         sound.play(SoundManager.Effect.GATE);
         kernel.setLayoutX(gate.getX() + Constants.TILE_SIZE * 2);
@@ -692,7 +698,12 @@ public final class GameApplication extends Application {
         for (HelperAdvisor.Kind kind : HelperAdvisor.Kind.values()) {
             helpers.getChildren().add(helperButton(kind));
         }
-        overlay.getChildren().addAll(kernel, answers, lifelines, helpers, trialMeter);
+        Button cancel = new Button("CANCEL TRIAL");
+        cancel.setLayoutX(18);
+        cancel.setLayoutY(520);
+        cancel.setOnAction(e -> confirmCancelTrial());
+        placeLivesHud(overlay);
+        overlay.getChildren().addAll(kernel, answers, lifelines, helpers, trialMeter, cancel);
         logicalRoot.getChildren().setAll(viewport, overlay);
         fadeIn(overlay);
     }
@@ -752,9 +763,43 @@ public final class GameApplication extends Application {
                 showQuestion();
         
             }});
-        feedback.getChildren().addAll(playerBubble, kernelBubble, proceed);
+        Button cancel = new Button("CANCEL TRIAL");
+        cancel.setLayoutX(18);
+        cancel.setLayoutY(520);
+        cancel.setOnAction(e -> confirmCancelTrial());
+        placeLivesHud(feedback);
+        feedback.getChildren().addAll(playerBubble, kernelBubble, proceed, cancel);
         // Kernel response screens intentionally omit all HUD elements.
         logicalRoot.getChildren().setAll(viewport, feedback);
+    }
+
+    private void confirmCancelTrial() {
+        Label message = text("CANCEL THIS TRIAL?\nYour attempt will end and this trial will remain incomplete.", 22);
+        Button yes = new Button("YES, CANCEL RUN");
+        yes.setOnAction(e -> {
+            trial = null;
+            activeGate = null;
+            resetLifelines();
+            showWorld();
+        });
+        Button no = new Button("KEEP PLAYING");
+        no.setOnAction(e -> showQuestion());
+        HBox choices = new HBox(18, yes, no);
+        choices.setAlignment(Pos.CENTER);
+        choices.setMaxWidth(Double.MAX_VALUE);
+        VBox box = new VBox(18, message, choices);
+        box.setAlignment(Pos.CENTER);
+        box.setFillWidth(true);
+        box.setPrefWidth(700);
+        box.setStyle("-fx-background-color: rgba(10,20,32,.94); -fx-padding: 26; -fx-background-radius: 18; -fx-border-color: #63d7e8; -fx-border-radius: 18;");
+        logicalRoot.getChildren().setAll(viewport, box);
+    }
+
+    private void placeLivesHud(Pane pane) {
+        refreshHud();
+        livesHud.setLayoutX(Constants.LOGICAL_WIDTH - 215);
+        livesHud.setLayoutY(14);
+        pane.getChildren().add(livesHud);
     }
 
     private void useHelper(HelperAdvisor.Kind kind) {
@@ -762,7 +807,9 @@ public final class GameApplication extends Application {
             Label prompt = speechBubble(kind.name() + "\nWhat would you like me to do? Choose a lifeline first.", 18, 390);
             Button back = new Button("BACK TO QUESTION");
             back.setOnAction(e -> showQuestion());
-            VBox box = new VBox(15, prompt, back);
+            Button cancel = new Button("CANCEL TRIAL");
+            cancel.setOnAction(e -> confirmCancelTrial());
+            VBox box = new VBox(15, prompt, back, cancel);
             box.setAlignment(Pos.TOP_CENTER);
             box.setLayoutY(20);
             logicalRoot.getChildren().setAll(viewport, box);
@@ -773,6 +820,8 @@ public final class GameApplication extends Application {
         Label advice = speechBubble(kind.name() + "\n" + selectedAdvice.getMessage() + "\nConfidence: " + selectedAdvice.getConfidence() + "%", 18, 390);
         Button back = new Button("BACK TO QUESTION");
         back.setOnAction(e -> showQuestion());
+        Button cancel = new Button("CANCEL TRIAL");
+        cancel.setOnAction(e -> confirmCancelTrial());
         if (selectedLifeline == Lifeline.PEEK) {
             peekUsed = true;
         }
@@ -784,7 +833,7 @@ public final class GameApplication extends Application {
             saveArmed = true;
         }
         selectedLifeline = null;
-        VBox box = new VBox(15, advice, back);
+        VBox box = new VBox(15, advice, back, cancel);
         box.setAlignment(Pos.TOP_CENTER);
         box.setLayoutY(18);
         logicalRoot.getChildren().setAll(viewport, box);
@@ -808,11 +857,12 @@ public final class GameApplication extends Application {
         boolean passed = trial.isComplete() && totalExp >= requiredExp;
         if (!passed) {
             sound.play(SoundManager.Effect.FAILURE); 
+            mainLives = Math.max(0, mainLives - 1);
+            saveProgress();
         }else if (activeGate.getTrialNumber() != questionBank.getTrialCount()) {
             sound.play(SoundManager.Effect.COMPLETE);
         }
         if (passed) {
-            playKernelExit();
             activeGate.setCompleted(true);
             player.setCheckpoint(activeGate.getLeftEdge() + 25);
             refreshWall();
@@ -825,17 +875,24 @@ public final class GameApplication extends Application {
                 break;
             }
         }
-        double kernelDestination = nextUncompletedIndex < gates.size()
-                ? gates.get(nextUncompletedIndex).getX() + 48
-                : WORLD_WIDTH - Constants.TILE_SIZE * 5;
-        changeKernelPosition(kernelDestination);
-        
         Label result = text((passed ? "TRIAL COMPLETE" : "TRIAL FAILED") + "\n\nTOTAL EXP: "
                 + totalExp + " / " + requiredExp + "\n\n"
                 + (passed ? "Press ENTER to return to the map."
                         : "The Kernel returns you to the Trial " + trial.getNumber() + " checkpoint.\nPress ENTER to retry."), 25);
         result.setTextFill(passed ? Color.web("#8ee6a1") : Color.web("#ff9a9a"));
-        logicalRoot.getChildren().setAll(viewport, result);
+        if (!passed && mainLives == 0) {
+            defeatAfterKernelLine();
+            return;
+        }
+        Button continueButton = new Button(passed ? "RETURN TO MAP" : "RETRY TRIAL");
+        continueButton.setOnAction(e -> finishResult());
+        VBox resultCard = new VBox(18, result, continueButton);
+        resultCard.setAlignment(Pos.CENTER);
+        resultCard.setMaxWidth(620);
+        resultCard.setStyle("-fx-background-color: rgba(10,20,32,.94); -fx-padding: 30; -fx-background-radius: 20; -fx-border-color: "
+                + (passed ? "#63d7e8" : "#d87575") + "; -fx-border-radius: 20;");
+        logicalRoot.getChildren().setAll(viewport, resultCard);
+        if (passed) playKernelExit(nextUnlockedKernelX());
     }
 
     private void finishResult() {
@@ -845,16 +902,36 @@ public final class GameApplication extends Application {
         showWorld();
     }
 
+    private void defeatAfterKernelLine() {
+        int trialNumber = activeGate.getTrialNumber();
+        Label line = speechBubble("KERNEL\nYour five lives are spent. The system is resetting you to Trial "
+                + Math.max(1, trialNumber - 1) + ". Regroup, then try again.", 20, 480);
+        Button continueButton = new Button("CONTINUE");
+        continueButton.setOnAction(e -> {
+            int lockTrial = Math.max(1, trialNumber - 1);
+            for (Gate gate : gates) {
+                if (gate.getTrialNumber() >= lockTrial) gate.setCompleted(false);
+            }
+            totalExp = Math.min(totalExp, Math.max(0, (lockTrial - 1) * Constants.POINTS_PER_TRIAL));
+            mainLives = 5;
+            player.setCheckpoint(gates.get(lockTrial - 1).getLeftEdge() - 30);
+            player.respawnAt(gates.get(lockTrial - 1).getLeftEdge() - 30);
+            refreshWall(); saveProgress(); showWorld();
+        });
+        VBox box = new VBox(16, line, continueButton);
+        box.setAlignment(Pos.CENTER);
+        logicalRoot.getChildren().setAll(viewport, box);
+    }
+
     /** Plays the Kernel's jump after a passed trial while gameplay input is locked. */
-    private void playKernelExit() {
+    private void playKernelExit(double destinationX) {
         state = GameState.RESULT;
         kernelCutsceneActive = true;
         player.setLeft(false);
         player.setRight(false);
         kernelIdleFrame = 0;
         kernel.setImage(KERNEL_JUMP_FRAMES[0]);
-        double baseY = Constants.GROUND_Y - Constants.TILE_SIZE * 5 + 20;
-        Label line = speechBubble("KERNEL\nTrial complete. I will meet you further in the system.", 19, 430);
+        Label line = speechBubble("KERNEL\nTrial complete. I will remain here while you continue.", 19, 430);
         VBox overlay = new VBox(line);
         overlay.setAlignment(Pos.TOP_CENTER);
         overlay.setLayoutY(20);
@@ -862,48 +939,53 @@ public final class GameApplication extends Application {
         Timeline exit = new Timeline();
         for (int frame = 0; frame < KERNEL_JUMP_FRAMES.length; frame++) {
             final int currentFrame = frame;
-            double progress = (frame + 1.0) / KERNEL_JUMP_FRAMES.length;
-            double arc = Math.sin(Math.PI * progress) * 54;
             exit.getKeyFrames().add(new KeyFrame(Duration.millis((frame + 1) * 75.0), e -> {
                 kernel.setImage(KERNEL_JUMP_FRAMES[currentFrame]);
-                kernel.setLayoutY(baseY - arc);
             }));
         }
         exit.setOnFinished(e -> {
-            kernel.setLayoutY(baseY);
             kernel.setImage(KERNEL_IDLE_FRAMES[0]);
+            kernel.setLayoutX(destinationX);
             kernelCutsceneActive = false;
             if (activeGate.getTrialNumber() == questionBank.getTrialCount()) {
+                systemCleared = true;
+                saveProgress();
                 showVictory();
-            } else {
+            } else if (state == GameState.RESULT) {
                 showWorld();
             }
         });
         exit.play();
     }
 
-    /**
-     * Moves the Kernel to the next uncleared gate or to the end of the map.
-     */
-    private void changeKernelPosition(double x) {
-        kernel.setLayoutX(x);
-        kernel.setLayoutY(Constants.GROUND_Y - Constants.TILE_SIZE * 5 + 20);
+    /** Finds the next available trial position after a completed trial. */
+    private double nextUnlockedKernelX() {
+        for (Gate gate : gates) {
+            if (!gate.isCompleted()) return gate.getX() + Constants.TILE_SIZE * 2;
+        }
+        return gates.get(gates.size() - 1).getX() + Constants.TILE_SIZE * 2;
     }
 
     private void showVictory() {
         state = GameState.VICTORY;
         Rectangle flash = new Rectangle(Constants.LOGICAL_WIDTH, Constants.LOGICAL_HEIGHT, Color.WHITE);
         flash.setOpacity(0.0);
+        flash.setMouseTransparent(true);
         VBox box = new VBox(16);
         box.setAlignment(Pos.CENTER);
         Label message = title("SYSTEM BOUNDARY BREACHED", 34);
-        Label detail = text("The Kernel releases you into a world restored to color.\nAll paradigm trials completed.", 20);
-        Button replay = new Button("PLAY AGAIN");
+        Label kernelDialogue = speechBubble("KERNEL\nYou have exited the system. Every trial remains open if you wish to take it again.", 18, 620);
+        kernelDialogue.setAlignment(Pos.CENTER);
+        kernelDialogue.setTextAlignment(javafx.scene.text.TextAlignment.CENTER);
+        Label detail = text("The Kernel: “You have exited the system. The world is yours to explore; every trial remains open for another run.”\nAll paradigm trials completed.", 20);
+        Button replay = new Button("REENTER SYSTEM · RETAKE TRIALS");
+        detail.setText("All paradigm trials completed. The world remains open for exploration.");
+        detail.setFont(javafx.scene.text.Font.font("Consolas", 16));
         replay.setOnAction(e -> {
-            for (Gate gate : gates) {
-                gate.setCompleted(false);
-            
-            }totalExp = 0;
+            systemCleared = true;
+            mainLives = 5;
+            activeGate = null;
+            kernel.setLayoutX(gates.get(0).getX() + Constants.TILE_SIZE * 2);
             player.setCheckpoint(Constants.TILE_SIZE * 3);
             player.respawnAt(Constants.TILE_SIZE * 3);
             refreshWall();
@@ -912,7 +994,7 @@ public final class GameApplication extends Application {
         });
         Button menu = new Button("RETURN TO MENU");
         menu.setOnAction(e -> showMenu());
-        box.getChildren().addAll(message, detail, replay, menu);
+        box.getChildren().addAll(message, kernelDialogue, detail, replay, menu);
         logicalRoot.getChildren().setAll(viewport, box, flash, terminalHeader, expHud, trialHud);
         FadeTransition fade = new FadeTransition(Duration.seconds(.35), flash);
         fade.setFromValue(1);
@@ -1010,6 +1092,8 @@ public final class GameApplication extends Application {
         player.setCheckpoint(gate.getLeftEdge() + 25);
         refreshWall();
         saveProgress();
+        activeGate = gate;
+        playKernelExit(nextUnlockedKernelX());
     }
 
     private void completeAllGates() {
@@ -1018,6 +1102,8 @@ public final class GameApplication extends Application {
         }
         player.clearWall();
         saveProgress();
+        activeGate = gates.get(gates.size() - 1);
+        playKernelExit(nextUnlockedKernelX());
     }
 
     /**
@@ -1030,6 +1116,8 @@ public final class GameApplication extends Application {
         }
         totalExp = 0;
         trialExp = 0;
+        mainLives = 5;
+        systemCleared = false;
         player.setCheckpoint(Constants.TILE_SIZE * 3);
         player.respawnAt(Constants.TILE_SIZE * 3);
         refreshWall();
@@ -1049,6 +1137,7 @@ public final class GameApplication extends Application {
         try (InputStream input = Files.newInputStream(savePath)) {
             saved.load(input);
             sound.setMuted(Boolean.parseBoolean(saved.getProperty("audioMuted", "false")));
+            mainLives = Math.max(1, Math.min(5, Integer.parseInt(saved.getProperty("mainLives", "5"))));
             totalExp = Math.max(0, Math.min(maximumExp(), Integer.parseInt(saved.getProperty("totalExp", "0"))));
             String unlocked = saved.getProperty("unlockedQuestionIds", "");
             for (String value : unlocked.split(",")) {
@@ -1069,6 +1158,8 @@ public final class GameApplication extends Application {
                     checkpoint = gate.getLeftEdge() + 25;
                 }
             }
+            systemCleared = Boolean.parseBoolean(saved.getProperty("systemCleared", "false"))
+                    || gates.stream().allMatch(Gate::isCompleted);
             player.setCheckpoint(checkpoint);
             player.respawnAt(checkpoint);
         } catch (IOException | IllegalArgumentException exception) {
@@ -1084,6 +1175,8 @@ public final class GameApplication extends Application {
         Properties saved = new Properties();
         saved.setProperty("audioMuted", Boolean.toString(sound.isMuted()));
         saved.setProperty("totalExp", Integer.toString(totalExp));
+        saved.setProperty("mainLives", Integer.toString(mainLives));
+        saved.setProperty("systemCleared", Boolean.toString(systemCleared));
         saved.setProperty("unlockedQuestionIds", unlockedQuestionIds.stream().sorted()
                 .map(String::valueOf).collect(java.util.stream.Collectors.joining(",")));
         for (Gate gate : gates) {
@@ -1176,6 +1269,7 @@ public final class GameApplication extends Application {
     private Label speechBubble(String value, int fontSize, double width) {
         Label bubble = new Label(value);
         bubble.setWrapText(true);
+        bubble.setFont(javafx.scene.text.Font.font("Consolas", fontSize));
         bubble.setPrefWidth(width);
         bubble.setMaxWidth(width);
         bubble.setStyle("-fx-font-size: " + fontSize + "; -fx-text-fill: #111820; -fx-background-color: rgba(255,255,255,.95); "
@@ -1206,8 +1300,15 @@ public final class GameApplication extends Application {
                 break;
             }
         }
-        expHud.setText("EXP " + totalExp + " / " + maximum + "  [" + bar + "]"
-                + (sound.isMuted() ? "   SOUND OFF [F7]" : "   SOUND ON [F7]"));
+        expHud.setText("EXP " + totalExp + " / " + maximum + "  [" + bar + "]");
+        livesHud.setText("LIVES  " + "♥ ".repeat(Math.max(0, mainLives)) + "♡ ".repeat(5 - Math.max(0, mainLives)));
+        livesHud.setStyle("-fx-font-size: 17; -fx-font-weight: bold; -fx-text-fill: #e6e8eb; -fx-background-color: rgba(13,18,28,.75); -fx-padding: 7 12; -fx-background-radius: 10;");
+        StackPane.setAlignment(livesHud, Pos.TOP_RIGHT);
+        StackPane.setMargin(livesHud, new Insets(48, 18, 0, 0));
+        soundHud.setText(sound.isMuted() ? "Sound off [F7]" : "Sound on [F7]");
+        soundHud.setStyle("-fx-font-size: 12; -fx-text-fill: #e9f1ee; -fx-effect: dropshadow(gaussian, #101a22, 2, .9, 0, 1);");
+        StackPane.setAlignment(soundHud, Pos.BOTTOM_RIGHT);
+        StackPane.setMargin(soundHud, new Insets(0, 18, 14, 0));
         trialHud.setText(current == questionBank.getTrialCount() ? "CORE TRIAL" : "TRIAL " + current);
     }
 
@@ -1254,6 +1355,7 @@ public final class GameApplication extends Application {
     private Label title(String value, int size) {
         Label label = text(value, size);
         label.setStyle("-fx-font-weight: bold; -fx-text-fill: white;");
+        label.setFont(javafx.scene.text.Font.font("Consolas", size));
         return label;
     }
 
