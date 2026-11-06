@@ -21,3 +21,5 @@ desktop.ini
 # Local logs and temporary files
 *.log
 *.tmp
+
+/dependency-reduced-pom.xml
