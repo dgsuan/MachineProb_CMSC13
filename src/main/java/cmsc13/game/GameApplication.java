@@ -61,19 +61,40 @@ public final class GameApplication extends Application {
      */
     private static final double SPLASH_SECONDS = 3;
 
-    /**
-     * The long map starts as a continuous walkable ground layer.
-     */
+    /** Solid landing areas around each trial, separated by progressively longer crossings. */
     private static final List<double[]> GROUND_SEGMENTS = List.of(
-            new double[] { 0, 1500 }, new double[] { 1580, 2940 }, new double[] { 3030, 4700 },
-            new double[] { 4800, 6900 }, new double[] { 7000, 9400 }, new double[] { 9500, WORLD_WIDTH }
-        );
-    /**
-     * Placeholder platforms for the first section of the long map.
-     */
+            new double[] { 0, 720 }, new double[] { 832, 1568 },
+            new double[] { 1952, 2784 }, new double[] { 2944, 3232 },
+            new double[] { 3712, 4256 }, new double[] { 4416, 4704 },
+            new double[] { 5056, 5632 }, new double[] { 6176, 7072 },
+            new double[] { 7264, 7616 }, new double[] { 8032, 8640 },
+            new double[] { 9280, 10240 }, new double[] { 10880, 11328 },
+            new double[] { 11520, 11904 }, new double[] { 12640, 13248 },
+            new double[] { 13888, WORLD_WIDTH });
+    /** Stepping stones, ascending stairs, and staggered bridges; the spawn area stays open. */
     private static final List<Platform> PLATFORMS = List.of(
-            new Platform(368, 300, 110), new Platform(527, 250, 120), new Platform(1510, 330, 95),
-            new Platform(2950, 320, 100), new Platform(4700, 315, 115), new Platform(6890, 325, 120));
+            // After Trial 1: two broad stepping stones.
+            new Platform(1632, 320, 112), new Platform(1808, 288, 112),
+            // Before Trial 3: climb, cross, then descend onto the gate's landing.
+            new Platform(3296, 320, 112), new Platform(3456, 256, 112),
+            new Platform(3616, 304, 96),
+            // Before Trial 4: a short elevated crossing.
+            new Platform(4768, 304, 112), new Platform(4928, 272, 96),
+            // Before Trial 5: a longer three-platform staircase.
+            new Platform(5696, 320, 112), new Platform(5872, 256, 112),
+            new Platform(6048, 304, 112),
+            // Before Trial 6: offset stepping stones following a ground jump.
+            new Platform(7680, 320, 112), new Platform(7856, 272, 112),
+            // Before Trial 7: four platforms with a high middle section.
+            new Platform(8704, 320, 112), new Platform(8864, 256, 112),
+            new Platform(9024, 224, 112), new Platform(9184, 288, 96),
+            // Final approach: several separate challenges with recovery ground between them.
+            new Platform(10304, 320, 112), new Platform(10480, 256, 112),
+            new Platform(10656, 224, 112), new Platform(10816, 304, 96),
+            new Platform(11968, 320, 112), new Platform(12144, 256, 112),
+            new Platform(12320, 224, 112), new Platform(12496, 288, 112),
+            new Platform(13312, 320, 112), new Platform(13488, 256, 112),
+            new Platform(13664, 224, 112), new Platform(13824, 304, 96));
 
     private final StackPane root = new StackPane();
     /**
@@ -600,10 +621,19 @@ public final class GameApplication extends Application {
             double x = 72 + random.nextDouble() * (WORLD_WIDTH - 144);
             double y = Constants.GROUND_Y - (8 + random.nextDouble() * 12);
             double size = 9 + random.nextDouble() * 13;
+            double phase = random.nextDouble() * Math.PI * 2.0;
+            // Keep the entire leaf, including rotation and hit sway, away from pit edges.
+            double clearance = Constants.TILE_SIZE + size * Math.sqrt(2)
+                    + Math.max(Constants.LEAF_SWAY_AMPLITUDE, Constants.LEAF_HIT_AMPLITUDE);
+            boolean aboveSafeGround = GROUND_SEGMENTS.stream().anyMatch(segment ->
+                    x - clearance >= segment[0] && x + clearance <= segment[1]);
+            if (!aboveSafeGround) {
+                continue;
+            }
             ImageView leafNode = createLeafNode(size);
             leafNode.setLayoutX(x);
             leafNode.setLayoutY(y);
-            leaves.add(new LeafSprite(leafNode, x, y, random.nextDouble() * Math.PI * 2.0));
+            leaves.add(new LeafSprite(leafNode, x, y, phase));
         }
         return leaves;
     }
