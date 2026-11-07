@@ -44,6 +44,7 @@ public final class SoundManager {
         switch (state) {
             case LOADING:
                 return Music.SPLASH;
+            case CREDITS:
             case VICTORY:
                 return Music.VICTORY;
             case WORLD:

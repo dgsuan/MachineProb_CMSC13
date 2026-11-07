@@ -22,5 +22,7 @@ desktop.ini
 *.log
 *.tmp
 
-/dependency-reduced-pom.xml
+# Workspace-local Maven dependency cache
+.m2/
+dependency-reduced-pom.xml
 
