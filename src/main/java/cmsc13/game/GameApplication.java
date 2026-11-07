@@ -65,16 +65,15 @@ public final class GameApplication extends Application {
      * The long map starts as a continuous walkable ground layer.
      */
     private static final List<double[]> GROUND_SEGMENTS = List.of(
-            new double[]{0, 1500}, new double[]{1580, 2940}, new double[]{3030, 4700},
-            new double[]{4800, 6900}, new double[]{7000, 9400}, new double[]{9500, WORLD_WIDTH}
-    );
+            new double[] { 0, 1500 }, new double[] { 1580, 2940 }, new double[] { 3030, 4700 },
+            new double[] { 4800, 6900 }, new double[] { 7000, 9400 }, new double[] { 9500, WORLD_WIDTH }
+        );
     /**
      * Placeholder platforms for the first section of the long map.
      */
     private static final List<Platform> PLATFORMS = List.of(
             new Platform(368, 300, 110), new Platform(527, 250, 120), new Platform(1510, 330, 95),
-            new Platform(2950, 320, 100), new Platform(4700, 315, 115), new Platform(6890, 325, 120)
-    );
+            new Platform(2950, 320, 100), new Platform(4700, 315, 115), new Platform(6890, 325, 120));
 
     private final StackPane root = new StackPane();
     /**
@@ -144,6 +143,8 @@ public final class GameApplication extends Application {
 
     @Override
     public void start(Stage stage) {
+        stage.initStyle(javafx.stage.StageStyle.UNDECORATED);
+        stage.getIcons().add(new Image(GameApplication.class.getResource("/icon.png").toExternalForm()));
         stage.setTitle(Constants.WINDOW_TITLE);
         stage.setMinWidth(Constants.MIN_WINDOW_WIDTH);
         stage.setMinHeight(Constants.MIN_WINDOW_HEIGHT);
@@ -152,6 +153,7 @@ public final class GameApplication extends Application {
         logicalRoot.setMaxSize(Constants.LOGICAL_WIDTH, Constants.LOGICAL_HEIGHT);
         root.setStyle("-fx-background-color: black;");
         root.getChildren().add(logicalRoot);
+        installWindowControls(stage);
         Scene scene = new Scene(root, Constants.LOGICAL_WIDTH, Constants.LOGICAL_HEIGHT);
         scene.getStylesheets().add(GameApplication.class.getResource("/Styles/game.css").toExternalForm());
         scene.setOnKeyPressed(this::onKeyPressed);
@@ -164,7 +166,8 @@ public final class GameApplication extends Application {
         player.setOnJump(() -> sound.play(SoundManager.Effect.JUMP));
         player.setOnFall(() -> sound.play(SoundManager.Effect.RESPAWN));
         stage.setScene(scene);
-        // Save immediately when the window closes so a menu or map exit keeps current progress.
+        // Save immediately when the window closes so a menu or map exit keeps current
+        // progress.
         stage.setOnCloseRequest(event -> saveProgress());
         root.widthProperty().addListener((observable, oldValue, newValue) -> updateViewportScale());
         root.heightProperty().addListener((observable, oldValue, newValue) -> updateViewportScale());
@@ -193,6 +196,43 @@ public final class GameApplication extends Application {
         updateViewportScale();
     }
 
+    /** Window controls remain available after removing the native title bar. */
+    private void installWindowControls(Stage stage) {
+        Label grip = new Label("SYSTEMBOUND");
+        grip.setStyle("-fx-text-fill: #cbdce8; -fx-font-size: 11; -fx-padding: 2 10;");
+        grip.setMaxWidth(Double.MAX_VALUE);
+        HBox.setHgrow(grip, javafx.scene.layout.Priority.ALWAYS);
+        double[] drag = new double[2];
+        grip.setOnMousePressed(e -> {
+            drag[0] = e.getScreenX() - stage.getX();
+            drag[1] = e.getScreenY() - stage.getY();
+        });
+        grip.setOnMouseDragged(e -> {
+            if (!stage.isMaximized()) {
+                stage.setX(e.getScreenX() - drag[0]);
+                stage.setY(e.getScreenY() - drag[1]);
+            }
+        });
+        grip.setOnMouseClicked(e -> {
+            if (e.getClickCount() == 2)
+                stage.setMaximized(!stage.isMaximized());
+        });
+        Button minimize = new Button("MIN");
+        minimize.setOnAction(e -> stage.setIconified(true));
+        Button maximize = new Button("MAX");
+        maximize.setOnAction(e -> stage.setMaximized(!stage.isMaximized()));
+        for (Button button : List.of(minimize, maximize)) {
+            button.setFocusTraversable(false);
+            button.setStyle("-fx-font-size: 10; -fx-padding: 1 10; -fx-min-height: 20;");
+        }
+        HBox chrome = new HBox(4, grip, minimize, maximize);
+        chrome.setMaxHeight(22);
+        chrome.setAlignment(Pos.CENTER_RIGHT);
+        chrome.setStyle("-fx-background-color: #101a27;");
+        StackPane.setAlignment(chrome, Pos.TOP_CENTER);
+        root.getChildren().add(chrome);
+    }
+
     private void createWorld() {
         world.getChildren().clear();
         world.setPrefSize(WORLD_WIDTH, Constants.LOGICAL_HEIGHT);
@@ -203,8 +243,7 @@ public final class GameApplication extends Application {
                 mountainLayerFar,
                 mountainLayerNear,
                 cloudLayerFar,
-                cloudLayerNear
-        );
+                cloudLayerNear);
         backgroundPane.setPrefSize(WORLD_WIDTH, Constants.LOGICAL_HEIGHT);
         backgroundPane.setMinSize(WORLD_WIDTH, Constants.LOGICAL_HEIGHT);
         backgroundPane.setMaxSize(WORLD_WIDTH, Constants.LOGICAL_HEIGHT);
@@ -238,9 +277,11 @@ public final class GameApplication extends Application {
         groundImage.setLayoutX(0);
         world.getChildren().add(groundImage);
 
-        // Collision is defined by GROUND_SEGMENTS, so the matching visual gaps remain visible.
+        // Collision is defined by GROUND_SEGMENTS, so the matching visual gaps remain
+        // visible.
         for (double[] segment : GROUND_SEGMENTS) {
-            Rectangle groundCollision = new Rectangle(segment[0], Constants.GROUND_Y, segment[1] - segment[0], Constants.GROUND_HEIGHT);
+            Rectangle groundCollision = new Rectangle(segment[0], Constants.GROUND_Y, segment[1] - segment[0],
+                    Constants.GROUND_HEIGHT);
             groundCollision.setFill(Color.TRANSPARENT);
             groundCollision.setMouseTransparent(true);
             world.getChildren().add(groundCollision);
@@ -376,7 +417,7 @@ public final class GameApplication extends Application {
      */
     private void showStories() {
         state = GameState.STORIES;
-        logicalRoot.getChildren().setAll(menuView.placeholder("STORIES", this::showMenu));
+        logicalRoot.getChildren().setAll(menuView.story(this::showMenu));
     }
 
     /**
@@ -384,7 +425,7 @@ public final class GameApplication extends Application {
      */
     private void showCredits() {
         state = GameState.CREDITS;
-        logicalRoot.getChildren().setAll(menuView.placeholder("CREDITS", this::showMenu));
+        logicalRoot.getChildren().setAll(menuView.credits(this::showMenu));
     }
 
     private void showWorld() {
@@ -394,7 +435,8 @@ public final class GameApplication extends Application {
         prompt = new Label("Press 'E' to start");
         prompt.setMouseTransparent(true);
         prompt.setAlignment(Pos.CENTER);
-        prompt.setStyle("-fx-font-family: 'Consolas'; -fx-font-size: 13; -fx-font-weight: bold; -fx-text-fill: #112630; -fx-background-color: rgba(232,250,255,.95); -fx-background-radius: 12; -fx-padding: 8 12; -fx-border-color: #63d7e8; -fx-border-radius: 12;");
+        prompt.setStyle(
+                "-fx-font-family: 'Consolas'; -fx-font-size: 13; -fx-font-weight: bold; -fx-text-fill: #112630; -fx-background-color: rgba(232,250,255,.95); -fx-background-radius: 12; -fx-padding: 8 12; -fx-border-color: #63d7e8; -fx-border-radius: 12;");
         world.getChildren().add(prompt);
         kernel.setLayoutY(Constants.GROUND_Y - Constants.TILE_SIZE * 5 + 10);
         configureHud();
@@ -445,7 +487,8 @@ public final class GameApplication extends Application {
         updateBackgroundParallax(cameraX);
         updateWorldColor();
         updateLeaves();
-        // Menus deliberately have no gameplay prompt, but their background still animates.
+        // Menus deliberately have no gameplay prompt, but their background still
+        // animates.
         if (prompt == null) {
             return;
         }
@@ -477,12 +520,14 @@ public final class GameApplication extends Application {
         for (LeafSprite leaf : leaves) {
             double phase = leaf.hitTimer > 0 ? leaf.phase + 1.3 : leaf.phase;
             double speed = leaf.hitTimer > 0 ? Constants.LEAF_HIT_SPEED : Constants.LEAF_SWAY_SPEED;
-            double sway = Math.sin(time * speed + phase) * (leaf.hitTimer > 0 ? Constants.LEAF_HIT_AMPLITUDE : Constants.LEAF_SWAY_AMPLITUDE);
+            double sway = Math.sin(time * speed + phase)
+                    * (leaf.hitTimer > 0 ? Constants.LEAF_HIT_AMPLITUDE : Constants.LEAF_SWAY_AMPLITUDE);
             double drift = Math.sin(time * (speed * 1.5) + phase * 1.7) * (leaf.hitTimer > 0 ? 8.0 : 3.6);
 
             leaf.node.setLayoutX(leaf.baseX + sway);
             leaf.node.setLayoutY(leaf.baseY + drift);
-            leaf.node.setRotate(Math.toDegrees((12 * Math.sin(1.5 * time + phase)) + (3 * Math.sin(4.2 * time + phase))));
+            leaf.node.setRotate(
+                    Math.toDegrees((12 * Math.sin(1.5 * time + phase)) + (3 * Math.sin(4.2 * time + phase))));
 
             if (leaf.hitTimer > 0) {
                 leaf.hitTimer = Math.max(0, leaf.hitTimer - 0.05);
@@ -518,7 +563,8 @@ public final class GameApplication extends Application {
     }
 
     private static ImageView createKernel() {
-        Image image = new Image(GameApplication.class.getResource("/characters/kernel/idle/idle1.png").toExternalForm());
+        Image image = new Image(
+                GameApplication.class.getResource("/characters/kernel/idle/idle1.png").toExternalForm());
         ImageView result = new ImageView(image);
         result.setFitWidth(Constants.TILE_SIZE * 5);
         result.setFitHeight(Constants.TILE_SIZE * 5);
@@ -532,7 +578,8 @@ public final class GameApplication extends Application {
     private static Image[] loadCharacterFrames(String prefix, int count) {
         Image[] frames = new Image[count];
         for (int index = 0; index < count; index++) {
-            frames[index] = new Image(GameApplication.class.getResource(prefix + (index + 1) + ".png").toExternalForm());
+            frames[index] = new Image(
+                    GameApplication.class.getResource(prefix + (index + 1) + ".png").toExternalForm());
         }
         return frames;
     }
@@ -574,7 +621,8 @@ public final class GameApplication extends Application {
     private static Image[] loadLeafFrames() {
         Image[] frames = new Image[15];
         for (int index = 1; index <= frames.length; index++) {
-            frames[index - 1] = new Image(GameApplication.class.getResource("/BackGround/leaves/leaves" + index + ".png").toExternalForm());
+            frames[index - 1] = new Image(
+                    GameApplication.class.getResource("/BackGround/leaves/leaves" + index + ".png").toExternalForm());
         }
         return frames;
     }
@@ -592,7 +640,8 @@ public final class GameApplication extends Application {
             return;
         }
         activeGate = gate;
-        if (prompt != null) prompt.setVisible(false);
+        if (prompt != null)
+            prompt.setVisible(false);
         lastSpokenQuestionId = -1;
         sound.play(SoundManager.Effect.GATE);
         kernel.setLayoutX(gate.getX() + Constants.TILE_SIZE * 2);
@@ -614,7 +663,8 @@ public final class GameApplication extends Application {
         choices.setAlignment(Pos.CENTER);
         VBox box = new VBox(16, message, choices);
         box.setAlignment(Pos.CENTER);
-        box.setStyle("-fx-background-color: rgba(10, 20, 32, .86); -fx-padding: 28; -fx-background-radius: 20; -fx-border-color: #63d7e8; -fx-border-radius: 20;");
+        box.setStyle(
+                "-fx-background-color: rgba(10, 20, 32, .86); -fx-padding: 28; -fx-background-radius: 20; -fx-border-color: #63d7e8; -fx-border-radius: 20;");
         logicalRoot.getChildren().setAll(viewport, box);
     }
 
@@ -627,11 +677,14 @@ public final class GameApplication extends Application {
         Pane overlay = new Pane();
         Label questionText = new Label("KERNEL\n" + question.getQuestionText());
         questionText.setWrapText(true);
-        questionText.setStyle("-fx-font-family: 'Consolas'; -fx-font-size: " + (question.getType() == QuestionType.PROGRAMMING ? 15 : 20) + "; -fx-text-fill: #111820; -fx-padding: 12 16 12 16;");
+        questionText.setStyle("-fx-font-family: 'Consolas'; -fx-font-size: "
+                + (question.getType() == QuestionType.PROGRAMMING ? 15 : 20)
+                + "; -fx-text-fill: #111820; -fx-padding: 12 16 12 16;");
         ScrollPane questionScroll = new ScrollPane(questionText);
         questionScroll.setFitToWidth(true);
         questionScroll.setPrefSize(460, 330);
-        questionScroll.setStyle("-fx-background: rgba(255,255,255,.95); -fx-background-radius: 18; -fx-border-color: #8a95a5; -fx-border-radius: 18;");
+        questionScroll.setStyle(
+                "-fx-background: rgba(255,255,255,.95); -fx-background-radius: 18; -fx-border-color: #8a95a5; -fx-border-radius: 18;");
         Pane kernel = new Pane(questionScroll);
         kernel.setPrefSize(460, 330);
         kernel.setLayoutX(282);
@@ -643,7 +696,8 @@ public final class GameApplication extends Application {
             int answer = i;
             Label choice = new Label((char) ('A' + i) + ". " + question.getChoices().get(i));
             choice.setWrapText(true);
-            choice.setStyle("-fx-font-family: 'Consolas'; -fx-font-size: " + (question.getType() == QuestionType.PROGRAMMING ? 11 : 14) + "; -fx-text-fill: #111820;");
+            choice.setStyle("-fx-font-family: 'Consolas'; -fx-font-size: "
+                    + (question.getType() == QuestionType.PROGRAMMING ? 11 : 14) + "; -fx-text-fill: #111820;");
             ScrollPane choiceScroll = new ScrollPane(choice);
             choiceScroll.setFitToWidth(true);
             choiceScroll.setPrefViewportHeight(58);
@@ -655,7 +709,8 @@ public final class GameApplication extends Application {
             button.setGraphic(choiceScroll);
             button.setPrefWidth(295);
             button.setPrefHeight(68);
-            // The embedded scroll pane is the visible button face, so forward its mouse click.
+            // The embedded scroll pane is the visible button face, so forward its mouse
+            // click.
             choiceScroll.setOnMouseClicked(event -> {
                 button.fire();
                 event.consume();
@@ -665,7 +720,8 @@ public final class GameApplication extends Application {
         }
         answers.setLayoutX(202);
         answers.setLayoutY(405);
-        // Keep this trial meter inside the quiz view: it never shows the lifetime score or gate path.
+        // Keep this trial meter inside the quiz view: it never shows the lifetime score
+        // or gate path.
         configureTrialMeter();
         VBox trialMeter = new VBox(5, trialExpLabel, trialExpBar);
         trialMeter.setLayoutX(382);
@@ -677,20 +733,23 @@ public final class GameApplication extends Application {
         peek.setDisable(peekUsed);
         if (selectedLifeline == Lifeline.PEEK) {
             peek.getStyleClass().add("lifeline-selected");
-        
-        }peek.setOnAction(e -> chooseLifeline(Lifeline.PEEK));
+
+        }
+        peek.setOnAction(e -> chooseLifeline(Lifeline.PEEK));
         Button copy = sideButton(copyUsed ? "COPY USED" : "COPY", null);
         copy.setDisable(copyUsed);
         if (selectedLifeline == Lifeline.COPY) {
             copy.getStyleClass().add("lifeline-selected");
-        
-        }copy.setOnAction(e -> chooseLifeline(Lifeline.COPY));
+
+        }
+        copy.setOnAction(e -> chooseLifeline(Lifeline.COPY));
         Button save = sideButton(saveUsed ? "SAVE USED" : "SAVE", null);
         save.setDisable(saveUsed);
         if (selectedLifeline == Lifeline.SAVE) {
             save.getStyleClass().add("lifeline-selected");
-        
-        }save.setOnAction(e -> chooseLifeline(Lifeline.SAVE));
+
+        }
+        save.setOnAction(e -> chooseLifeline(Lifeline.SAVE));
         lifelines.getChildren().addAll(peek, copy, save);
         VBox helpers = sidePanel("HELPERS");
         helpers.setLayoutX(840);
@@ -748,11 +807,15 @@ public final class GameApplication extends Application {
         Label playerBubble = speechBubble("PLAYER\n" + question.getChoices().get(answer), 17, 300);
         playerBubble.setLayoutX(170);
         playerBubble.setLayoutY(20);
-        Label kernelBubble = speechBubble("KERNEL\n" + (correct ? "Correct. +" + Constants.POINTS_PER_CORRECT_ANSWER + " EXP." : saveProtectedThisAnswer ? "SAVE protected your EXP." : "Incorrect. EXP decreased.") + "\n" + question.getExplanation(), 17, 450);
+        Label kernelBubble = speechBubble("KERNEL\n"
+                + (correct ? "Correct. +" + Constants.POINTS_PER_CORRECT_ANSWER + " EXP."
+                        : saveProtectedThisAnswer ? "SAVE protected your EXP." : "Incorrect. EXP decreased.")
+                + "\n" + question.getExplanation(), 17, 450);
         kernelBubble.setLayoutX(380);
         kernelBubble.setLayoutY(155);
         Button proceed = new Button("OK — CONTINUE");
-        proceed.setStyle("-fx-font-weight: bold; -fx-text-fill: white; -fx-background-color: " + (correct ? "#3d9b61" : "#c94e4e") + ";");
+        proceed.setStyle("-fx-font-weight: bold; -fx-text-fill: white; -fx-background-color: "
+                + (correct ? "#3d9b61" : "#c94e4e") + ";");
         proceed.setLayoutX(450);
         proceed.setLayoutY(370);
         proceed.setOnAction(e -> {
@@ -761,8 +824,9 @@ public final class GameApplication extends Application {
                 showResult();
             } else {
                 showQuestion();
-        
-            }});
+
+            }
+        });
         Button cancel = new Button("CANCEL TRIAL");
         cancel.setLayoutX(18);
         cancel.setLayoutY(520);
@@ -791,7 +855,8 @@ public final class GameApplication extends Application {
         box.setAlignment(Pos.CENTER);
         box.setFillWidth(true);
         box.setPrefWidth(700);
-        box.setStyle("-fx-background-color: rgba(10,20,32,.94); -fx-padding: 26; -fx-background-radius: 18; -fx-border-color: #63d7e8; -fx-border-radius: 18;");
+        box.setStyle(
+                "-fx-background-color: rgba(10,20,32,.94); -fx-padding: 26; -fx-background-radius: 18; -fx-border-color: #63d7e8; -fx-border-radius: 18;");
         logicalRoot.getChildren().setAll(viewport, box);
     }
 
@@ -804,7 +869,8 @@ public final class GameApplication extends Application {
 
     private void useHelper(HelperAdvisor.Kind kind) {
         if (selectedLifeline == null) {
-            Label prompt = speechBubble(kind.name() + "\nWhat would you like me to do? Choose a lifeline first.", 18, 390);
+            Label prompt = speechBubble(kind.name() + "\nWhat would you like me to do? Choose a lifeline first.", 18,
+                    390);
             Button back = new Button("BACK TO QUESTION");
             back.setOnAction(e -> showQuestion());
             Button cancel = new Button("CANCEL TRIAL");
@@ -817,7 +883,8 @@ public final class GameApplication extends Application {
         }
         sound.play(SoundManager.Effect.HELPER);
         selectedAdvice = new HelperAdvisor(kind).advise(trial.getCurrentQuestion());
-        Label advice = speechBubble(kind.name() + "\n" + selectedAdvice.getMessage() + "\nConfidence: " + selectedAdvice.getConfidence() + "%", 18, 390);
+        Label advice = speechBubble(kind.name() + "\n" + selectedAdvice.getMessage() + "\nConfidence: "
+                + selectedAdvice.getConfidence() + "%", 18, 390);
         Button back = new Button("BACK TO QUESTION");
         back.setOnAction(e -> showQuestion());
         Button cancel = new Button("CANCEL TRIAL");
@@ -856,10 +923,10 @@ public final class GameApplication extends Application {
         int requiredExp = requiredExpForTrial(activeGate.getTrialNumber());
         boolean passed = trial.isComplete() && totalExp >= requiredExp;
         if (!passed) {
-            sound.play(SoundManager.Effect.FAILURE); 
+            sound.play(SoundManager.Effect.FAILURE);
             mainLives = Math.max(0, mainLives - 1);
             saveProgress();
-        }else if (activeGate.getTrialNumber() != questionBank.getTrialCount()) {
+        } else if (activeGate.getTrialNumber() != questionBank.getTrialCount()) {
             sound.play(SoundManager.Effect.COMPLETE);
         }
         if (passed) {
@@ -878,7 +945,9 @@ public final class GameApplication extends Application {
         Label result = text((passed ? "TRIAL COMPLETE" : "TRIAL FAILED") + "\n\nTOTAL EXP: "
                 + totalExp + " / " + requiredExp + "\n\n"
                 + (passed ? "Press ENTER to return to the map."
-                        : "The Kernel returns you to the Trial " + trial.getNumber() + " checkpoint.\nPress ENTER to retry."), 25);
+                        : "The Kernel returns you to the Trial " + trial.getNumber()
+                                + " checkpoint.\nPress ENTER to retry."),
+                25);
         result.setTextFill(passed ? Color.web("#8ee6a1") : Color.web("#ff9a9a"));
         if (!passed && mainLives == 0) {
             defeatAfterKernelLine();
@@ -889,10 +958,12 @@ public final class GameApplication extends Application {
         VBox resultCard = new VBox(18, result, continueButton);
         resultCard.setAlignment(Pos.CENTER);
         resultCard.setMaxWidth(620);
-        resultCard.setStyle("-fx-background-color: rgba(10,20,32,.94); -fx-padding: 30; -fx-background-radius: 20; -fx-border-color: "
-                + (passed ? "#63d7e8" : "#d87575") + "; -fx-border-radius: 20;");
+        resultCard.setStyle(
+                "-fx-background-color: rgba(10,20,32,.94); -fx-padding: 30; -fx-background-radius: 20; -fx-border-color: "
+                        + (passed ? "#63d7e8" : "#d87575") + "; -fx-border-radius: 20;");
         logicalRoot.getChildren().setAll(viewport, resultCard);
-        if (passed) playKernelExit(nextUnlockedKernelX());
+        if (passed)
+            playKernelExit(nextUnlockedKernelX());
     }
 
     private void finishResult() {
@@ -910,20 +981,25 @@ public final class GameApplication extends Application {
         continueButton.setOnAction(e -> {
             int lockTrial = Math.max(1, trialNumber - 1);
             for (Gate gate : gates) {
-                if (gate.getTrialNumber() >= lockTrial) gate.setCompleted(false);
+                if (gate.getTrialNumber() >= lockTrial)
+                    gate.setCompleted(false);
             }
             totalExp = Math.min(totalExp, Math.max(0, (lockTrial - 1) * Constants.POINTS_PER_TRIAL));
             mainLives = 5;
             player.setCheckpoint(gates.get(lockTrial - 1).getLeftEdge() - 30);
             player.respawnAt(gates.get(lockTrial - 1).getLeftEdge() - 30);
-            refreshWall(); saveProgress(); showWorld();
+            refreshWall();
+            saveProgress();
+            showWorld();
         });
         VBox box = new VBox(16, line, continueButton);
         box.setAlignment(Pos.CENTER);
         logicalRoot.getChildren().setAll(viewport, box);
     }
 
-    /** Plays the Kernel's jump after a passed trial while gameplay input is locked. */
+    /**
+     * Plays the Kernel's jump after a passed trial while gameplay input is locked.
+     */
     private void playKernelExit(double destinationX) {
         state = GameState.RESULT;
         kernelCutsceneActive = true;
@@ -961,7 +1037,8 @@ public final class GameApplication extends Application {
     /** Finds the next available trial position after a completed trial. */
     private double nextUnlockedKernelX() {
         for (Gate gate : gates) {
-            if (!gate.isCompleted()) return gate.getX() + Constants.TILE_SIZE * 2;
+            if (!gate.isCompleted())
+                return gate.getX() + Constants.TILE_SIZE * 2;
         }
         return gates.get(gates.size() - 1).getX() + Constants.TILE_SIZE * 2;
     }
@@ -974,10 +1051,13 @@ public final class GameApplication extends Application {
         VBox box = new VBox(16);
         box.setAlignment(Pos.CENTER);
         Label message = title("SYSTEM BOUNDARY BREACHED", 34);
-        Label kernelDialogue = speechBubble("KERNEL\nYou have exited the system. Every trial remains open if you wish to take it again.", 18, 620);
+        Label kernelDialogue = speechBubble(
+                "KERNEL\nYou have exited the system. Every trial remains open if you wish to take it again.", 18, 620);
         kernelDialogue.setAlignment(Pos.CENTER);
         kernelDialogue.setTextAlignment(javafx.scene.text.TextAlignment.CENTER);
-        Label detail = text("The Kernel: “You have exited the system. The world is yours to explore; every trial remains open for another run.”\nAll paradigm trials completed.", 20);
+        Label detail = text(
+                "The Kernel: “You have exited the system. The world is yours to explore; every trial remains open for another run.”\nAll paradigm trials completed.",
+                20);
         Button replay = new Button("REENTER SYSTEM · RETAKE TRIALS");
         detail.setText("All paradigm trials completed. The world remains open for exploration.");
         detail.setFont(javafx.scene.text.Font.font("Consolas", 16));
@@ -994,7 +1074,9 @@ public final class GameApplication extends Application {
         });
         Button menu = new Button("RETURN TO MENU");
         menu.setOnAction(e -> showMenu());
-        box.getChildren().addAll(message, kernelDialogue, detail, replay, menu);
+        Button credits = new Button("VIEW CREDITS");
+        credits.setOnAction(e -> showCredits());
+        box.getChildren().addAll(message, kernelDialogue, detail, replay, credits, menu);
         logicalRoot.getChildren().setAll(viewport, box, flash, terminalHeader, expHud, trialHud);
         FadeTransition fade = new FadeTransition(Duration.seconds(.35), flash);
         fade.setFromValue(1);
@@ -1025,12 +1107,13 @@ public final class GameApplication extends Application {
             }
             return;
         }
-        // F6 restarts gate progression and lifetime EXP while preserving unlocked archive entries.
+        // F6 restarts gate progression and lifetime EXP while preserving unlocked
+        // archive entries.
         if (key == KeyCode.F6 && (state == GameState.MENU || state == GameState.WORLD)) {
             resetGateProgress();
             return;
         }
-        if (event.isControlDown() && event.isShiftDown()) {
+        if (state == GameState.WORLD && event.isControlDown() && event.isShiftDown()) {
             if (key == KeyCode.T) {
                 completeNearestGate();
                 return;
@@ -1207,7 +1290,8 @@ public final class GameApplication extends Application {
     }
 
     private void configureParallaxLayer(ImageView layer, double opacity, double y) {
-        // Assets are authored at 16000 x 576. Keep their native proportion and do not enlarge them.
+        // Assets are authored at 16000 x 576. Keep their native proportion and do not
+        // enlarge them.
         layer.setFitWidth(0);
         layer.setFitHeight(0);
         layer.setPreserveRatio(true);
@@ -1235,7 +1319,8 @@ public final class GameApplication extends Application {
     private VBox sidePanel(String heading) {
         VBox panel = new VBox(8);
         panel.setPrefWidth(165);
-        panel.setStyle("-fx-background-color: rgba(255,255,255,.88); -fx-background-radius: 14; -fx-padding: 10; -fx-border-color: #596275; -fx-border-radius: 14;");
+        panel.setStyle(
+                "-fx-background-color: rgba(255,255,255,.88); -fx-background-radius: 14; -fx-padding: 10; -fx-border-color: #596275; -fx-border-radius: 14;");
         Label title = new Label(heading);
         title.setStyle("-fx-font-weight: bold; -fx-text-fill: #17212b; -fx-font-size: 12;");
         panel.getChildren().add(title);
@@ -1243,7 +1328,8 @@ public final class GameApplication extends Application {
     }
 
     private Button helperButton(HelperAdvisor.Kind kind) {
-        ImageView icon = new ImageView(new Image(GameApplication.class.getResource("/Helpers/" + helperFile(kind) + ".png").toExternalForm()));
+        ImageView icon = new ImageView(
+                new Image(GameApplication.class.getResource("/Helpers/" + helperFile(kind) + ".png").toExternalForm()));
         icon.setFitWidth(30);
         icon.setFitHeight(30);
         icon.setPreserveRatio(true);
@@ -1272,14 +1358,16 @@ public final class GameApplication extends Application {
         bubble.setFont(javafx.scene.text.Font.font("Consolas", fontSize));
         bubble.setPrefWidth(width);
         bubble.setMaxWidth(width);
-        bubble.setStyle("-fx-font-size: " + fontSize + "; -fx-text-fill: #111820; -fx-background-color: rgba(255,255,255,.95); "
+        bubble.setStyle("-fx-font-size: " + fontSize
+                + "; -fx-text-fill: #111820; -fx-background-color: rgba(255,255,255,.95); "
                 + "-fx-background-radius: 18; -fx-padding: 12 16 12 16; -fx-border-color: #8a95a5; -fx-border-radius: 18;");
         return bubble;
     }
 
     private Label controlsHud() {
         Label label = new Label("A / D or ← / → : Move\nSPACE : Jump\nE : Interact");
-        label.setStyle("-fx-font-size: 12; -fx-text-fill: #e9f1ee; -fx-effect: dropshadow(gaussian, #101a22, 2, .9, 0, 1);");
+        label.setStyle(
+                "-fx-font-size: 12; -fx-text-fill: #e9f1ee; -fx-effect: dropshadow(gaussian, #101a22, 2, .9, 0, 1);");
         label.setTranslateX(-410);
         label.setTranslateY(220);
         return label;
@@ -1302,11 +1390,13 @@ public final class GameApplication extends Application {
         }
         expHud.setText("EXP " + totalExp + " / " + maximum + "  [" + bar + "]");
         livesHud.setText("LIVES  " + "♥ ".repeat(Math.max(0, mainLives)) + "♡ ".repeat(5 - Math.max(0, mainLives)));
-        livesHud.setStyle("-fx-font-size: 17; -fx-font-weight: bold; -fx-text-fill: #e6e8eb; -fx-background-color: rgba(13,18,28,.75); -fx-padding: 7 12; -fx-background-radius: 10;");
+        livesHud.setStyle(
+                "-fx-font-size: 17; -fx-font-weight: bold; -fx-text-fill: #e6e8eb; -fx-background-color: rgba(13,18,28,.75); -fx-padding: 7 12; -fx-background-radius: 10;");
         StackPane.setAlignment(livesHud, Pos.TOP_RIGHT);
         StackPane.setMargin(livesHud, new Insets(48, 18, 0, 0));
         soundHud.setText(sound.isMuted() ? "Sound off [F7]" : "Sound on [F7]");
-        soundHud.setStyle("-fx-font-size: 12; -fx-text-fill: #e9f1ee; -fx-effect: dropshadow(gaussian, #101a22, 2, .9, 0, 1);");
+        soundHud.setStyle(
+                "-fx-font-size: 12; -fx-text-fill: #e9f1ee; -fx-effect: dropshadow(gaussian, #101a22, 2, .9, 0, 1);");
         StackPane.setAlignment(soundHud, Pos.BOTTOM_RIGHT);
         StackPane.setMargin(soundHud, new Insets(0, 18, 14, 0));
         trialHud.setText(current == questionBank.getTrialCount() ? "CORE TRIAL" : "TRIAL " + current);
@@ -1314,7 +1404,7 @@ public final class GameApplication extends Application {
 
     /**
      * Maximum score assumes every bank question is answered correctly exactly
-     * once. 
+     * once.
      *
      */
     private int maximumExp() {
