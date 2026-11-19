@@ -39,6 +39,7 @@ public final class TrialManager {
             throw new IllegalArgumentException("No questions for trial " + trialId);
         }
         Collections.shuffle(questions, random);
+        questions.replaceAll(question -> question.withShuffledChoices(random));
         return new Trial(trialId, questions);
     }
 }
