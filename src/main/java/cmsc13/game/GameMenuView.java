@@ -109,9 +109,10 @@ final class GameMenuView {
                                 "1  Introduction to Programming Paradigms\n2  Procedural Programming\n3  Functional Programming\n4  Object-Oriented Programming\n5  Imperative vs. Declarative Programming\n6  Event-Driven Programming\n7  Component Mappings between Programming Paradigms"),
                         new HBox(20, key("+" + Constants.POINTS_PER_CORRECT_ANSWER + " EXP", "Correct answer"),
                                 key("-" + Constants.POINTS_PER_CORRECT_ANSWER + " EXP", "Incorrect; floor is zero")),
-                        paragraph("Pass with cumulative EXP of at least trial number x " + Constants.POINTS_PER_TRIAL
-                                + " and at least " + Trial.REQUIRED_CORRECT_ANSWERS
-                                + " net correct answers this attempt. Unprotected mistakes reduce the net count. Trial 1 requires 600 EXP; the Core requires 4800. Retry if either condition is unmet."));
+                        paragraph("Reach " + Constants.POINTS_PER_TRIAL
+                                + " EXP in the current attempt to complete that trial immediately and unlock its gate. "
+                                + "Complete the final Core trial to finish the game. "
+                                + "Questions and answer choices shuffle each attempt. If questions run out before the target, retry the trial."));
                 break;
             case 2:
                 body.getChildren().add(heading("MEET YOUR HELPERS"));

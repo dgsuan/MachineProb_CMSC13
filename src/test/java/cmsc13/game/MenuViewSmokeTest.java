@@ -8,6 +8,8 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import org.junit.jupiter.api.Test;
 
 import javafx.application.Platform;
@@ -83,6 +85,7 @@ class MenuViewSmokeTest {
                 assertEquals(3, backs[0]);
                 assertEquals(SoundManager.Music.VICTORY, SoundManager.musicFor(GameState.CREDITS, false));
                 assertEquals(SoundManager.Music.MENU, SoundManager.musicFor(GameState.MENU, false));
+                verifyTrialWinAndQuestionLayout();
                 root.getChildren().clear();
             } catch (Throwable error) {
                 failure.set(error);
@@ -93,6 +96,73 @@ class MenuViewSmokeTest {
         assertTrue(done.await(20, TimeUnit.SECONDS));
         if (failure.get() != null)
             throw new AssertionError(failure.get());
+    }
+
+    private static void verifyTrialWinAndQuestionLayout() throws Exception {
+        GameApplication game = new GameApplication();
+        setField(game, "savePath", java.nio.file.Path.of("target", "trial-test-progress.properties"));
+        Question question = new QuestionBank().getAllQuestions().stream()
+                .filter(q -> q.getId() == 13).findFirst().orElseThrow();
+        Trial trial = new Trial(1, java.util.Collections.nCopies(10, question));
+        Gate gate = new Gate(1, 400, 8);
+        setField(game, "trial", trial);
+        setField(game, "activeGate", gate);
+        setField(game, "trialExp", 500);
+        StackPane root = (StackPane) getField(game, "logicalRoot");
+        Scene scene = new Scene(root, 1024, 576);
+        scene.getStylesheets().add(MenuViewSmokeTest.class.getResource("/Styles/game.css").toExternalForm());
+        invoke(game, "createWorld");
+        invoke(game, "showWorld");
+        root.applyCss();
+        root.layout();
+        snapshot(root, "pitfall-world");
+        invoke(game, "showQuestion");
+        root.applyCss();
+        root.layout();
+        assertTrue(text(root).contains("Which code produces the expected output below?"));
+        assertTrue(text(root).contains("KERNEL  /  TRIAL GUIDE"));
+        snapshot(root, "trial-question");
+        invoke(game, "showQuestion");
+        assertSame(question, trial.getCurrentQuestion());
+        java.lang.reflect.Method answer = GameApplication.class.getDeclaredMethod("answerQuestion", int.class);
+        answer.setAccessible(true);
+        int wrong = (question.getCorrectAnswerIndex() + 1) % 4;
+        setField(game, "copyUsed", true);
+        setField(game, "pendingCopyAnswer", wrong);
+        setField(game, "selectedAdvice", new HelperAdvisor.Advice(wrong, 60, "Old advice"));
+        answer.invoke(game, question.getCorrectAnswerIndex());
+        assertEquals(400, getField(game, "trialExp"));
+        assertEquals(null, getField(game, "pendingCopyAnswer"));
+        trial.nextQuestion();
+        invoke(game, "showQuestion");
+        answer.invoke(game, question.getCorrectAnswerIndex());
+        assertEquals(500, getField(game, "trialExp"));
+        trial.nextQuestion();
+        invoke(game, "showQuestion");
+        answer.invoke(game, question.getCorrectAnswerIndex());
+        assertEquals(600, getField(game, "trialExp"));
+        assertEquals(GameState.RESULT, getField(game, "state"));
+        assertTrue(gate.isCompleted());
+        assertFalse(trial.isFinished());
+        assertTrue(text(root).contains("TRIAL COMPLETE!"));
+    }
+
+    private static Object getField(Object target, String name) throws Exception {
+        java.lang.reflect.Field field = target.getClass().getDeclaredField(name);
+        field.setAccessible(true);
+        return field.get(target);
+    }
+
+    private static void setField(Object target, String name, Object value) throws Exception {
+        java.lang.reflect.Field field = target.getClass().getDeclaredField(name);
+        field.setAccessible(true);
+        field.set(target, value);
+    }
+
+    private static void invoke(Object target, String name) throws Exception {
+        java.lang.reflect.Method method = target.getClass().getDeclaredMethod(name);
+        method.setAccessible(true);
+        method.invoke(target);
     }
 
     private static void snapshot(StackPane root, String name) throws java.io.IOException {

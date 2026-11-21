@@ -1,7 +1,6 @@
 package cmsc13.game;
 
 import javafx.scene.Group;
-import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
@@ -32,11 +31,7 @@ public final class Gate {
         sprite.setFitHeight(64);
         sprite.setPreserveRatio(true);
         sprite.setSmooth(false);
-        Label label = new Label(coreGate ? "CORE" : "T" + trialNumber);
-        label.setStyle("-fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 8; -fx-effect: dropshadow(gaussian, black, 2, .8, 0, 1);");
-        label.setLayoutX(9);
-        label.setLayoutY(19);
-        node.getChildren().addAll(sprite, label);
+        node.getChildren().add(sprite);
         node.setLayoutX(x);
         node.setLayoutY(Constants.GROUND_Y - 62);
         tick(System.nanoTime());

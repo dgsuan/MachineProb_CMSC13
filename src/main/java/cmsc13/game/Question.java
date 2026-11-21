@@ -1,6 +1,9 @@
 package cmsc13.game;
 
 import java.util.List;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Random;
 
 /**
  * Represents a single question
@@ -49,6 +52,25 @@ public class Question {
 
     public boolean isCorrectAnswer(int selectedIndex) {
         return selectedIndex == correctAnswerIndex;
+    }
+
+    /** Copy choices per attempt, tracking indices even when choice texts match. */
+    public Question withShuffledChoices(Random random) {
+        List<Integer> order = new ArrayList<>();
+        for (int i = 0; i < choices.size(); i++) order.add(i);
+        Collections.shuffle(order, random);
+        List<String> shuffled = new ArrayList<>();
+        for (int index : order) shuffled.add(choices.get(index));
+        return new Question(id, type, topic, questionText, shuffled,
+                order.indexOf(correctAnswerIndex), explanation, difficulty, trialId, progType, progLang);
+    }
+
+    public String getInstruction() {
+        if (type != QuestionType.PROGRAMMING) return "Choose the best answer.";
+        if ("Type A".equals(progType)) return "What does the following code output when run as described?";
+        if ("Type B".equals(progType)) return "Which code produces the expected output below?";
+        if ("Type C".equals(progType)) return "Which code fills the blank to achieve the expected result?";
+        return "Read the code and choose the best answer.";
     }
 
     // Getters

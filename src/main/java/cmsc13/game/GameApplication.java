@@ -160,6 +160,7 @@ public final class GameApplication extends Application {
     private int totalExp;
     private boolean peekUsed, copyUsed, saveUsed, saveArmed;
     private HelperAdvisor.Advice selectedAdvice;
+    private Integer pendingCopyAnswer;
     private Lifeline selectedLifeline;
 
     @Override
@@ -310,10 +311,45 @@ public final class GameApplication extends Application {
         for (int i = 0; i < GROUND_SEGMENTS.size() - 1; i++) {
             double pitLeft = GROUND_SEGMENTS.get(i)[1];
             double pitRight = GROUND_SEGMENTS.get(i + 1)[0];
-            Rectangle pit = new Rectangle(pitLeft, Constants.GROUND_Y, pitRight - pitLeft, Constants.GROUND_HEIGHT);
-            pit.setFill(Color.web("#11131b"));
-            pit.setStroke(Color.web("#34384a"));
-            pit.setStrokeWidth(2);
+            javafx.scene.canvas.Canvas pit = new javafx.scene.canvas.Canvas(
+                    pitRight - pitLeft, Constants.GROUND_HEIGHT);
+            pit.setLayoutX(pitLeft);
+            pit.setLayoutY(Constants.GROUND_Y);
+            javafx.scene.canvas.GraphicsContext ink = pit.getGraphicsContext2D();
+            double width = pit.getWidth();
+            double height = pit.getHeight();
+            // Match the map's black voids, binary rock texture and stepped pixel edges.
+            // Leave the opening clear so it cannot be mistaken for solid ground.
+            ink.setFill(Color.BLACK);
+            ink.fillRect(0, 0, width, height);
+            ink.setFont(javafx.scene.text.Font.font("Consolas", 9));
+            for (int row = 0; row < height / 12; row++) {
+                double y = row * 12;
+                double edge = 6 + (row * 7 % 4) * 3;
+                double shade = 0.55 - row * 0.022;
+                ink.setFill(Color.gray(shade));
+                ink.fillRect(0, y, edge, 2);
+                ink.fillRect(width - edge, y + 4, edge, 2);
+                ink.setFill(Color.gray(shade * 0.7));
+                ink.fillText(row % 2 == 0 ? "01" : "10", 2, y + 11);
+                ink.fillText(row % 3 == 0 ? "10" : "01", width - 14, y + 11);
+            }
+            // A few broken data fragments descend into the shaft rather than a UI grid.
+            for (int fragment = 0; fragment < width / 40; fragment++) {
+                double x = 22 + fragment * 40;
+                double y = 36 + (fragment * 37 % 100);
+                ink.setFill(Color.web("#383838"));
+                ink.fillText(fragment % 2 == 0 ? "1" : "0", x, y);
+                ink.fillRect(x + 4, y + 10, 2, 4);
+            }
+            // Stepped grayscale teeth echo the terrain's pixel-art silhouette.
+            for (double x = 8; x + 16 <= width - 8; x += 24) {
+                for (int step = 0; step < 4; step++) {
+                    ink.setFill(Color.gray(0.65 - step * 0.12));
+                    ink.fillRect(x + 6 - step * 2, height - 24 + step * 6,
+                            4 + step * 4, 6);
+                }
+            }
             world.getChildren().add(pit);
         }
 
@@ -705,12 +741,20 @@ public final class GameApplication extends Application {
             lastSpokenQuestionId = question.getId();
         }
         Pane overlay = new Pane();
-        Label questionText = new Label("KERNEL\n" + question.getQuestionText());
+        Label speaker = new Label("KERNEL  /  TRIAL GUIDE");
+        speaker.setStyle("-fx-font-family: 'Segoe UI'; -fx-font-size: 11; -fx-font-weight: bold; "
+                + "-fx-text-fill: #236173; -fx-background-color: #e0f3f6; -fx-background-radius: 5; -fx-padding: 5 9;");
+        Label instruction = new Label(question.getInstruction());
+        instruction.setWrapText(true);
+        instruction.setStyle("-fx-font-family: 'Segoe UI'; -fx-font-size: 16; -fx-font-weight: bold; -fx-text-fill: #172f42;");
+        Label questionText = new Label(question.getQuestionText());
         questionText.setWrapText(true);
         questionText.setStyle("-fx-font-family: 'Consolas'; -fx-font-size: "
                 + (question.getType() == QuestionType.PROGRAMMING ? 15 : 20)
-                + "; -fx-text-fill: #111820; -fx-padding: 12 16 12 16;");
-        ScrollPane questionScroll = new ScrollPane(questionText);
+                + "; -fx-text-fill: #111820;");
+        VBox questionContent = new VBox(12, speaker, instruction, questionText);
+        questionContent.setPadding(new Insets(16));
+        ScrollPane questionScroll = new ScrollPane(questionContent);
         questionScroll.setFitToWidth(true);
         questionScroll.setPrefSize(460, 330);
         questionScroll.setStyle(
@@ -816,8 +860,9 @@ public final class GameApplication extends Application {
 
     private void answerQuestion(int answer) {
         Question question = trial.getCurrentQuestion();
-        if (copyUsed && selectedAdvice != null) {
-            answer = selectedAdvice.getChoice();
+        if (pendingCopyAnswer != null) {
+            answer = pendingCopyAnswer;
+            pendingCopyAnswer = null;
         }
         boolean correct = trial.answerWithSave(answer, saveArmed);
         sound.play(correct ? SoundManager.Effect.CORRECT : SoundManager.Effect.INCORRECT);
@@ -833,6 +878,10 @@ public final class GameApplication extends Application {
                 : saveProtectedThisAnswer ? 0 : -Constants.POINTS_PER_CORRECT_ANSWER));
         saveProgress();
         refreshHud();
+        if (trialExp >= Constants.POINTS_PER_TRIAL) {
+            showResult();
+            return;
+        }
         Pane feedback = new Pane();
         Label playerBubble = speechBubble("PLAYER\n" + question.getChoices().get(answer), 17, 300);
         playerBubble.setLayoutX(170);
@@ -924,6 +973,7 @@ public final class GameApplication extends Application {
         }
         if (selectedLifeline == Lifeline.COPY) {
             copyUsed = true;
+            pendingCopyAnswer = selectedAdvice.getChoice();
         }
         if (selectedLifeline == Lifeline.SAVE) {
             saveUsed = true;
@@ -945,13 +995,14 @@ public final class GameApplication extends Application {
     private void resetLifelines() {
         peekUsed = copyUsed = saveUsed = saveArmed = false;
         selectedAdvice = null;
+        pendingCopyAnswer = null;
         selectedLifeline = null;
     }
 
     private void showResult() {
         state = GameState.RESULT;
-        int requiredExp = requiredExpForTrial(activeGate.getTrialNumber());
-        boolean passed = trial.isComplete() && totalExp >= requiredExp;
+        int requiredExp = Constants.POINTS_PER_TRIAL;
+        boolean passed = trialExp >= requiredExp;
         if (!passed) {
             sound.play(SoundManager.Effect.FAILURE);
             mainLives = Math.max(0, mainLives - 1);
@@ -972,8 +1023,8 @@ public final class GameApplication extends Application {
                 break;
             }
         }
-        Label result = text((passed ? "TRIAL COMPLETE" : "TRIAL FAILED") + "\n\nTOTAL EXP: "
-                + totalExp + " / " + requiredExp + "\n\n"
+        Label result = text((passed ? "TRIAL COMPLETE" : "TRIAL FAILED") + "\n\nTRIAL EXP: "
+                + trialExp + " / " + requiredExp + "\n\n"
                 + (passed ? "Press ENTER to return to the map."
                         : "The Kernel returns you to the Trial " + trial.getNumber()
                                 + " checkpoint.\nPress ENTER to retry."),
@@ -997,7 +1048,7 @@ public final class GameApplication extends Application {
     }
 
     private void finishResult() {
-        if (!trial.isComplete()) {
+        if (trialExp < Constants.POINTS_PER_TRIAL) {
             player.respawnAt(activeGate.getLeftEdge() - 30);
         }
         showWorld();
@@ -1037,7 +1088,8 @@ public final class GameApplication extends Application {
         player.setRight(false);
         kernelIdleFrame = 0;
         kernel.setImage(KERNEL_JUMP_FRAMES[0]);
-        Label line = speechBubble("KERNEL\nTrial complete. I will remain here while you continue.", 19, 430);
+        Label line = speechBubble("TRIAL COMPLETE!\n" + trialExp + " / " + Constants.POINTS_PER_TRIAL
+                + " EXP\nGate unlocked. Trial complete.", 22, 430);
         VBox overlay = new VBox(line);
         overlay.setAlignment(Pos.TOP_CENTER);
         overlay.setLayoutY(20);
@@ -1439,14 +1491,6 @@ public final class GameApplication extends Application {
      */
     private int maximumExp() {
         return questionBank.getTotalQuestions() * Constants.POINTS_PER_CORRECT_ANSWER;
-    }
-
-    /**
-     * Each successive trial requires another 600 points in the cumulative
-     * score.
-     */
-    private int requiredExpForTrial(int trialNumber) {
-        return trialNumber * Constants.POINTS_PER_TRIAL;
     }
 
     /**
